@@ -27,7 +27,7 @@ function getAIResponse(callSid, userSpeech) {
         { role: 'system', content: KLIVIO.prompts.phone({ agentName: 'James', callType: 'inbound' }) },
         ...session.messages.slice(-8),
       ],
-      max_tokens: 100,
+      max_tokens: 80,
       temperature: 0.75,
     });
 
@@ -66,20 +66,22 @@ function isOverTimeLimit(callSid) {
 }
 
 // ── TwiML helpers ──
+const VOICE = 'Google.en-GB-Neural2-B'; // Deep, natural British male
+
 function twimlSayGather(text, action = '/api/voice/gather') {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Brian" language="en-GB">${escapeXml(text)}</Say>
-  <Gather input="speech" action="${action}" method="POST" speechTimeout="auto" language="en-GB" enhanced="true">
+  <Say voice="${VOICE}">${escapeXml(text)}</Say>
+  <Gather input="speech" action="${action}" method="POST" speechTimeout="3" speechModel="phone_call" language="en-GB" enhanced="true" profanityFilter="false">
   </Gather>
-  <Say voice="Polly.Brian" language="en-GB">I didn't catch that. Goodbye.</Say>
+  <Say voice="${VOICE}">I didn't quite catch that — no worries, feel free to call back. Take care.</Say>
 </Response>`;
 }
 
 function twimlSayHangup(text) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Brian" language="en-GB">${escapeXml(text)}</Say>
+  <Say voice="${VOICE}">${escapeXml(text)}</Say>
   <Hangup/>
 </Response>`;
 }
@@ -98,7 +100,7 @@ function handleInbound(req, res) {
   const callSid = req.body?.CallSid || 'unknown';
   console.log(`[VOICE] Inbound call: ${callSid}`);
   getSession(callSid);
-  const greeting = "Hi, thanks for calling Klivio. I'm James. We build AI workers for businesses — things like lead response, chatbots, and review automation. How can I help you today?";
+  const greeting = "Hey, thanks for calling Klivio — this is James. How can I help?";
   res.type('text/xml').send(twimlSayGather(greeting));
 }
 
