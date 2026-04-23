@@ -1,98 +1,33 @@
-// ── Klivio Voice Bot — Telnyx + Groq ──
-// Handles inbound calls and outbound cold calls
-// Telnyx Call Control API + built-in TTS/STT (no extra cost)
+// ── Klivio Voice Bot — Twilio + Groq ──
 require('dotenv').config();
 const https = require('https');
 const KLIVIO = require('./klivio-brain');
 
-const TELNYX_API_KEY = process.env.TELNYX_API_KEY;
+// ── In-memory sessions ──
+const sessions = {};
 
-// ── Active call sessions ──
-const calls = {};
-
-function getCall(id) {
-  if (!calls[id]) calls[id] = { messages: [], startTime: Date.now(), strikes: 0 };
-  return calls[id];
+function getSession(callSid) {
+  if (!sessions[callSid]) sessions[callSid] = { messages: [], startTime: Date.now() };
+  return sessions[callSid];
 }
 
-// ── Telnyx API request ──
-function telnyxApi(path, body) {
+function cleanSession(callSid) {
+  delete sessions[callSid];
+}
+
+// ── Groq AI response ──
+function getAIResponse(callSid, userSpeech) {
   return new Promise((resolve) => {
-    const payload = JSON.stringify(body);
-    const req = https.request({
-      hostname: 'api.telnyx.com',
-      path: `/v2${path}`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TELNYX_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-      },
-      timeout: 10000,
-    }, res => {
-      let d = '';
-      res.on('data', c => d += c);
-      res.on('end', () => resolve({ status: res.statusCode, body: d }));
-    });
-    req.on('error', e => { console.error('Telnyx API error:', e.message); resolve(null); });
-    req.on('timeout', () => { req.destroy(); resolve(null); });
-    req.write(payload);
-    req.end();
-  });
-}
-
-// ── Answer incoming call ──
-async function answerCall(callControlId) {
-  return telnyxApi(`/calls/${callControlId}/actions/answer`, {});
-}
-
-// ── Speak text to caller ──
-async function speak(callControlId, text, commandId = null) {
-  const body = {
-    payload: text,
-    voice: 'male',
-    language: 'en-GB',
-    service_level: 'premium',
-  };
-  if (commandId) body.client_state = commandId;
-  return telnyxApi(`/calls/${callControlId}/actions/speak`, body);
-}
-
-// ── Gather speech input ──
-async function gather(callControlId) {
-  return telnyxApi(`/calls/${callControlId}/actions/gather`, {
-    minimum_digit_silence_timeout_millis: 1500,
-    timeout_millis: 8000,
-    speech_timeout: 'auto',
-    speech_language: 'en-GB',
-    client_state: 'gathering',
-  });
-}
-
-// ── Hang up ──
-async function hangup(callControlId) {
-  return telnyxApi(`/calls/${callControlId}/actions/hangup`, {});
-}
-
-// ── AI response via Groq ──
-function getAIResponse(callId, userSpeech, callType = 'inbound', context = {}) {
-  return new Promise((resolve) => {
-    const session = getCall(callId);
+    const session = getSession(callSid);
     session.messages.push({ role: 'user', content: userSpeech });
-
-    const systemPrompt = KLIVIO.prompts.phone({
-      agentName: 'James',
-      callType,
-      ...context,
-    });
 
     const payload = JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: KLIVIO.prompts.phone({ agentName: 'James', callType: 'inbound' }) },
         ...session.messages.slice(-8),
       ],
-      max_tokens: 120,
+      max_tokens: 100,
       temperature: 0.75,
     });
 
@@ -105,14 +40,14 @@ function getAIResponse(callId, userSpeech, callType = 'inbound', context = {}) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
       },
-      timeout: 12000,
+      timeout: 10000,
     }, res => {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => {
         try {
           const json = JSON.parse(d);
-          const reply = json.choices?.[0]?.message?.content || "I didn't catch that. Could you say that again?";
+          const reply = json.choices?.[0]?.message?.content?.trim() || "Could you say that again?";
           session.messages.push({ role: 'assistant', content: reply });
           resolve(reply);
         } catch { resolve("Sorry, give me just a moment."); }
@@ -125,130 +60,89 @@ function getAIResponse(callId, userSpeech, callType = 'inbound', context = {}) {
   });
 }
 
-// ── Check time limit (3 min) ──
-function isOverTimeLimit(callId) {
-  const session = getCall(callId);
-  return (Date.now() - session.startTime) > 175000; // 175 seconds
+function isOverTimeLimit(callSid) {
+  const session = getSession(callSid);
+  return (Date.now() - session.startTime) > 170000;
 }
 
-// ── Detect if caller is not interested ──
-function detectDisengagement(text) {
-  const lower = text.toLowerCase();
-  const noSignals = ['not interested', 'no thank you', 'no thanks', 'remove me', 'don\'t call', 'stop calling', 'leave me alone', 'go away', 'goodbye', 'bye'];
-  return noSignals.some(s => lower.includes(s));
+// ── TwiML helpers ──
+function twimlSayGather(text, action = '/api/voice/gather') {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Brian" language="en-GB">${escapeXml(text)}</Say>
+  <Gather input="speech" action="${action}" method="POST" speechTimeout="auto" language="en-GB" enhanced="true">
+  </Gather>
+  <Say voice="Polly.Brian" language="en-GB">I didn't catch that. Goodbye.</Say>
+</Response>`;
 }
 
-// ── Main webhook handler ──
-async function handleWebhook(event) {
-  const { event_type, payload } = event;
-  const callControlId = payload?.call_control_id;
-  const callLegId = payload?.call_leg_id || callControlId;
+function twimlSayHangup(text) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Brian" language="en-GB">${escapeXml(text)}</Say>
+  <Hangup/>
+</Response>`;
+}
 
-  console.log(`[VOICE] Event: ${event_type} | Call: ${callControlId?.slice(-8)}`);
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
-  switch (event_type) {
+// ── Inbound call handler (initial greeting) ──
+function handleInbound(req, res) {
+  const callSid = req.body?.CallSid || 'unknown';
+  console.log(`[VOICE] Inbound call: ${callSid}`);
+  getSession(callSid);
+  const greeting = "Hi, thanks for calling Klivio. I'm James. We build AI workers for businesses — things like lead response, chatbots, and review automation. How can I help you today?";
+  res.type('text/xml').send(twimlSayGather(greeting));
+}
 
-    case 'call.initiated': {
-      // Incoming call — answer it
-      await answerCall(callControlId);
-      break;
-    }
+// ── Gather handler (speech → AI → respond) ──
+async function handleGather(req, res) {
+  const callSid = req.body?.CallSid || 'unknown';
+  const speech = req.body?.SpeechResult || '';
+  console.log(`[VOICE] Heard: "${speech}"`);
 
-    case 'call.answered': {
-      // Greet the caller
-      const greeting = "Hi, thanks for calling Klivio. I'm James. We build AI automation systems for businesses. How can I help you today?";
-      await speak(callControlId, greeting);
-      setTimeout(() => gather(callControlId), 3000);
-      break;
-    }
-
-    case 'call.gather.ended': {
-      const transcript = payload?.speech_result?.transcription || payload?.digits || '';
-      console.log(`[VOICE] Heard: "${transcript}"`);
-
-      if (!transcript || transcript.trim().length < 2) {
-        await speak(callControlId, "Sorry, I didn't catch that. Could you say that again?");
-        setTimeout(() => gather(callControlId), 2000);
-        return;
-      }
-
-      // Check time limit
-      if (isOverTimeLimit(callLegId)) {
-        await speak(callControlId, "I don't want to take more of your time. I'll send you our details by email. Have a great day!");
-        setTimeout(() => hangup(callControlId), 4000);
-        return;
-      }
-
-      // Check disengagement
-      if (detectDisengagement(transcript)) {
-        const session = getCall(callLegId);
-        session.strikes++;
-        if (session.strikes >= 2) {
-          await speak(callControlId, "No problem at all. Have a great day!");
-          setTimeout(() => hangup(callControlId), 2000);
-          return;
-        }
-      }
-
-      // Get AI response
-      const reply = await getAIResponse(callLegId, transcript, 'inbound');
-      await speak(callControlId, reply);
-
-      // Check if AI ended the conversation
-      const endSignals = ["have a great day", "have a good day", "goodbye", "best of luck", "take care"];
-      if (endSignals.some(s => reply.toLowerCase().includes(s))) {
-        setTimeout(() => hangup(callControlId), 5000);
-      } else {
-        setTimeout(() => gather(callControlId), 2500);
-      }
-      break;
-    }
-
-    case 'call.speak.ended': {
-      // Nothing to do — gather is triggered from gather.ended
-      break;
-    }
-
-    case 'call.hangup': {
-      console.log(`[VOICE] Call ended: ${callControlId?.slice(-8)}`);
-      delete calls[callLegId];
-      break;
-    }
-
-    default:
-      console.log(`[VOICE] Unhandled event: ${event_type}`);
+  if (!speech.trim()) {
+    return res.type('text/xml').send(twimlSayHangup("I couldn't hear you. Feel free to call back anytime. Goodbye!"));
   }
+
+  if (isOverTimeLimit(callSid)) {
+    cleanSession(callSid);
+    return res.type('text/xml').send(twimlSayHangup("I don't want to take more of your time. Check out klivio.bond for more info. Have a great day!"));
+  }
+
+  const noSignals = ['not interested', 'no thank you', 'no thanks', 'remove me', "don't call", 'goodbye', 'bye', 'go away'];
+  if (noSignals.some(s => speech.toLowerCase().includes(s))) {
+    cleanSession(callSid);
+    return res.type('text/xml').send(twimlSayHangup("No problem at all. Have a great day!"));
+  }
+
+  const reply = await getAIResponse(callSid, speech);
+
+  const endSignals = ['have a great day', 'have a good day', 'goodbye', 'best of luck', 'take care'];
+  if (endSignals.some(s => reply.toLowerCase().includes(s))) {
+    cleanSession(callSid);
+    return res.type('text/xml').send(twimlSayHangup(reply));
+  }
+
+  res.type('text/xml').send(twimlSayGather(reply));
 }
 
-// ── Outbound cold call ──
-async function makeCall(toNumber, businessName, industry) {
-  return new Promise((resolve) => {
-    const payload = JSON.stringify({
-      connection_id: process.env.TELNYX_CONNECTION_ID,
-      to: toNumber,
-      from: process.env.TELNYX_PHONE,
-      webhook_url: `${process.env.BASE_URL}/api/voice`,
-      client_state: Buffer.from(JSON.stringify({ businessName, industry, type: 'cold' })).toString('base64'),
-    });
-
-    const req = https.request({
-      hostname: 'api.telnyx.com',
-      path: '/v2/calls',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TELNYX_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-      },
-    }, res => {
-      let d = '';
-      res.on('data', c => d += c);
-      res.on('end', () => resolve(JSON.parse(d)));
-    });
-    req.on('error', resolve);
-    req.write(payload);
-    req.end();
-  });
+// ── Status callback (cleanup on hangup) ──
+function handleStatus(req, res) {
+  const callSid = req.body?.CallSid;
+  const status = req.body?.CallStatus;
+  if (status === 'completed' || status === 'failed') {
+    console.log(`[VOICE] Call ended: ${callSid}`);
+    cleanSession(callSid);
+  }
+  res.sendStatus(200);
 }
 
-module.exports = { handleWebhook, makeCall };
+module.exports = { handleInbound, handleGather, handleStatus };

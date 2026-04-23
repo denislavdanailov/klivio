@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const { chat } = require('./chatbot');
-const { handleWebhook } = require('./voice');
+const { handleInbound, handleGather, handleStatus } = require('./voice');
 
 const app = express();
 app.use(express.json());
@@ -322,11 +322,10 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ── Voice Webhook (Telnyx) ──
-app.post('/api/voice', async (req, res) => {
-  res.sendStatus(200); // Acknowledge immediately
-  try { await handleWebhook(req.body); } catch (e) { console.error('Voice error:', e.message); }
-});
+// ── Voice Webhooks (Twilio) ──
+app.post('/api/voice', handleInbound);
+app.post('/api/voice/gather', handleGather);
+app.post('/api/voice/status', handleStatus);
 
 // ── Chatbot API ──
 app.post('/api/chat', async (req, res) => {
