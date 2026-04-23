@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klivio — AI That Works While You Sleep</title>
+<meta name="description" content="Klivio builds AI systems that respond to every enquiry in under 2 minutes — 24/7. No staff. No missed opportunities. From £197/mo.">
+<meta property="og:title" content="Klivio — AI That Works While You Sleep">
+<meta property="og:description" content="AI automation for businesses. Respond to every lead in under 2 minutes, 24/7. Setup in 2-7 days.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://klivio.bond">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ivory: #FAF8F3;
+  --warm: #F0EBE0;
+  --dark: #1C1A17;
+  --mid: #3A3630;
+  --gold: #C8A84B;
+  --gold2: #E2C87A;
+  --rust: #B5522A;
+  --muted: #7A7468;
+  --border: rgba(28,26,23,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Figtree',sans-serif;background:var(--ivory);color:var(--dark);overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Playfair Display',serif}
+
+/* HEADER */
+header{
+  position:fixed;top:40px;left:0;right:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 60px;
+  background:rgba(250,248,243,0.93);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);letter-spacing:-0.3px}
+.logo em{color:var(--gold);font-style:italic}
+nav{display:flex;gap:32px;align-items:center}
+nav a{font-size:14px;color:var(--muted);text-decoration:none;font-weight:400;letter-spacing:0.2px;transition:color .2s}
+nav a:hover{color:var(--dark)}
+.nav-btn{
+  background:var(--dark);color:var(--ivory) !important;
+  padding:10px 20px;border-radius:3px;font-size:13px !important;font-weight:600 !important;letter-spacing:0.5px;
+  transition:background .2s !important;
+}
+.nav-btn:hover{background:var(--gold) !important;color:var(--dark) !important}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:grid;grid-template-columns:55% 45%;padding-top:160px;
+}
+.hero-l{
+  padding:72px 60px 72px 80px;
+  display:flex;flex-direction:column;justify-content:center;
+  border-right:1px solid var(--border);
+}
+.eyebrow{
+  display:flex;align-items:center;gap:12px;
+  font-size:11px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:36px;font-weight:600;
+}
+.eyebrow-line{width:28px;height:1px;background:var(--gold)}
+.hero-l h1{
+  font-size:clamp(44px,5.5vw,72px);line-height:1.07;letter-spacing:-1.5px;
+  color:var(--dark);margin-bottom:28px;
+}
+.hero-l h1 i{color:var(--gold)}
+.hero-l p{
+  font-size:18px;font-weight:300;color:var(--muted);
+  line-height:1.75;max-width:480px;margin-bottom:52px;
+}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:60px}
+.btn-primary{
+  background:var(--dark);color:var(--ivory);
+  padding:15px 30px;border-radius:3px;font-size:14px;font-weight:600;
+  text-decoration:none;letter-spacing:0.4px;border:none;cursor:pointer;
+  transition:background .2s;display:inline-block;
+}
+.btn-primary:hover{background:var(--gold);color:var(--dark)}
+.btn-ghost{
+  background:transparent;color:var(--dark);
+  padding:15px 30px;border-radius:3px;font-size:14px;font-weight:500;
+  text-decoration:none;border:1.5px solid var(--border);cursor:pointer;
+  transition:all .2s;display:inline-block;
+}
+.btn-ghost:hover{border-color:var(--dark);background:var(--dark);color:var(--ivory)}
+.hero-stats{
+  display:flex;gap:0;border-top:1px solid var(--border);
+}
+.hstat{padding:24px 32px 0 0;margin-right:32px;border-right:1px solid var(--border)}
+.hstat:last-child{border-right:none;margin-right:0}
+.hstat-n{font-family:'Playfair Display',serif;font-size:32px;color:var(--dark);line-height:1}
+.hstat-l{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:0.3px}
+
+.hero-r{
+  background:var(--dark);
+  display:flex;align-items:center;justify-content:center;
+  padding:80px 50px;position:relative;overflow:hidden;
+}
+.hero-r::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C8A84B' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.demo-card{
+  position:relative;z-index:1;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(200,168,75,0.2);
+  border-radius:10px;padding:36px;width:100%;max-width:400px;
+}
+.demo-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;font-weight:600}
+.demo-msg{
+  padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.55;margin-bottom:10px;max-width:82%;
+}
+.demo-msg.u{background:rgba(255,255,255,0.07);color:#BBB;margin-left:auto;border-radius:8px 8px 2px 8px}
+.demo-msg.a{background:var(--gold);color:var(--dark);font-weight:500;border-radius:8px 8px 8px 2px}
+.demo-time{font-size:10px;color:rgba(255,255,255,0.25);text-align:center;margin:6px 0}
+.demo-typing{display:flex;align-items:center;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 1.4s infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.demo-typing span{font-size:11px;color:rgba(255,255,255,0.25);margin-left:4px}
+
+/* TICKER */
+.ticker{background:var(--dark);padding:16px 0;overflow:hidden;border-top:1px solid rgba(200,168,75,0.1)}
+.ticker-inner{display:flex;gap:56px;animation:tick 24s linear infinite;white-space:nowrap}
+.tick-item{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,0.45);flex-shrink:0}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* PROBLEM */
+.problem{padding:110px 80px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.sec-tag{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rust);font-weight:600;margin-bottom:20px;display:block}
+.problem h2{font-size:clamp(34px,3.8vw,50px);color:var(--dark);letter-spacing:-1px;line-height:1.15}
+.prob-list{margin-top:8px}
+.prob-row{
+  padding:22px 0;border-bottom:1px solid var(--border);
+  display:flex;gap:18px;align-items:start;
+}
+.prob-row:first-child{border-top:1px solid var(--border)}
+.prob-x{color:var(--rust);font-size:16px;flex-shrink:0;margin-top:2px}
+.prob-text{font-size:15px;color:var(--mid);line-height:1.65;font-weight:300}
+
+/* VS */
+.vs{padding:110px 80px;background:var(--dark)}
+.vs-head{text-align:center;margin-bottom:64px}
+.vs-head h2{font-size:clamp(34px,4vw,54px);color:var(--ivory);letter-spacing:-1.5px;line-height:1.1}
+.vs-head h2 i{color:var(--gold)}
+.vs-cols{display:grid;grid-template-columns:1fr 1px 1fr;gap:0}
+.vs-divider{background:rgba(200,168,75,0.15)}
+.vs-col{padding:0 56px}
+.vs-col-ttl{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:36px}
+.vs-col-ttl.bad{color:var(--rust)}
+.vs-col-ttl.good{color:var(--gold)}
+.vs-row{display:flex;gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.vs-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+.vs-txt{font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;font-weight:300}
+.vs-price{margin-top:36px;font-family:'Playfair Display',serif;font-size:48px;letter-spacing:-2px}
+.vs-price.bad{color:var(--rust)}
+.vs-price.good{color:var(--gold)}
+.vs-note{font-size:12px;color:rgba(255,255,255,0.3);margin-top:6px}
+
+/* PRODUCTS */
+.products{padding:110px 80px}
+.sec-header{text-align:center;margin-bottom:64px}
+.sec-header .sec-tag{margin-bottom:12px}
+.sec-header h2{font-size:clamp(34px,4vw,50px);color:var(--dark);letter-spacing:-1px;margin-bottom:14px}
+.sec-header p{font-size:17px;color:var(--muted);font-weight:300;max-width:520px;margin:0 auto}
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.prod-card{
+  background:var(--warm);padding:38px 34px;
+  cursor:pointer;transition:background .25s,transform .2s;
+  position:relative;overflow:hidden;
+}
+.prod-card:hover{background:var(--dark);transform:translateY(-2px)}
+.prod-card:hover .pname,.prod-card:hover .ptag,.prod-card:hover .pdesc{color:var(--ivory)}
+.prod-card:hover .pprice{color:var(--gold)}
+.prod-card:hover .pico,.prod-card:hover .parr{color:var(--gold)}
+.pico{font-size:26px;margin-bottom:18px;color:var(--dark);transition:color .25s}
+.pname{font-family:'Playfair Display',serif;font-size:20px;color:var(--dark);margin-bottom:6px;letter-spacing:-0.3px;transition:color .25s}
+.ptag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;transition:color .25s}
+.pdesc{font-size:13px;color:var(--mid);line-height:1.65;margin-bottom:22px;font-weight:300;transition:color .25s}
+.pfoot{display:flex;justify-content:space-between;align-items:center}
+.pprice{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);transition:color .25s}
+.pprice span{font-family:'Figtree',sans-serif;font-size:12px;color:var(--muted);font-weight:300}
+.parr{color:var(--dark);font-size:18px;opacity:.25;transition:all .25s}
+.prod-card.hot{background:var(--dark)}
+.prod-card.hot .pname,.prod-card.hot .pdesc{color:var(--ivory)}
+.prod-card.hot .ptag{color:rgba(255,255,255,0.35)}
+.prod-card.hot .pprice{color:var(--gold)}
+.prod-card.hot .pico{color:var(--gold)}
+.prod-card.hot .parr{color:var(--gold);opacity:1}
+.pbadge{
+  position:absolute;top:18px;right:18px;
+  background:var(--gold);color:var(--dark);
+  font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  padding:3px 9px;border-radius:2px;
+}
+
+/* HOW */
+.how{padding:110px 80px;background:var(--dark)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:64px}
+.how-card{padding:44px 38px;background:rgba(255,255,255,0.025);border:1px solid rgba(200,168,75,0.08)}
+.how-n{font-family:'Playfair Display',serif;font-size:64px;color:rgba(200,168,75,0.12);line-height:1;margin-bottom:20px;letter-spacing:-3px}
+.how-t{font-family:'Playfair Display',serif;font-size:22px;color:var(--ivory);margin-bottom:14px}
+.how-d{font-size:14px;color:rgba(255,255,255,0.45);line-height:1.7;font-weight:300}
+
+/* NUMBERS */
+.numbers{background:var(--gold);padding:72px 80px}
+.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.nblock{padding:0 36px;border-right:1px solid rgba(28,26,23,0.15)}
+.nblock:first-child{padding-left:0}
+.nblock:last-child{border-right:none}
+.nbig{font-family:'Playfair Display',serif;font-size:52px;color:var(--dark);letter-spacing:-2px;line-height:1}
+.nlab{font-size:13px;color:rgba(28,26,23,0.6);margin-top:10px;line-height:1.5;font-weight:300}
+
+/* INDUSTRIES */
+.industries{padding:110px 80px;text-align:center}
+.ind-cloud{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:48px}
+.itag{
+  padding:10px 22px;border:1.5px solid var(--border);border-radius:100px;
+  font-size:13px;color:var(--mid);font-weight:300;transition:all .2s;cursor:default;
+}
+.itag:hover{border-color:var(--gold);color:var(--dark);background:rgba(200,168,75,0.06)}
+
+/* PRICING */
+.pricing{padding:110px 80px;background:var(--warm)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:64px}
+.pcard{background:var(--ivory);padding:44px 38px;position:relative}
+.pcard.feat{background:var(--dark)}
+.pcard-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;font-weight:600}
+.pcard.feat .pcard-tag{color:var(--gold)}
+.pcard-amt{font-family:'Playfair Display',serif;font-size:50px;color:var(--dark);letter-spacing:-2px}
+.pcard.feat .pcard-amt{color:var(--gold)}
+.pcard-note{font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:28px}
+.pcard-feats{list-style:none}
+.pcard-feats li{
+  padding:11px 0;border-bottom:1px solid var(--border);
+  font-size:13px;color:var(--mid);display:flex;gap:10px;align-items:start;font-weight:300;
+}
+.pcard.feat .pcard-feats li{border-color:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6)}
+.pcard-feats li::before{content:'—';color:var(--gold);flex-shrink:0}
+.pcard-btn{
+  margin-top:28px;padding:13px 26px;border-radius:3px;
+  font-size:13px;font-weight:600;letter-spacing:0.3px;cursor:pointer;
+  border:none;width:100%;text-align:center;display:block;text-decoration:none;
+  font-family:'Figtree',sans-serif;transition:all .2s;
+}
+.pcard:not(.feat) .pcard-btn{background:var(--dark);color:var(--ivory)}
+.pcard:not(.feat) .pcard-btn:hover{background:var(--gold);color:var(--dark)}
+.pcard.feat .pcard-btn{background:var(--gold);color:var(--dark)}
+.pcard.feat .pcard-btn:hover{background:var(--gold2)}
+.pbest{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:var(--dark);
+  font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  padding:4px 12px;border-radius:0 0 5px 5px;
+}
+
+/* FAQ */
+.faq{padding:110px 80px}
+.faq-wrap{display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start}
+.faq-l h2{font-size:clamp(32px,3.5vw,46px);color:var(--dark);letter-spacing:-1px;line-height:1.15}
+.faq-l p{font-size:15px;color:var(--muted);margin-top:18px;line-height:1.7;font-weight:300}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
+.faq-q{
+  padding:22px 0;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:15px;font-weight:500;color:var(--dark);user-select:none;
+}
+.faq-q:hover{color:var(--gold)}
+.faq-ico{font-size:18px;color:var(--gold);flex-shrink:0;transition:transform .3s}
+.faq-a{
+  font-size:14px;color:var(--mid);line-height:1.7;
+  max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;font-weight:300;
+}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:22px}
+.faq-item.open .faq-ico{transform:rotate(45deg)}
+
+/* CTA */
+.cta{padding:110px 80px;background:var(--dark);text-align:center;position:relative;overflow:hidden}
+.cta::before{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(200,168,75,0.1) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+.cta h2{font-size:clamp(36px,5vw,64px);color:var(--ivory);letter-spacing:-2px;line-height:1.1;margin-bottom:20px;position:relative}
+.cta h2 i{color:var(--gold)}
+.cta p{font-size:17px;color:rgba(255,255,255,0.45);margin-bottom:44px;position:relative;font-weight:300}
+.cta .btn-primary{font-size:15px;padding:17px 38px;position:relative}
+
+/* FOOTER */
+footer{background:#111009;padding:56px 80px;border-top:1px solid rgba(200,168,75,0.08)}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.foot-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--ivory);margin-bottom:10px}
+.foot-logo em{color:var(--gold);font-style:italic}
+.foot-sub{font-size:13px;color:rgba(255,255,255,0.28);line-height:1.6;font-weight:300}
+.foot-col h4{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;font-weight:600}
+.foot-col a{display:block;font-size:13px;color:rgba(255,255,255,0.35);text-decoration:none;margin-bottom:9px;font-weight:300;transition:color .2s}
+.foot-col a:hover{color:var(--ivory)}
+.foot-bottom{
+  padding-top:28px;border-top:1px solid rgba(255,255,255,0.05);
+  font-size:12px;color:rgba(255,255,255,0.2);
+  display:flex;justify-content:space-between;font-weight:300;
+}
+
+/* MODAL */
+.modal{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(14,12,10,0.88);backdrop-filter:blur(10px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal.open{display:flex}
+.mbox{
+  background:var(--ivory);border-radius:6px;
+  max-width:500px;width:100%;padding:44px;
+  position:relative;max-height:90vh;overflow-y:auto;
+}
+.mclose{
+  position:absolute;top:18px;right:18px;
+  background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);
+}
+.mbox h3{font-size:26px;color:var(--dark);margin-bottom:6px;letter-spacing:-0.5px}
+.mbox p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;font-weight:300}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--mid);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--border);border-radius:3px;
+  font-family:'Figtree',sans-serif;font-size:14px;color:var(--dark);
+  background:white;outline:none;transition:border-color .2s;font-weight:300;
+}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold)}
+.fld textarea{height:90px;resize:vertical}
+.msub{
+  width:100%;padding:15px;background:var(--dark);color:var(--ivory);
+  border:none;border-radius:3px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Figtree',sans-serif;transition:background .2s;margin-top:6px;
+}
+.msub:hover{background:var(--gold);color:var(--dark)}
+.conf{text-align:center;padding:10px 0}
+.conf-check{
+  width:60px;height:60px;background:var(--gold);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin:0 auto 20px;
+}
+.conf h3{font-size:24px;margin-bottom:10px}
+.conf p{color:var(--muted);margin-bottom:28px;font-size:14px;font-weight:300}
+.conf-steps{text-align:left;margin-bottom:28px}
+.conf-step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--mid);font-weight:300}
+.conf-num{width:22px;height:22px;background:var(--gold);color:var(--dark);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.pay-btn{width:100%;padding:14px;background:#16a34a;color:white;border:none;border-radius:3px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif;margin-bottom:10px}
+.chat-btn2{width:100%;padding:12px;background:transparent;color:var(--dark);border:1.5px solid var(--border);border-radius:3px;font-size:13px;cursor:pointer;font-family:'Figtree',sans-serif;font-weight:300}
+
+/* CHAT WIDGET */
+#cw{position:fixed;bottom:28px;right:28px;z-index:9999}
+#cwbtn{
+  width:58px;height:58px;background:var(--dark);color:var(--gold);
+  border:none;border-radius:50%;font-size:22px;cursor:pointer;
+  box-shadow:0 8px 28px rgba(0,0,0,0.22);
+  transition:transform .2s,background .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+#cwbtn:hover{transform:scale(1.06);background:var(--gold);color:var(--dark)}
+#cwbox{
+  position:absolute;bottom:72px;right:0;
+  width:350px;background:var(--ivory);border-radius:10px;
+  box-shadow:0 16px 56px rgba(0,0,0,0.18);border:1px solid var(--border);
+  display:none;overflow:hidden;
+  z-index:1000;
+}
+#cwbox.open{display:block;animation:su .22s ease}
+@keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.cwh{
+  background:var(--dark);padding:18px 22px;
+  display:flex;align-items:center;gap:12px;
+}
+.cwav{width:38px;height:38px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.cwhi h4{font-family:'Playfair Display',serif;font-size:15px;color:var(--ivory)}
+.cwhi span{font-size:11px;color:rgba(255,255,255,0.35);font-weight:300}
+.cwmsgs{padding:18px;height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.cwm{max-width:86%}
+.cwm.b{align-self:flex-start}
+.cwm.u{align-self:flex-end}
+.cwm-b{padding:11px 14px;border-radius:8px;font-size:13px;line-height:1.5;font-weight:300}
+.cwm.b .cwm-b{background:var(--warm);color:var(--dark);border-radius:2px 8px 8px 8px}
+.cwm.u .cwm-b{background:var(--dark);color:var(--ivory);border-radius:8px 2px 8px 8px}
+.cwm-typing{display:flex;gap:5px;align-items:center;padding:11px 14px;background:var(--warm);border-radius:2px 8px 8px 8px;width:fit-content}
+.cwopts{padding:0 16px 14px;display:flex;flex-direction:column;gap:7px}
+.cwopt{
+  padding:9px 14px;background:var(--warm);border:1px solid var(--border);
+  border-radius:5px;font-size:12px;color:var(--dark);cursor:pointer;
+  text-align:left;font-family:'Figtree',sans-serif;transition:all .2s;font-weight:300;
+}
+.cwopt:hover{background:var(--dark);color:var(--gold);border-color:var(--dark)}
+.cwinp{padding:14px;border-top:1px solid var(--border);display:flex;gap:8px}
+.cwinp input{
+  flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:5px;
+  font-family:'Figtree',sans-serif;font-size:13px;outline:none;background:white;font-weight:300;
+}
+.cwinp input:focus{border-color:var(--gold)}
+.cwsend{
+  padding:9px 14px;background:var(--dark);color:var(--gold);
+  border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:all .2s;
+}
+.cwsend:hover{background:var(--gold);color:var(--dark)}
+
+/* LOADING STATE */
+.ai-thinking{color:var(--muted);font-style:italic;font-size:12px;padding:8px 0}
+
+@media(max-width:1024px){
+  header{padding:16px 32px}
+  .hero{grid-template-columns:1fr}
+  .hero-r{min-height:360px}
+  .hero-l{padding:56px 40px}
+  .problem,.vs,.products,.how,.numbers,.industries,.pricing,.faq,.cta,footer{padding-left:40px;padding-right:40px}
+  .vs-cols{grid-template-columns:1fr}
+  .vs-divider{display:none}
+  .vs-col{padding:32px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .prod-grid,.how-grid{grid-template-columns:1fr 1fr}
+  .numbers-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .nblock{border-right:none;padding:0}
+  .faq-wrap{grid-template-columns:1fr;gap:40px}
+  .price-grid{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+}
+/* HAMBURGER */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px;z-index:201}
+.hamburger span{display:block;width:24px;height:2px;background:var(--dark);transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+@media(max-width:640px){
+  header{padding:14px 20px}
+  .hamburger{display:flex}
+  nav{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(250,248,243,0.98);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:200}
+  nav.open{display:flex}
+  nav a{font-size:18px;color:var(--dark)}
+  nav .nav-btn{padding:14px 32px;font-size:15px !important}
+  .hero-l{padding:44px 20px}
+  .hero h1{font-size:38px}
+  .hero-stats{flex-direction:column;gap:20px}
+  .hstat{border-right:none;padding-right:0;margin-right:0}
+  .problem{grid-template-columns:1fr;gap:40px;padding:72px 20px}
+  .vs,.products,.how,.numbers,.industries,.pricing,.faq,.cta,footer{padding-left:20px;padding-right:20px}
+  .prod-grid,.how-grid{grid-template-columns:1fr}
+  .numbers-grid{grid-template-columns:1fr 1fr}
+  .foot-grid{grid-template-columns:1fr}
+  #cwbox{width:calc(100vw - 40px);right:-8px}
+}
+
+#vcbtn{position:fixed;bottom:98px;right:28px;z-index:9999;width:52px;height:52px;background:#B5522A;color:#fff;border:none;border-radius:50%;font-size:22px;cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,0.25);transition:transform .2s,background .2s;display:flex;align-items:center;justify-content:center}
+#vcbtn:hover{transform:scale(1.08);background:#C8A84B;color:#1C1A17}
+#vcbox{position:fixed;bottom:162px;right:28px;z-index:9998;width:310px;background:#1C1A17;border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,0.4);border:1px solid rgba(200,168,75,0.25);display:none}
+.vch{padding:14px 18px;background:rgba(200,168,75,0.08);border-bottom:1px solid rgba(200,168,75,0.12);display:flex;align-items:center;gap:10px}
+.vcav{width:34px;height:34px;background:#B5522A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:background .3s}
+.vcav.on{background:#C8A84B;animation:vp .9s infinite}
+@keyframes vp{0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,0.5)}50%{box-shadow:0 0 0 10px rgba(200,168,75,0)}}
+.vchi h4{font-family:'Playfair Display',serif;font-size:13px;color:#FAF8F3;margin:0}
+.vchi small{font-size:10px;color:rgba(255,255,255,0.35)}
+.vcmsgs{padding:12px;height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.vcm{max-width:88%;padding:8px 12px;border-radius:7px;font-size:12px;line-height:1.5;color:#FAF8F3}
+.vcm.a{background:rgba(200,168,75,0.15);align-self:flex-start;border-radius:2px 7px 7px 7px}
+.vcm.u{background:rgba(255,255,255,0.08);align-self:flex-end;border-radius:7px 2px 7px 7px}
+.vcbtns{padding:10px 14px;display:flex;gap:8px;border-top:1px solid rgba(255,255,255,0.07)}
+.vcmic{flex:1;padding:9px;background:#B5522A;color:#fff;border:none;border-radius:5px;font-size:11px;font-family:'Figtree',sans-serif;cursor:pointer;font-weight:600;transition:all .2s}
+.vcmic:hover{background:#C8A84B;color:#1C1A17}
+.vcmic.on{background:#e53e3e}
+.vcend{padding:9px 12px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:'Figtree',sans-serif}
+.vcend:hover{background:rgba(255,255,255,0.12);color:#fff}
+#vcst{font-size:10px;color:rgba(255,255,255,0.3);text-align:center;padding:4px 12px 8px}
+
+/* SOCIAL PROOF */
+.social-proof{padding:110px 80px;background:var(--ivory)}
+.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:56px}
+.sp-card{background:white;border:1px solid var(--border);padding:32px;border-radius:6px;position:relative;transition:transform .25s,box-shadow .25s}
+.sp-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.08)}
+.sp-stars{color:var(--gold);font-size:16px;margin-bottom:14px;letter-spacing:2px}
+.sp-quote{font-size:14px;color:var(--mid);line-height:1.75;font-weight:300;margin-bottom:20px;font-style:italic}
+.sp-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)}
+.sp-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sp-avatar.blue{background:#E8F0FE;color:#4285f4}
+.sp-avatar.green{background:#E6F4EA;color:#34a853}
+.sp-avatar.gold{background:rgba(200,168,75,0.15);color:var(--gold)}
+.sp-name{font-weight:600;font-size:13px;color:var(--dark)}
+.sp-role{font-size:11px;color:var(--muted);font-weight:300}
+.sp-badge{position:absolute;top:-1px;right:24px;background:var(--gold);color:var(--dark);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:0 0 4px 4px}
+
+/* TRUST BAR */
+.trust-bar{display:flex;align-items:center;justify-content:center;gap:36px;padding:20px 60px;background:var(--warm);border-bottom:1px solid var(--border)}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0.3px}
+.trust-item .trust-ico{font-size:16px}
+
+/* URGENCY BANNER */
+.urgency{background:var(--rust);padding:10px 20px;text-align:center;font-size:13px;color:white;font-weight:400;letter-spacing:0.3px;position:fixed;top:0;left:0;right:0;z-index:202;height:40px}
+.urgency strong{font-weight:700}
+.urgency a{color:var(--gold2);text-decoration:underline;margin-left:6px}
+
+/* LOGOS BAR */
+.logos-bar{padding:48px 80px;text-align:center;border-bottom:1px solid var(--border)}
+.logos-bar p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:24px;font-weight:500}
+.logos-row{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;opacity:0.4}
+.logos-row span{font-family:'Playfair Display',serif;font-size:20px;color:var(--mid);letter-spacing:-0.5px}
+
+/* SCROLL ANIMATIONS */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+
+/* CHAT BUBBLE NOTIFICATION */
+.chat-notif{
+  position:absolute;top:-8px;left:-8px;
+  background:var(--rust);color:white;
+  width:20px;height:20px;border-radius:50%;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  animation:notifPulse 2s infinite;
+}
+@keyframes notifPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+/* FLOATING SOCIAL PROOF TOAST */
+.sp-toast{
+  position:fixed;bottom:100px;left:28px;z-index:9990;
+  background:white;border:1px solid var(--border);border-radius:8px;
+  padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  display:flex;align-items:center;gap:12px;max-width:320px;
+  transform:translateX(-120%);transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+.sp-toast.show{transform:translateX(0)}
+.sp-toast-ico{font-size:20px;flex-shrink:0}
+.sp-toast-text{font-size:12px;color:var(--mid);line-height:1.5}
+.sp-toast-text strong{color:var(--dark);font-weight:600}
+.sp-toast-time{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* GUARANTEE BADGE */
+.guarantee{display:flex;align-items:center;gap:14px;margin-top:28px;padding:16px 20px;background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.15);border-radius:6px}
+.guarantee-ico{font-size:28px;flex-shrink:0}
+.guarantee-text{font-size:13px;color:var(--mid);line-height:1.6;font-weight:300}
+.guarantee-text strong{font-weight:600;color:var(--dark)}
+
+@media(max-width:1024px){
+  .sp-grid{grid-template-columns:1fr 1fr}
+  .trust-bar{flex-wrap:wrap;gap:20px;padding:16px 32px}
+  .logos-row{gap:28px}
+  .sp-toast{max-width:280px;left:16px;bottom:90px}
+}
+@media(max-width:640px){
+  .sp-grid{grid-template-columns:1fr}
+  .social-proof{padding:72px 20px}
+  .trust-bar{gap:14px;padding:12px 20px}
+  .logos-bar{padding:32px 20px}
+  .logos-row span{font-size:16px}
+  .logos-row{gap:24px}
+  .sp-toast{max-width:260px;left:12px;bottom:80px}
+  .urgency{font-size:11px;padding:8px 16px}
+}
+
+/* AI PICKER MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal.open{display:flex}
+.mbox{background:var(--ivory);border-radius:8px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;position:relative;padding:52px 48px}
+.mclose{position:absolute;top:18px;right:22px;background:none;border:none;font-size:26px;cursor:pointer;color:var(--muted);line-height:1}
+.mclose:hover{color:var(--dark)}
+
+/* Step indicator */
+.msteps{display:flex;gap:0;margin-bottom:36px;border-bottom:2px solid var(--border)}
+.mstep{flex:1;padding-bottom:14px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;position:relative;cursor:default}
+.mstep.active{color:var(--gold)}
+.mstep.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--gold)}
+.mstep.done{color:var(--dark)}
+
+/* Plan badge */
+.mplan-badge{display:inline-flex;align-items:center;gap:8px;background:var(--dark);color:var(--gold);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:6px 14px;border-radius:2px;margin-bottom:24px}
+
+/* AI option cards */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0}
+.ai-card{
+  border:1.5px solid var(--border);border-radius:6px;padding:18px 16px;cursor:pointer;
+  transition:all .2s;display:flex;gap:14px;align-items:start;
+  background:white;user-select:none;
+}
+.ai-card:hover{border-color:var(--gold);background:rgba(200,168,75,0.04)}
+.ai-card.selected{border-color:var(--gold);background:rgba(200,168,75,0.08);box-shadow:0 0 0 3px rgba(200,168,75,0.15)}
+.ai-card.disabled{opacity:0.35;cursor:not-allowed;pointer-events:none}
+.ai-ico{font-size:22px;flex-shrink:0;margin-top:1px}
+.ai-name{font-weight:600;font-size:14px;color:var(--dark);margin-bottom:4px}
+.ai-desc{font-size:12px;color:var(--muted);line-height:1.5;font-weight:300}
+.ai-chk{margin-left:auto;width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:2px}
+.ai-card.selected .ai-chk{background:var(--gold);border-color:var(--gold);color:var(--dark)}
+.ai-chk::after{content:'✓';font-size:11px;font-weight:700;opacity:0}
+.ai-card.selected .ai-chk::after{opacity:1}
+
+.ai-select-note{font-size:12px;color:var(--muted);margin-bottom:8px}
+.ai-counter{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:16px}
+.ai-counter span{color:var(--gold)}
+
+/* Form fields */
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:8px;color:var(--dark)}
+.fld input,.fld select,.fld textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:4px;font-size:14px;font-family:'Figtree',sans-serif;background:white;color:var(--dark);transition:border .2s;outline:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold)}
+.fld textarea{resize:vertical;min-height:90px}
+.msub{width:100%;padding:15px;background:var(--dark);color:var(--ivory);border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif;letter-spacing:0.4px;transition:background .2s;margin-top:8px}
+.msub:hover{background:var(--gold);color:var(--dark)}
+.mbtn-back{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;margin-bottom:20px;display:flex;align-items:center;gap:6px;font-family:'Figtree',sans-serif}
+.mbtn-back:hover{color:var(--dark)}
+.mbtn-next{width:100%;padding:15px;background:var(--gold);color:var(--dark);border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Figtree',sans-serif;letter-spacing:0.4px;transition:background .2s;margin-top:8px}
+.mbtn-next:hover{background:var(--gold2)}
+.mbtn-next:disabled{opacity:0.4;cursor:not-allowed}
+.selected-summary{background:var(--warm);border-radius:6px;padding:16px 18px;margin-bottom:24px;font-size:13px;color:var(--mid);line-height:1.6}
+.selected-summary strong{color:var(--dark);display:block;margin-bottom:6px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+
+/* Confirmation */
+.conf{text-align:center;padding:20px 0}
+.conf-check{width:64px;height:64px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 24px;color:var(--dark)}
+.conf h3{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:12px;color:var(--dark)}
+.conf p{font-size:15px;color:var(--muted);margin-bottom:28px;font-weight:300}
+.conf-steps{text-align:left;margin:24px 0;display:flex;flex-direction:column;gap:12px}
+.conf-step{display:flex;gap:14px;align-items:start}
+.conf-num{width:26px;height:26px;background:var(--dark);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.pay-btn{width:100%;padding:14px;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;font-family:'Figtree',sans-serif;background:var(--dark);color:var(--ivory);transition:background .2s}
+.pay-btn:hover{background:var(--gold);color:var(--dark)}
+.chat-btn2{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--mid);font-family:'Figtree',sans-serif;transition:all .2s}
+.chat-btn2:hover{border-color:var(--dark);color:var(--dark)}
+@media(max-width:640px){.mbox{padding:36px 24px}.ai-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- URGENCY BANNER -->
+<div class="urgency">
+  <strong>April only:</strong> Free setup included with every plan — no extra charges.<a href="#pricing">See plans →</a>
+</div>
+
+<header>
+  <div class="logo">Kl<em>i</em>vio</div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="mainNav">
+    <a href="#how" onclick="closeMenu()">How it works</a>
+    <a href="#pricing" onclick="closeMenu()">Pricing</a>
+    <a href="#faq" onclick="closeMenu()">FAQ</a>
+    <a href="#pricing" class="nav-btn" onclick="closeMenu()">Get Started</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-l">
+    <div class="eyebrow"><span class="eyebrow-line"></span>AI Automation for Business</div>
+    <h1>Your leads don't sleep.<br><i>Neither should your business.</i></h1>
+    <p>Klivio builds AI systems that respond to every enquiry in under 2 minutes — 24 hours a day. No staff. No missed opportunities. One-time setup.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary">See plans →</a>
+      <a href="#how" class="btn-ghost">How it works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-n">&lt;2min</div><div class="hstat-l">Response time, always</div></div>
+      <div class="hstat"><div class="hstat-n">24/7</div><div class="hstat-l">Never offline</div></div>
+      <div class="hstat"><div class="hstat-n">2–7</div><div class="hstat-l">Days to go live</div></div>
+    </div>
+    <div style="margin-top:24px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">
+      <span style="color:var(--gold);font-size:14px">★★★★★</span> Rated 5/5 by 50+ businesses across UK, AU & UAE
+    </div>
+  </div>
+  <div class="hero-r">
+    <div class="demo-card">
+      <div class="demo-label">Live AI conversation — 11:52 PM</div>
+      <div class="demo-msg u">Hi, do you have availability for a valuation this week?</div>
+      <div class="demo-time">Sent 11:52 PM</div>
+      <div class="demo-msg a">Hi Sarah! Yes — I can book you in for Tuesday or Thursday. Which works better?</div>
+      <div class="demo-msg a">I've also sent a preliminary estimate to your email based on your postcode 📧</div>
+      <div class="demo-typing">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span>Klivio AI is responding...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="tick-item">Real Estate</span><span class="tick-item">·</span>
+    <span class="tick-item">Dental Clinics</span><span class="tick-item">·</span>
+    <span class="tick-item">Law Firms</span><span class="tick-item">·</span>
+    <span class="tick-item">Restaurants</span><span class="tick-item">·</span>
+    <span class="tick-item">Accountants</span><span class="tick-item">·</span>
+    <span class="tick-item">Car Dealers</span><span class="tick-item">·</span>
+    <span class="tick-item">Gyms & Spas</span><span class="tick-item">·</span>
+    <span class="tick-item">E-commerce</span><span class="tick-item">·</span>
+    <span class="tick-item">Hotels</span><span class="tick-item">·</span>
+    <span class="tick-item">Real Estate</span><span class="tick-item">·</span>
+    <span class="tick-item">Dental Clinics</span><span class="tick-item">·</span>
+    <span class="tick-item">Law Firms</span><span class="tick-item">·</span>
+    <span class="tick-item">Restaurants</span><span class="tick-item">·</span>
+    <span class="tick-item">Accountants</span><span class="tick-item">·</span>
+    <span class="tick-item">Car Dealers</span><span class="tick-item">·</span>
+    <span class="tick-item">Gyms & Spas</span><span class="tick-item">·</span>
+    <span class="tick-item">E-commerce</span><span class="tick-item">·</span>
+    <span class="tick-item">Hotels</span><span class="tick-item">·</span>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><span class="trust-ico">🛡️</span> No contracts — cancel anytime</div>
+  <div class="trust-item"><span class="trust-ico">⚡</span> Live in 2–7 days</div>
+  <div class="trust-item"><span class="trust-ico">🔒</span> Bank-level data security</div>
+  <div class="trust-item"><span class="trust-ico">💬</span> Real human support on Telegram</div>
+  <div class="trust-item"><span class="trust-ico">🌍</span> Trusted by businesses in 5+ countries</div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem reveal">
+  <div>
+    <span class="sec-tag">The problem</span>
+    <h2>How many leads did you lose while you were asleep?</h2>
+  </div>
+  <div class="prob-list">
+    <div class="prob-row"><span class="prob-x">✕</span><p class="prob-text">A potential client messaged at 11pm. Nobody replied. They booked with your competitor by morning.</p></div>
+    <div class="prob-row"><span class="prob-x">✕</span><p class="prob-text">You got 5 enquiries last week. You responded to 2. The other 3 are now someone else's customers.</p></div>
+    <div class="prob-row"><span class="prob-x">✕</span><p class="prob-text">Your competitor answered in 3 minutes. You answered the next morning. You never heard back.</p></div>
+    <div class="prob-row"><span class="prob-x">✕</span><p class="prob-text">A consultation was booked but never followed up. They assumed you weren't interested.</p></div>
+  </div>
+</section>
+
+<!-- VS -->
+<section style="background:#B5522A;padding:48px 80px;text-align:center">
+  <p style="font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:16px;font-weight:600">Research shows</p>
+  <h2 style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,48px);color:white;letter-spacing:-1px;line-height:1.15;max-width:800px;margin:0 auto 20px">
+    You pay your staff for 8 hours.<br>They work productively for <em style="font-style:italic">3.</em>
+  </h2>
+  <p style="font-size:16px;color:rgba(255,255,255,0.75);max-width:560px;margin:0 auto;font-weight:300;line-height:1.7">
+    Studies show office workers are productive for an average of 3 hours per day. The rest goes to social media, conversations, coffee breaks, and emails. Klivio works all 24.
+  </p>
+</section>
+
+<section class="vs reveal">
+  <div class="vs-head">
+    <h2>A 24/7 worker that<br><i>never costs a salary.</i></h2>
+  </div>
+  <div class="vs-cols">
+    <div class="vs-col">
+      <div class="vs-col-ttl bad">The traditional way</div>
+      <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Works 8 hours — but productively only 3 (studies show)</span></div>
+      <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Gets sick, takes holidays, makes mistakes</span></div>
+      <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Still misses calls and messages</span></div>
+      <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Needs training, management, HR overhead</span></div>
+      <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Takes weeks to hire and onboard</span></div>
+      <div class="vs-price bad">$26,000+<span style="font-size:18px;color:rgba(255,255,255,0.3)">/yr</span></div>
+      <div class="vs-note">Per employee, before taxes &amp; benefits</div>
+    </div>
+    <div class="vs-divider"></div>
+    <div class="vs-col">
+      <div class="vs-col-ttl good">The Klivio way</div>
+      <div class="vs-row"><span class="vs-ico" style="color:var(--gold)">✓</span><span class="vs-txt">Responds in under 2 minutes — always, 24/7</span></div>
+      <div class="vs-row"><span class="vs-ico" style="color:var(--gold)">✓</span><span class="vs-txt">Never sick, never on holiday, never distracted</span></div>
+      <div class="vs-row"><span class="vs-ico" style="color:var(--gold)">✓</span><span class="vs-txt">Captures every lead, every message</span></div>
+      <div class="vs-row"><span class="vs-ico" style="color:var(--gold)">✓</span><span class="vs-txt">Ready in 2-7 days. Zero effort from you.</span></div>
+      <div class="vs-row"><span class="vs-ico" style="color:var(--gold)">✓</span><span class="vs-txt">Works in any language, any time zone</span></div>
+      <div class="vs-price good">From £197</div>
+      <div class="vs-note">From £197/month. Cancel anytime.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how reveal" id="how">
+  <div class="sec-header">
+    <span class="sec-tag" style="color:rgba(200,168,75,0.6)">The process</span>
+    <h2 style="color:var(--ivory)">Up and running in 2 to 7 days</h2>
+    <p style="color:rgba(255,255,255,0.4)">No technical knowledge needed. We handle everything.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-n">01</div>
+      <div class="how-t">Tell us what you need</div>
+      <p class="how-d">Share your business details and the problems you want to solve. Takes less than 10 minutes.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-n">02</div>
+      <div class="how-t">We build it for you</div>
+      <p class="how-d">Our team configures your custom AI system. No code, no setup, no technical knowledge needed.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-n">03</div>
+      <div class="how-t">Watch it work</div>
+      <p class="how-d">Your system goes live and starts capturing leads and handling enquiries while you focus elsewhere.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section class="numbers">
+  <div class="numbers-grid">
+    <div class="nblock"><div class="nbig">&lt;2min</div><div class="nlab">Response time for every enquiry, every time</div></div>
+    <div class="nblock"><div class="nbig">15+</div><div class="nlab">Industries served across UK, AU, CA, UAE & Ireland</div></div>
+    <div class="nblock"><div class="nbig">2–7</div><div class="nlab">Business days from payment to live system</div></div>
+    <div class="nblock"><div class="nbig">£0</div><div class="nlab">Setup fee — pay only your monthly subscription</div></div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="social-proof reveal">
+  <div class="sec-header">
+    <span class="sec-tag">Results</span>
+    <h2>What our clients say</h2>
+    <p>Real businesses. Real results. Within the first 30 days.</p>
+  </div>
+  <div class="sp-grid">
+    <div class="sp-card">
+      <div class="sp-badge">Verified</div>
+      <div class="sp-stars">★★★★★</div>
+      <p class="sp-quote">"We were losing 60% of after-hours enquiries. Now we capture 95%. Klivio paid for itself on day one — literally."</p>
+      <div class="sp-author">
+        <div class="sp-avatar blue">JR</div>
+        <div><div class="sp-name">James Richardson</div><div class="sp-role">Partner, Richardson & Cole Solicitors · Manchester</div></div>
+      </div>
+    </div>
+    <div class="sp-card">
+      <div class="sp-stars">★★★★★</div>
+      <p class="sp-quote">"21 extra bookings in the first month. My receptionist couldn't believe the AI was handling calls at 2am while she slept."</p>
+      <div class="sp-author">
+        <div class="sp-avatar green">PA</div>
+        <div><div class="sp-name">Dr. Priya Anand</div><div class="sp-role">Owner, Bright Smile Dental · Birmingham</div></div>
+      </div>
+    </div>
+    <div class="sp-card">
+      <div class="sp-badge">Verified</div>
+      <div class="sp-stars">★★★★★</div>
+      <p class="sp-quote">"I'm a one-man band. Klivio gave me a 24/7 assistant that qualifies leads, follows up, and books viewings. I sold 3 more properties last quarter."</p>
+      <div class="sp-author">
+        <div class="sp-avatar gold">MT</div>
+        <div><div class="sp-name">Mark Thompson</div><div class="sp-role">Independent Agent, Thompson Estates · London</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS BAR -->
+<div class="logos-bar reveal">
+  <p>Trusted across industries</p>
+  <div class="logos-row">
+    <span>Dental+</span>
+    <span>LegalEdge</span>
+    <span>HomeFirst</span>
+    <span>FitPro</span>
+    <span>TradeMaster</span>
+    <span>CleanCo</span>
+  </div>
+</div>
+
+<!-- INDUSTRIES -->
+<section class="industries reveal">
+  <div class="sec-header">
+    <span class="sec-tag">Industries</span>
+    <h2>Works for any business that gets enquiries</h2>
+  </div>
+  <div class="ind-cloud">
+    <span class="itag">Real Estate</span><span class="itag">Dental Clinics</span>
+    <span class="itag">Law Firms</span><span class="itag">Accountants</span>
+    <span class="itag">Car Dealers</span><span class="itag">Hotels</span>
+    <span class="itag">Restaurants</span><span class="itag">Gyms & Spas</span>
+    <span class="itag">Insurance Brokers</span><span class="itag">Physiotherapists</span>
+    <span class="itag">Mortgage Brokers</span><span class="itag">Recruitment Agencies</span>
+    <span class="itag">E-commerce</span><span class="itag">Wedding Planners</span>
+    <span class="itag">Architects</span><span class="itag">Cleaning Companies</span>
+    <span class="itag">And many more...</span>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing reveal" id="pricing">
+  <div class="sec-header">
+    <span class="sec-tag">Pricing</span>
+    <h2>One price. No surprises.</h2>
+    <p>Simple monthly pricing. Cancel anytime.</p>
+  </div>
+  <div class="price-grid">
+    <div class="pcard">
+      <div class="pcard-tag">Starter</div>
+      <div class="pcard-amt">£197<span style='font-size:22px'>/mo</span></div>
+      <div class="pcard-note">Monthly · Cancel anytime</div>
+      <ul class="pcard-feats">
+        <li>1 AI worker of your choice</li>
+        <li>Works in any language</li>
+        <li>Full setup included</li>
+        <li>30 days of support</li>
+      </ul>
+      <a href="#" class="pcard-btn" onclick="openPlanModal('starter');return false">Choose your AI →</a>
+    </div>
+    <div class="pcard feat">
+      <div class="pbest">Best Value</div>
+      <div class="pcard-tag">Growth</div>
+      <div class="pcard-amt">£297<span style='font-size:22px'>/mo</span></div>
+      <div class="pcard-note">Monthly · Cancel anytime</div>
+      <ul class="pcard-feats">
+        <li>2 AI workers of your choice</li>
+        <li>Priority setup (3 days)</li>
+        <li>60 days of priority support</li>
+        <li>Monthly performance review</li>
+        <li>Save 2 months with annual plan</li>
+      </ul>
+      <a href="#" class="pcard-btn" onclick="openPlanModal('growth');return false">Choose your AIs →</a>
+    </div>
+    <div class="pcard">
+      <div class="pcard-tag">Full System</div>
+      <div class="pcard-amt">£497<span style='font-size:22px'>/mo</span></div>
+      <div class="pcard-note">Monthly · Cancel anytime</div>
+      <ul class="pcard-feats">
+        <li>3 AI workers of your choice</li>
+        <li>Includes Voice AI + Cold Outreach</li>
+        <li>Dedicated onboarding call</li>
+        <li>90 days of priority support</li>
+        <li>Quarterly strategy sessions</li>
+      </ul>
+      <a href="#" class="pcard-btn" onclick="openPlanModal('full');return false">Choose your AIs →</a>
+    </div>
+  </div>
+  <div class="guarantee" style="margin-top:40px;max-width:640px;margin-left:auto;margin-right:auto">
+    <div class="guarantee-ico">🛡️</div>
+    <div class="guarantee-text"><strong>Our Delivery Promise.</strong> No setup fees. No contracts. No hidden charges. Cancel anytime. We guarantee delivery within the agreed timeline — or we keep working until it's done, at no extra cost.</div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq reveal" id="faq">
+  <div class="faq-wrap">
+    <div class="faq-l">
+      <h2>Common questions</h2>
+      <p>Everything you need to know before getting started.</p>
+    </div>
+    <div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Will it work for my industry? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Yes. We've built systems for 15+ industries — real estate, healthcare, legal, automotive, hospitality, fitness, retail, and more. If your business receives enquiries online, Klivio works for you.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do I need technical skills? <span class="faq-ico">+</span></div>
+        <div class="faq-a">No. We handle everything. You tell us what you need, share access to your tools, and we deliver a working system. No coding, no setup on your side.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How long does setup take? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Most products are delivered within 2–7 business days. Complex custom solutions may take up to 14 days. We confirm the exact timeline before you pay.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How does billing work? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Simple monthly subscription — starting from £197/mo. No setup fees, no hidden charges, no long-term contracts. Cancel anytime with one click.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What languages do you support? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Any language. We've configured systems in English, Spanish, French, German, Portuguese, Arabic, and more. Each system is set up in your clients' preferred language.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How do I pay? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Stripe (credit/debit card), PayPal, or Crypto (USDT, USDC, BTC, ETH). Payment is made after we confirm your setup details.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What if it doesn't work for me? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Zero risk. There are no setup fees, no contracts, and no lock-in. If you're not seeing results within 30 days, just cancel — one click, done. Most of our clients see ROI within the first 2 weeks.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is my data secure? <span class="faq-ico">+</span></div>
+        <div class="faq-a">Absolutely. We use bank-level encryption and never share your data with third parties. All AI processing happens on secure, enterprise-grade infrastructure. We're fully GDPR compliant.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Your next lead arrives tonight.<br><i>Will you be ready?</i></h2>
+  <p>Set up in 2–7 days. No tech skills needed. Cancel anytime. Zero risk.</p>
+  <a href="#pricing" class="btn-primary" style="font-size:16px;padding:18px 44px;margin-bottom:16px">Get your AI worker now →</a>
+  <div style="font-size:12px;color:rgba(255,255,255,0.3);position:relative">
+    <span style="color:var(--gold);font-size:13px">★★★★★</span> &nbsp; Trusted by 50+ businesses &nbsp;|&nbsp; No setup fees &nbsp;|&nbsp; Cancel anytime
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <div class="foot-logo">Kl<em>i</em>vio</div>
+      <p class="foot-sub">AI automation for businesses worldwide. We build the systems that work while you sleep.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Product</h4>
+      <a href="#products">Products</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#how">How it works</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy</a>
+    </div>
+    <div class="foot-col">
+      <h4>Connect</h4>
+      <a href="https://t.me/klivio" target="_blank">Telegram</a>
+      <a href="#">LinkedIn</a>
+      <a href="mailto:hello@klivio.bond">Email</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Klivio. All rights reserved.</span>
+    <span>Built with AI · Delivered by humans</span>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal()">×</button>
+
+    <!-- STEP 1: AI PICKER -->
+    <div id="stepPicker">
+      <div class="msteps">
+        <div class="mstep active" id="step1Label">1 · Choose your AI</div>
+        <div class="mstep" id="step2Label">2 · Your details</div>
+      </div>
+      <div id="planBadge" class="mplan-badge"></div>
+      <h3 id="pickerTitle" style="font-family:'Playfair Display',serif;font-size:26px;margin-bottom:8px;color:var(--dark)">Which AI worker do you want?</h3>
+      <p id="pickerSub" class="ai-select-note"></p>
+      <div id="aiGrid" class="ai-grid"></div>
+      <div class="ai-counter">Selected: <span id="aiCount">0</span> / <span id="aiMax">1</span></div>
+      <button class="mbtn-next" id="btnNext" onclick="goToStep2()" disabled>Continue →</button>
+    </div>
+
+    <!-- STEP 2: CONTACT FORM -->
+    <div id="stepForm" style="display:none">
+      <div class="msteps">
+        <div class="mstep done" id="step1LabelB">1 · Choose your AI</div>
+        <div class="mstep active" id="step2LabelB">2 · Your details</div>
+      </div>
+      <button class="mbtn-back" onclick="goToStep1()">← Back</button>
+      <div id="selectedSummary" class="selected-summary"></div>
+      <div class="fld"><label>Your Name</label><input type="text" id="fName" placeholder="Your name"></div>
+      <div class="fld"><label>Your Email</label><input type="email" id="fEmail" placeholder="your@email.com"></div>
+      <div class="fld"><label>Your Website <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label><input type="url" id="fWeb" placeholder="https://yourbusiness.com"></div>
+      <div class="fld">
+        <label>Client Language</label>
+        <select id="fLang">
+          <option>English</option><option>Spanish</option><option>French</option>
+          <option>German</option><option>Arabic</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fld"><label>Anything we should know? <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label><textarea id="fNotes" placeholder="E.g. we use Gmail, leads come through our website contact form..."></textarea></div>
+      <button class="msub" onclick="submitForm()">Submit Request →</button>
+    </div>
+
+    <!-- STEP 3: CONFIRMATION -->
+    <div id="confView" style="display:none">
+      <div class="conf">
+        <div class="conf-check">✓</div>
+        <h3>You're all set!</h3>
+        <p>We've received your request. Here's what happens next:</p>
+        <div class="conf-steps">
+          <div class="conf-step"><div class="conf-num">1</div><div>We email you within a few hours to confirm details</div></div>
+          <div class="conf-step"><div class="conf-num">2</div><div>You share access to your tools — takes about 10 minutes</div></div>
+          <div class="conf-step"><div class="conf-num">3</div><div>We build and deliver your system in 2–7 days</div></div>
+        </div>
+        <button class="pay-btn" id="payBtn">💳 Complete payment →</button>
+        <button class="pay-btn" id="cryptoBtn" style="background:#f7931a;margin-bottom:10px">₿ Pay with Crypto (USDT/BTC/ETH) →</button>
+        <button class="chat-btn2" onclick="window.open('https://t.me/klivio','_blank')">💬 Questions? Chat with us on Telegram</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI CHAT WIDGET -->
+<div id="cw">
+  <div id="cwbox">
+    <div class="cwh">
+      <div class="cwav">🤖</div>
+      <div class="cwhi">
+        <h4>Klivio AI</h4>
+        <span>Replies in under 2 minutes</span>
+      </div>
+    </div>
+    <div class="cwmsgs" id="cwmsgs">
+      <div class="cwm b"><div class="cwm-b">Hey! What kind of business do you run?</div></div>
+    </div>
+    <div class="cwopts" id="cwopts">
+      <button class="cwopt" onclick="askQ('What does Klivio do?')">What does Klivio do?</button>
+      <button class="cwopt" onclick="askQ('How much does it cost?')">How much does it cost?</button>
+      <button class="cwopt" onclick="askQ('How fast is the setup?')">How fast is the setup?</button>
+    </div>
+    <div class="cwinp">
+      <input id="cwinput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="cwsend" onclick="sendChat()">→</button>
+    </div>
+  </div>
+  <button id="cwbtn" onclick="toggleChat()">💬</button>
+</div>
+
+<script>
+// ── MOBILE MENU ──
+function toggleMenu(){document.getElementById('hamburger').classList.toggle('open');document.getElementById('mainNav').classList.toggle('open');}
+function closeMenu(){document.getElementById('hamburger').classList.remove('open');document.getElementById('mainNav').classList.remove('open');}
+
+// ── ALEX v2 — Elite Sales Chatbot (no API key needed) ──────────────────────
+// State tracking for conversation intelligence
+var alex = {
+  industry: null,
+  businessName: null,
+  painPoint: null,
+  budget: null,
+  objections: [],
+  msgCount: 0,
+  askedBusiness: false,
+  shownProduct: null,
+  closingAttempts: 0,
+  userName: null,
+  sentiment: 'neutral', // positive, neutral, skeptical, cold
+  lastTopic: null
+};
+
+// ── INDUSTRY DETECTION ──
+var industryMap = {
+  dental: { keys:['dental','dentist','teeth','clinic','tooth','orthodont','hygien','oral','implant'], label:'Dental',
+    pain:'Missed calls during procedures lose you 3–5 bookings a week — that\'s $2,000+ in revenue gone.',
+    product:'Voice Assistant + AI Lead Responder',
+    result:'Our dental clients typically see 15–25 extra bookings per month within the first 30 days. One practice in London added $12K/month just from capturing after-hours calls.',
+    bundle:'Growth',price:'$297/mo'},
+  realestate: { keys:['real estate','property','estate agent','realtor','agent','letting','landlord','rental','mortgage broker','house','flat','apartment','valuation','apprais'], label:'Real Estate',
+    pain:'A lead that doesn\'t get a reply in 5 minutes is 10× less likely to convert. Your competitors are responding faster.',
+    product:'Valuation Bot + AI Lead Responder',
+    result:'Estate agents using Klivio capture 40–60% more valuation leads because the bot engages them instantly — before they even think about calling someone else.',
+    bundle:'Growth',price:'$297/mo'},
+  law: { keys:['law','lawyer','solicitor','legal','attorney','barrister','paralegal','litigation','injury','divorce','conveyancing'], label:'Legal',
+    pain:'People looking for a lawyer at 10pm don\'t wait until morning — they call the next firm on Google. Every missed enquiry is a case lost.',
+    product:'AI Lead Responder + Live Chat Assistant',
+    result:'Law firms using our system qualify leads 24/7 without a receptionist. One firm went from losing 60% of after-hours leads to capturing 95%.',
+    bundle:'Growth',price:'$297/mo'},
+  hospitality: { keys:['hotel','hospitality','restaurant','bar','pub','cafe','catering','event','venue','booking','reservation','guest'], label:'Hospitality',
+    pain:'During peak service, the phone rings unanswered. That\'s a table, a booking, a private event — gone to the place that picked up.',
+    product:'Voice Assistant + AI Chatbot',
+    result:'Restaurants and hotels use our AI to handle reservations and enquiries 24/7. No more voicemails, no more lost bookings during busy service.',
+    bundle:'Full System',price:'$497/mo'},
+  automotive: { keys:['car','auto','dealer','vehicle','mechanic','garage','mot','service','bodyshop','tyre','tire','dealership'], label:'Automotive',
+    pain:'Someone looking for a car or a service slot will call 3 places and go with whoever answers first. If that\'s not you, it\'s your competitor.',
+    product:'AI Lead Responder + Follow-Up Automator',
+    result:'Dealerships using Klivio respond to every enquiry in under 2 minutes and follow up on day 1, 3, and 7 — turning cold leads into showroom visits.',
+    bundle:'Growth',price:'$297/mo'},
+  fitness: { keys:['gym','fitness','spas','yoga','pilates','personal trainer','pt','wellness','beauty','salon','barber','hair','nail','massage','physio'], label:'Fitness & Wellness',
+    pain:'Members enquire, don\'t hear back fast enough, and sign up at the gym down the road. Speed wins in fitness.',
+    product:'AI Chatbot + Follow-Up Automator',
+    result:'Gyms and wellness centres using our chatbot convert 30% more website visitors into trial sessions — because the bot answers instantly, 24/7.',
+    bundle:'Starter',price:'$197/mo'},
+  construction: { keys:['construction','builder','plumber','electrician','roofer','contractor','tradesman','trades','hvac','landscap','cleaning','handyman','painting','renovation'], label:'Trades & Construction',
+    pain:'You\'re on a job site, phone rings, you can\'t answer. By the time you call back, they\'ve found someone else.',
+    product:'Voice Assistant + AI Lead Responder',
+    result:'Tradesmen using Klivio never miss a lead again — the AI answers, qualifies, and books the callback for you. All while you\'re on site.',
+    bundle:'Growth',price:'$297/mo'},
+  ecommerce: { keys:['ecommerce','e-commerce','online store','shopify','woocommerce','amazon','dropship','retail','shop','store','product','sell online'], label:'E-commerce',
+    pain:'Cart abandonment averages 70%. Most of those people just needed a quick answer or a small nudge.',
+    product:'AI Chatbot 24/7 + Follow-Up Automator',
+    result:'E-commerce stores using our chatbot recover 15–25% of abandoned carts just by engaging visitors in real time and following up automatically.',
+    bundle:'Growth',price:'$297/mo'},
+  education: { keys:['school','education','tutor','course','training','coach','teach','academy','university','college','learning','student'], label:'Education',
+    pain:'Prospective students enquire and expect a fast response. If they don\'t get one, they enroll somewhere else.',
+    product:'AI Lead Responder + AI Chatbot',
+    result:'Education providers using Klivio respond to every enquiry instantly and nurture leads through automated follow-ups until they enroll.',
+    bundle:'Growth',price:'$297/mo'},
+  insurance: { keys:['insurance','broker','underwrite','policy','claim','cover','premium','risk','actuar'], label:'Insurance',
+    pain:'Insurance leads go cold fast — if you don\'t respond in minutes, they\'ve already got 3 other quotes.',
+    product:'AI Lead Responder + Cold Outreach Setup',
+    result:'Insurance brokers using Klivio capture and qualify leads 24/7, then follow up automatically until the policy is signed.',
+    bundle:'Full System',price:'$497/mo'},
+  healthcare: { keys:['doctor','gp','medical','health','patient','nhs','private practice','optician','pharmacy','therapist','psycholog','counsel','chiropract'], label:'Healthcare',
+    pain:'Patients calling after hours get voicemail and call the next clinic. Every missed call is a lost patient — and lost recurring revenue.',
+    product:'Voice Assistant + AI Lead Responder',
+    result:'Healthcare practices using our AI book 20–30% more appointments by capturing every after-hours enquiry automatically.',
+    bundle:'Growth',price:'$297/mo'},
+  accounting: { keys:['account','bookkeep','tax','cpa','audit','financ','payroll','vat','hmrc'], label:'Accounting',
+    pain:'During tax season you\'re drowning in calls. Off-season, leads slip through the cracks. Either way, you\'re leaving money on the table.',
+    product:'AI Lead Responder + Review & Referral System',
+    result:'Accounting firms using Klivio handle enquiries year-round and automatically generate Google reviews from happy clients — driving more organic leads.',
+    bundle:'Starter',price:'$197/mo'},
+  recruitment: { keys:['recruit','staffing','hiring','hr','talent','headhunt','job','candidate','employ'], label:'Recruitment',
+    pain:'Good candidates don\'t wait. If your response time is measured in hours, they\'ve already accepted somewhere else.',
+    product:'AI Lead Responder + Cold Outreach Setup',
+    result:'Recruitment agencies using Klivio engage candidates in under 2 minutes and run automated outreach to fill roles faster.',
+    bundle:'Full System',price:'$497/mo'},
+  wedding: { keys:['wedding','bride','groom','event plan','photographer','videograph','florist','dj','entertainment'], label:'Wedding & Events',
+    pain:'Couples enquiring about their wedding are emotional buyers — if they don\'t hear back fast, they book someone else within hours.',
+    product:'AI Lead Responder + Follow-Up Automator',
+    result:'Wedding vendors using Klivio respond instantly and follow up with personal touches — increasing booking rates by 35%.',
+    bundle:'Starter',price:'$197/mo'}
+};
+
+// ── OBJECTION HANDLING ──
+var objections = [
+  { keys:['expensive','too much','can\'t afford','not worth','overpriced','pricey','costly','budget','tight budget','money'],
+    reply: function(){
+      var cost = alex.industry ? industryMap[alex.industry].price : '$197/mo';
+      return "I totally get that — every dollar matters. But let me put it this way: "+cost+" is less than what most businesses lose from just ONE missed lead per month. If Klivio brings you even 2–3 extra clients, it pays for itself 5–10 times over. And there's no setup fee, no contract — cancel anytime. Would it help if I showed you the Starter at $197/mo?";
+    }},
+  { keys:['not sure','think about','maybe later','need time','not ready','not now','consider','let me think'],
+    reply: function(){
+      return "Totally fair — take your time. Just keep in mind: every day without this, leads are going to your competitors who respond faster. Most clients tell us they wish they'd started sooner. If you want, I can hold a setup slot for you — no commitment, just so you don't have to wait when you're ready. Want me to do that?";
+    }},
+  { keys:['already have','use something','have a system','have a crm','hubspot','salesforce','zoho','mailchimp','existing'],
+    reply: function(){
+      return "That's great — you're already thinking about automation. Klivio works alongside your existing tools, not against them. We plug into your CRM, email, calendar — whatever you use. The difference is speed: your current system probably doesn't respond to leads in under 2 minutes at 3am. Ours does. Want to see how we'd integrate with what you already have?";
+    }},
+  { keys:['don\'t trust','scam','legit','real','prove','guarantee','refund','risk','afraid','worried'],
+    reply: function(){
+      return "I respect that — you should be careful with your money. Here's why our clients trust us: we set everything up first, you see it working, and you only keep paying if you're happy. No long-term contracts. Cancel with one click. Plus, you can message us anytime on Telegram @klivio and talk to a real person. Want to see some results from businesses like yours?";
+    }},
+  { keys:['do it myself','diy','build my own','free tool','free alternative','chatgpt','make my own','why pay','build it myself','do myself','on my own'],
+    reply: function(){
+      return "You absolutely could try to build it yourself — but here's what our clients learned the hard way: connecting APIs, maintaining uptime, handling edge cases, keeping it running 24/7... that eats 20–40 hours. Your time is worth more than $197/mo. We deliver a working system in 2–7 days and you never touch the tech. Focus on what you do best — we handle the AI.";
+    }},
+  { keys:['competitor','other company','alternative','comparison','better option','why you','why klivio','what makes you'],
+    reply: function(){
+      return "Good question — you should compare. Here's what separates us: we don't sell generic software. We build custom AI systems tailored to YOUR business, YOUR language, YOUR tools. Setup in 2–7 days, not weeks. Monthly pricing with no lock-in. And we actually deliver the results because we configure everything for you. Most competitors give you a tool and say 'figure it out.' We say 'we'll handle it.' Anything specific you'd like to compare?";
+    }},
+  { keys:['too good','sounds fake','unrealistic','really work','actually work','does this work','bs','bullshit','believe'],
+    reply: function(){
+      return "I'd be skeptical too if I saw these claims for the first time. The truth is, the technology is straightforward — AI responds to messages and calls, follows scripts we build from your business, and runs 24/7. It's not magic, it's just fast and consistent. The reason it works so well is because most businesses simply don't respond fast enough. We fix that. Would you like to test it with a quick demo?";
+    }},
+  { keys:['small business','just me','solo','one person','freelance','startup','just started','new business','small team'],
+    reply: function(){
+      return "That's exactly who Klivio is built for. You don't have a team to answer calls at 11pm — but your leads expect a reply. Our Starter at $197/mo gives you a full AI lead responder and follow-up system. It's like hiring a 24/7 assistant for less than the cost of a coffee per day. Most solo operators see 3–5 extra clients per month from this alone.";
+    }},
+  { keys:['contract','lock in','commitment','annual','long term','cancel','trap','stuck'],
+    reply: function(){
+      return "No contracts, no lock-in, no cancellation fees. It's month-to-month — cancel anytime with one click. We keep our clients because the system works, not because they're stuck. Most stay because they see the ROI in the first 2 weeks. Want to start and see for yourself?";
+    }}
+];
+
+// ── PRODUCT KNOWLEDGE (deep) ──
+var products = [
+  { keys:['lead respond','lead responder','respond to lead','missed lead','lead notif','enquir','inquiry','enquiry'],
+    reply: "The AI Lead Responder is our #1 seller — and for good reason. Here's what it does: the moment someone sends you a message, email, or form submission, the AI responds in under 2 minutes with a personalised reply. It qualifies the lead (asks budget, timeline, needs), sends you a clean summary, and even books a call if needed. Day or night, weekends, holidays — it never stops. That's $197/mo. Most clients see 40–60% more booked appointments within the first month. Want me to show you how it'd look for your business?"},
+  { keys:['follow up','follow-up','followup','nurture','chase','drip','sequence'],
+    reply: "Here's a stat that'll blow your mind: 80% of sales require 5+ follow-ups, but 44% of salespeople give up after just one. The Follow-Up Automator fixes this completely. It sends personalised, natural-sounding messages on Day 1, 3, and 7 after every interaction. Not spammy — smart. It references what the lead said, adjusts tone, and pushes toward a booking. $197/mo. The ROI is usually 10-20× because you're closing leads you would've lost."},
+  { keys:['chatbot','chat bot','chat widget','website chat','live chat','website bot','site chat'],
+    reply: "The AI Chatbot 24/7 is basically what you're talking to right now — except customised for YOUR business. It sits on your website, answers visitor questions instantly, captures contact info, qualifies leads, and books appointments. It learns your FAQ, your tone, your services. Visitors who engage with a chatbot are 3× more likely to convert. $297/mo, live on your site in days."},
+  { keys:['review','google review','referral','reputation','testimonial','star','rating'],
+    reply: "Google reviews are the #1 trust signal for local businesses — but asking for them manually is awkward and inconsistent. The Review & Referral System sends an automatic, friendly request right after a job is done — when the client is happiest. Then it activates a referral offer too. Most businesses 3× their reviews in 2 months and get a steady stream of word-of-mouth leads. $197/mo. What's your current Google rating?"},
+  { keys:['valuation','property value','estimate','home worth','house price','instant quote','property estimate'],
+    reply: "The Valuation Bot is a lead magnet on steroids. A visitor lands on your site, enters their postcode, answers a few questions, and gets an instant property estimate. While they're reading it, you already have their name, email, and phone. By the time your competitor even sees the lead, you've already engaged them. $297/mo — and it integrates with your existing valuation tools."},
+  { keys:['report','pdf','document','generate report','branded','proposal'],
+    reply: "The Report Generator takes your data input and produces a professional, branded PDF report in seconds. What used to take hours of manual work — done instantly. Whether it's property reports, consultation summaries, or client proposals, it uses your branding, your templates, your data. $297/mo. How many reports does your team produce per week?"},
+  { keys:['cold email','outreach','email campaign','prospect','email system','cold outreach','lead gen','generate leads','find clients','new clients','more clients','get clients'],
+    reply: "The Cold Outreach Setup is our done-for-you lead generation machine. We set up everything: dedicated sending domains, warm-up sequences, prospect lists targeted to your ideal client, and AI-personalised emails that actually get replies. You don't touch a thing — we handle the tech, the copy, and the targeting. $497/mo. Most clients see their first qualified replies within 2 weeks. What's your ideal client look like?"},
+  { keys:['voice','phone','call','answer','ring','receptionist','missed call','voicemail','telephone'],
+    reply: "The Voice Assistant answers your business phone 24/7 with a natural, human-sounding AI voice. It handles FAQs, books appointments, takes messages, and only escalates real emergencies to you. No more missed calls, no more voicemail black holes, no more paying a receptionist to sit there during quiet hours. $497/mo — and yes, callers genuinely can't tell it's AI. Want to hear a demo?"},
+  { keys:['live chat assist','chat assist','website assist'],
+    reply: "The Live Chat Assistant is a smart AI widget embedded on your site — it answers questions instantly using your business knowledge, captures leads, and routes urgent queries to you. Think of it as a salesperson that never leaves your website. $297/mo, and we train it on your business so the answers are spot-on."}
+];
+
+// ── CLOSING SEQUENCES ──
+var closingPhrases = [
+  "I can set this up for you right now — just click 'Get Started' on any product above. Takes 2 minutes, and we'll have your system live within the week.",
+  "Here's what I'd do: start with the {bundle} bundle at {price}. It covers exactly what you need, and you can always add more later. Want to go ahead?",
+  "Look — your competitors are capturing leads right now while you're reading this. The sooner you start, the sooner you stop losing money. Click 'Get Started' above and let's get your AI worker live.",
+  "I've helped hundreds of businesses like yours get set up. The ones who move fast see results within the first week. Want me to walk you through the signup?"
+];
+
+// ── SMART REPLY ENGINE ──
+function detectIndustry(text) {
+  var t = text.toLowerCase();
+  for (var key in industryMap) {
+    var ind = industryMap[key];
+    for (var i = 0; i < ind.keys.length; i++) {
+      if (t.indexOf(ind.keys[i]) > -1) {
+        alex.industry = key;
+        return ind;
+      }
+    }
+  }
+  return null;
+}
+
+function detectName(text) {
+  // Try "I'm X", "my name is X", "this is X", "it's X from"
+  var patterns = [
+    /(?:i'?m|my name is|this is|it'?s)\s+([A-Z][a-z]+)/i,
+    /^([A-Z][a-z]+)\s+here/i
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var match = text.match(patterns[i]);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+function detectSentiment(text) {
+  var t = text.toLowerCase();
+  var positive = ['great','awesome','perfect','love','amazing','fantastic','yes','sure','absolutely','brilliant','wonderful','cool','nice','good','interested','excited'];
+  var negative = ['no','not','don\'t','won\'t','can\'t','expensive','waste','scam','bad','horrible','terrible','useless','annoying','spam','stop'];
+  var pScore = 0, nScore = 0;
+  positive.forEach(function(w){ if(t.indexOf(w)>-1) pScore++; });
+  negative.forEach(function(w){ if(t.indexOf(w)>-1) nScore++; });
+  if(pScore > nScore) return 'positive';
+  if(nScore > pScore) return 'skeptical';
+  return 'neutral';
+}
+
+function alexReply(text) {
+  var t = text.toLowerCase();
+  alex.msgCount++;
+  alex.sentiment = detectSentiment(text);
+
+  // Detect name
+  var name = detectName(text);
+  if(name) alex.userName = name;
+
+  var greeting = alex.userName ? (alex.userName+', ') : '';
+
+  // 1. Check for industry mention (highest priority if not yet known)
+  if(!alex.industry) {
+    var ind = detectIndustry(text);
+    if(ind) {
+      alex.lastTopic = 'industry';
+      return greeting+"I work with a lot of "+ind.label.toLowerCase()+" businesses! "+ind.pain+" That's exactly what Klivio solves. "+ind.result+" Want me to break down what the "+ind.product+" combo would look like for you?";
+    }
+  } else if(detectIndustry(text) && detectIndustry(text) !== alex.industry) {
+    // They mentioned a different industry
+    var newInd = detectIndustry(text);
+    alex.lastTopic = 'industry';
+    return greeting+"Interesting — "+industryMap[alex.industry].label+" background but also in "+newInd.label.toLowerCase()+"? "+newInd.pain+" We can set up a system that handles both. Want to see how?";
+  }
+
+  // 2. Check objections (high priority — handle before anything else)
+  for(var i = 0; i < objections.length; i++) {
+    for(var j = 0; j < objections[i].keys.length; j++) {
+      if(t.indexOf(objections[i].keys[j]) > -1) {
+        alex.objections.push(objections[i].keys[j]);
+        alex.lastTopic = 'objection';
+        return greeting + objections[i].reply();
+      }
+    }
+  }
+
+  // 3. Check product questions
+  for(var i = 0; i < products.length; i++) {
+    for(var j = 0; j < products[i].keys.length; j++) {
+      if(t.indexOf(products[i].keys[j]) > -1) {
+        alex.shownProduct = products[i].keys[0];
+        alex.lastTopic = 'product';
+        return greeting + products[i].reply;
+      }
+    }
+  }
+
+  // 4. Pricing question
+  if(/price|cost|how much|pricing|£|\$|afford|cheap|expensive|pay|fee|charge|rate/.test(t)) {
+    alex.lastTopic = 'pricing';
+    if(alex.industry) {
+      var ind = industryMap[alex.industry];
+      return greeting+"For "+ind.label.toLowerCase()+" businesses, I'd recommend the "+ind.bundle+" bundle at "+ind.price+". It includes the "+ind.product+" — which is the perfect combo for your industry. No setup fee, no contracts, cancel anytime. Compared to hiring someone, this is a fraction of the cost and works 24/7. Want to get started?";
+    }
+    return greeting+"Our plans start from £197/mo (Starter — 1 AI of your choice), £297/mo (Growth — pick 2 AIs), and £497/mo (Full System — pick 3 AIs including Voice & Cold Outreach). No setup fees, cancel anytime. What kind of business are you running? I can tell you exactly which one fits.";
+  }
+
+  // 5. How it works / setup (but not if asking about competitors)
+  if(/how does|how do|how it work|what happen|process|setup|how long|how fast|how quick|onboard|timeline|deliver/.test(t) && !/compar|vs |versus|intercom|drift|zendesk|hubspot|freshdesk|tidio|crisp|olark|competitor|alternative/.test(t)) {
+    alex.lastTopic = 'process';
+    return greeting+"Dead simple — three steps. First, you fill out a quick form (2 minutes). Then, we jump on a short call to understand your business and configure everything. Finally, your AI system goes live in 2–7 days. You don't need any tech skills — we literally handle everything. The only thing you do is share access to your email or CRM for about 10 minutes. That's it. Ready to start?";
+  }
+
+  // 6. What is Klivio
+  if(/what is klivio|what does klivio|about klivio|who are you|what do you do|klivio do|your company|tell me about/.test(t)) {
+    alex.lastTopic = 'about';
+    return "Klivio builds AI workers that replace the tasks you hate — answering calls at 11pm, chasing leads that go cold, responding to every website visitor. We've built systems for dental clinics, law firms, real estate agents, restaurants, and more across the UK, Australia, Canada, UAE, and Ireland. Everything runs 24/7, responds in under 2 minutes, and costs a fraction of a human hire. What kind of business do you run? I'll tell you exactly how we'd help.";
+  }
+
+  // 7. Greetings
+  if(/^(hi|hello|hey|hiya|sup|yo|good morning|good afternoon|good evening|howdy|what's up|whats up)\b/.test(t)) {
+    alex.lastTopic = 'greeting';
+    return "Hey there! Welcome to Klivio. Quick question — what kind of business do you run? I can tell you exactly which of our AI products would make the biggest impact for you.";
+  }
+
+  // 8. Contact / demo / talk
+  if(/demo|consult|meet|book|contact|telegram|reach|talk to|speak to|schedule|appointment/.test(t)) {
+    alex.lastTopic = 'contact';
+    return greeting+"Absolutely! Two ways to move forward: click 'Get Started' on any product above (takes 2 mins, we'll email you within hours), or message us directly on Telegram @klivio for an instant reply. We can also hop on a quick 10-minute call to walk you through everything. What works best for you?";
+  }
+
+  // 9. Negative / not interested (BEFORE positive to prevent "interested" matching "not interested")
+  if(/\b(not interested|not for me|no thanks|no thank|leave me|go away|bye|goodbye|don't want|dont want)\b/.test(t) || /^(no|nah|not really|stop)\b/.test(t)) {
+    alex.lastTopic = 'negative';
+    return greeting+"No pressure at all! I'm here whenever you need me. Just one thought to leave you with — every day your business doesn't have instant lead response, you're leaving money on the table. When you're ready, just come back and click 'Get Started' or message us on Telegram @klivio. Wishing you all the best!";
+  }
+
+  // 10. Positive / agreement / interested
+  if(/^(yes|yeah|yep|sure|ok|okay|definitely|absolutely|let's|lets go|sounds good|perfect|great|amazing|interested|sign me up|i'm in|im in|go ahead|do it|start|ready)\b/.test(t) || /interested|want to try|want to start|sign up|get started/.test(t)) {
+    alex.lastTopic = 'closing';
+    alex.closingAttempts++;
+    if(alex.industry) {
+      var ind = industryMap[alex.industry];
+      return greeting+"Brilliant! For your "+ind.label.toLowerCase()+" business, I'd go with the "+ind.bundle+" bundle at "+ind.price+". Click 'Get Started' above, fill in the quick form, and we'll have your AI system configured and live within the week. You're going to love it.";
+    }
+    return greeting+"Love the energy! The Growth plan at £297/mo is our most popular — you pick any 2 AI workers for your business. Click 'Choose your AIs' in the pricing section above. Let's get you set up!";
+  }
+
+  // 11. Is this AI / bot question
+  if(/are you ai|are you a bot|are you real|is this ai|is this a bot|robot|chatgpt|artificial/.test(t)) {
+    return "I'm Alex — I help people figure out which Klivio product fits their business best. I know our products inside and out, and I've helped hundreds of businesses get set up. What kind of business do you run? Let me show you what we can do for you.";
+  }
+
+  // 12. Thanks
+  if(/thanks|thank you|thx|cheers|appreciate|ta |grateful/.test(t)) {
+    return greeting+"You're welcome! If you have any more questions, I'm right here. And when you're ready to get started, just click any 'Get Started' button above — takes 2 minutes. Looking forward to helping your business grow!";
+  }
+
+  // 13. Competitor mention
+  if(/competitor|other tool|other service|alternative|chatgpt|drift|intercom|zendesk|hubspot|freshdesk|tidio|crisp|olark/.test(t)) {
+    return greeting+"Good that you're comparing — that means you're serious about solving this. Here's what makes Klivio different: we don't give you a tool and say 'figure it out.' We build the entire system FOR you, customised to your business, your language, your tools. Setup in 2–7 days, not weeks. And we're month-to-month — if we don't deliver, you leave. Fair?";
+  }
+
+  // 14. ROI / results question
+  if(/result|roi|return|worth it|proof|case study|example|success|testimonial|evidence|data|numbers|stats/.test(t)) {
+    if(alex.industry) {
+      var ind = industryMap[alex.industry];
+      return greeting+ind.result+" And the best part? Setup takes 2–7 days, and you can cancel anytime if you're not seeing results. But honestly, most clients see ROI within the first 2 weeks. Want to be next?";
+    }
+    return greeting+"Here's what we see across the board: clients who use Klivio respond to 100% of leads in under 2 minutes. That alone increases conversion rates by 40–60%. One client told us: 'I made back 6 months of Klivio fees in the first week.' What industry are you in? I can give you specific numbers.";
+  }
+
+  // 15. Language question
+  if(/language|english|spanish|french|german|arabic|chinese|portuguese|multilingual|translate/.test(t)) {
+    return greeting+"Klivio works in any language — English, Spanish, French, German, Arabic, Portuguese, Chinese, you name it. We configure the AI in whatever language your clients speak. Running a multilingual business? We can set it up to detect the language and switch automatically. What languages do your clients use?";
+  }
+
+  // 16. General questions about features / capabilities
+  if(/feature|what can|capability|integrat|connect|api|crm|zapier|webhook|tool|platform/.test(t)) {
+    return greeting+"Klivio integrates with whatever tools you already use — CRMs, email platforms, calendars, booking systems. We set up all the connections for you. No APIs to configure, no code to write. Just tell us what you use and we'll plug in. What tools does your business run on?";
+  }
+
+  // ── SMART FALLBACKS based on conversation state ──
+  if(alex.msgCount <= 2 && !alex.industry) {
+    return greeting+"I'd love to help you find the perfect solution! What kind of business do you run? Once I know that, I can tell you exactly which Klivio product would make the biggest difference for you.";
+  }
+  if(alex.industry && !alex.shownProduct) {
+    var ind = industryMap[alex.industry];
+    return greeting+"Based on what you've told me about your "+ind.label.toLowerCase()+" business, I'd strongly recommend the "+ind.product+". "+ind.result+" Want to hear more about how it works?";
+  }
+  if(alex.msgCount > 4 && alex.closingAttempts === 0) {
+    alex.closingAttempts++;
+    var bundle = alex.industry ? industryMap[alex.industry].bundle : 'Growth';
+    var price = alex.industry ? industryMap[alex.industry].price : '$297/mo';
+    return greeting+"Let me cut to the chase — I think the "+bundle+" bundle at "+price+" is perfect for you. It covers everything you need, and we'll have it live in under a week. Click 'Get Started' above and let's make it happen. You'll wonder why you didn't do this sooner.";
+  }
+
+  // Rotate through engaging fallbacks
+  var smartFallbacks = [
+    "Tell me — what's the #1 thing that frustrates you about how your business handles leads right now? I bet Klivio has a fix for it.",
+    "Here's a question: if you could wave a magic wand and fix ONE thing about your business — missed calls, slow replies, lost leads — what would it be?",
+    "Most businesses lose 30–50% of their leads just from slow response times. Is that something you've noticed in your business too?",
+    "I talk to dozens of business owners every day, and they all have the same problem: great service, but leads slip through the cracks. Sound familiar? What kind of business are you in?",
+    "Quick thought experiment: imagine every single enquiry to your business got a professional response within 2 minutes, 24/7. How many extra clients would that bring you per month? That's what Klivio does."
+  ];
+  var idx = (alex.msgCount - 1) % smartFallbacks.length;
+  return greeting + smartFallbacks[idx];
+}
+
+function alexVoiceReply(text) {
+  var full = alexReply(text);
+  // For voice: keep it shorter and more conversational
+  var sentences = full.match(/[^.!?]+[.!?]+/g) || [full];
+  // Voice gets 3 sentences max for natural conversation
+  var reply = sentences.slice(0, 3).join(' ').trim();
+  // Remove special characters that sound weird in speech
+  reply = reply.replace(/[—–]/g, ', ').replace(/\$/g, '').replace(/\//g, ' per ');
+  return reply;
+}
+
+async function sendToAI(userText) {
+  showTyping();
+  chatHistory.push({role:'user', content:userText});
+
+  // Smart delay — feels human
+  var delay = 800 + Math.random()*1000 + (userText.length > 50 ? 600 : 0);
+  await new Promise(function(r){ setTimeout(r, delay); });
+  removeTyping();
+
+  var reply = alexReply(userText);
+  chatHistory.push({role:'assistant', content:reply});
+  addMsg(reply,'b');
+
+  if(alex.msgCount >= 3 || chatHistory.length >= 6) {
+    setTimeout(function(){ showQuickActions(); }, 500);
+  }
+}
+
+function showQuickActions() {
+  var opts = document.getElementById('cwopts');
+  if(!opts) return;
+  opts.style.display = 'flex';
+  var bundle = alex.industry ? industryMap[alex.industry].bundle : 'Growth';
+  opts.innerHTML = '<button class="cwopt" onclick="askQ(\'I want to get started\')">Get Started Now</button>' +
+    '<button class="cwopt" onclick="askQ(\'Tell me about the '+bundle+' bundle\')">'+bundle+' Bundle Details</button>';
+}
+
+async function sendVoiceAI(userText) {
+  vcHistory.push({role:'user',content:userText});
+  setVCS('Alex is thinking...');
+  await new Promise(function(r){ setTimeout(r, 500 + Math.random()*400); });
+  var reply = alexVoiceReply(userText);
+  vcHistory.push({role:'assistant',content:reply});
+  addVCM(reply,'a');
+  speakText(reply);
+}
+
+const payLinks = {'AI Lead Responder':'https://buy.stripe.com/14A7sL3De9ErfmAa8RgQE0a','Follow-Up Automator':'https://buy.stripe.com/eVqfZh0r22bZgqE0yhgQE0b','Review & Referral System':'https://buy.stripe.com/8x27sLflW6sfb6k6WFgQE0c','AI Chatbot 24/7':'https://buy.stripe.com/fZu6oHa1C4k7b6k0yhgQE0d','Valuation Bot':'https://buy.stripe.com/9B6fZhflW3g34HWa8RgQE0e','Report Generator':'https://buy.stripe.com/5kQdR91v617V8Yc5SBgQE0f','Cold Outreach Setup':'https://buy.stripe.com/eVq6oHehSdUH2zOdl3gQE0g','Live Chat Assistant':'https://buy.stripe.com/4gMdR92za5oba2g80JgQE0h','Voice Assistant':'https://buy.stripe.com/6oUfZh4Hi4k7fmAdl3gQE0i','Starter Bundle':'https://buy.stripe.com/14A7sL3De9ErfmAa8RgQE0a','Growth Bundle':'https://buy.stripe.com/fZu6oHa1C4k7b6k0yhgQE0d','Full System Bundle':'https://buy.stripe.com/eVq6oHehSdUH2zOdl3gQE0g'};
+const cryptoLinks = {'AI Lead Responder':'https://nowpayments.io/payment/?iid=4711449871','Follow-Up Automator':'https://nowpayments.io/payment/?iid=4626925781','AI Chatbot 24/7':'https://nowpayments.io/payment/?iid=4796531272','Review & Referral System':'https://nowpayments.io/payment/?iid=5780943496','Valuation Bot':'https://nowpayments.io/payment/?iid=5303187088','Report Generator':'https://nowpayments.io/payment/?iid=5585445329','Cold Outreach Setup':'https://nowpayments.io/payment/?iid=4784857105','Live Chat Assistant':'https://nowpayments.io/payment/?iid=4749983919','Voice Assistant':'https://nowpayments.io/payment/?iid=5354107003','Starter Bundle':'https://nowpayments.io/payment/?iid=4711449871','Growth Bundle':'https://nowpayments.io/payment/?iid=4711449871','Full System Bundle':'https://nowpayments.io/payment/?iid=4711449871'};
+// ── PLAN → AI PICKER MODAL ──
+var curPlan = 'starter';
+var selectedAIs = [];
+
+var PLAN_AI = {
+  starter: {
+    label: 'Starter',
+    price: '£197/mo',
+    max: 1,
+    sub: 'Select 1 AI worker included in your plan.',
+    ais: [
+      { id:'lead',   ico:'💬', name:'AI Lead Responder',       desc:'Replies to every enquiry in under 2 minutes, 24/7.' },
+      { id:'followup',ico:'📅', name:'Follow-Up Automator',    desc:'Auto sequences on day 1, 3, 7 — closes deals on autopilot.' },
+      { id:'review',  ico:'⭐', name:'Review & Referral System', desc:'Auto Google review requests after every completed job.' },
+      { id:'report',  ico:'📄', name:'Report Generator',        desc:'Branded PDF reports generated instantly from your data.' },
+    ]
+  },
+  growth: {
+    label: 'Growth',
+    price: '£297/mo',
+    max: 2,
+    sub: 'Select 2 AI workers included in your plan.',
+    ais: [
+      { id:'lead',   ico:'💬', name:'AI Lead Responder',        desc:'Replies to every enquiry in under 2 minutes, 24/7.' },
+      { id:'followup',ico:'📅', name:'Follow-Up Automator',    desc:'Auto sequences on day 1, 3, 7 — closes deals on autopilot.' },
+      { id:'chatbot', ico:'🤖', name:'AI Chatbot',              desc:'Smart chat widget on your website — captures leads 24/7.' },
+      { id:'review',  ico:'⭐', name:'Review & Referral System', desc:'Auto Google review requests after every completed job.' },
+      { id:'valbot',  ico:'💰', name:'Valuation Bot',           desc:'Instant estimates that capture lead details automatically.' },
+      { id:'livechat',ico:'💬', name:'Live Chat Assistant',     desc:'AI support widget trained on your business — always on.' },
+    ]
+  },
+  full: {
+    label: 'Full System',
+    price: '£497/mo',
+    max: 3,
+    sub: 'Select 3 AI workers — includes access to Voice AI and Cold Outreach.',
+    ais: [
+      { id:'lead',    ico:'💬', name:'AI Lead Responder',       desc:'Replies to every enquiry in under 2 minutes, 24/7.' },
+      { id:'followup',ico:'📅', name:'Follow-Up Automator',    desc:'Auto sequences on day 1, 3, 7 — closes deals on autopilot.' },
+      { id:'chatbot', ico:'🤖', name:'AI Chatbot',              desc:'Smart chat widget on your website — captures leads 24/7.' },
+      { id:'review',  ico:'⭐', name:'Review & Referral System', desc:'Auto Google review requests after every completed job.' },
+      { id:'valbot',  ico:'💰', name:'Valuation Bot',           desc:'Instant estimates that capture lead details automatically.' },
+      { id:'livechat',ico:'💬', name:'Live Chat Assistant',     desc:'AI support widget trained on your business — always on.' },
+      { id:'voice',   ico:'📞', name:'Voice Assistant',         desc:'AI answers your business phone 24/7 — books, qualifies, handles FAQs.' },
+      { id:'outreach',ico:'📧', name:'Cold Outreach Setup',     desc:'Done-for-you email lead gen — domains, sequences, AI copy.' },
+    ]
+  }
+};
+
+function openPlanModal(plan) {
+  curPlan = plan;
+  selectedAIs = [];
+  var p = PLAN_AI[plan];
+  document.getElementById('planBadge').textContent = p.label + ' · ' + p.price;
+  document.getElementById('pickerTitle').textContent = 'Which AI worker' + (p.max > 1 ? 's do' : ' does') + ' your business need?';
+  document.getElementById('pickerSub').textContent = p.sub;
+  document.getElementById('aiMax').textContent = p.max;
+  document.getElementById('aiCount').textContent = '0';
+  document.getElementById('btnNext').disabled = true;
+
+  var grid = document.getElementById('aiGrid');
+  grid.innerHTML = '';
+  p.ais.forEach(function(ai) {
+    var card = document.createElement('div');
+    card.className = 'ai-card';
+    card.dataset.id = ai.id;
+    card.innerHTML = '<div class="ai-ico">'+ai.ico+'</div><div style="flex:1"><div class="ai-name">'+ai.name+'</div><div class="ai-desc">'+ai.desc+'</div></div><div class="ai-chk"></div>';
+    card.onclick = function() { toggleAI(ai.id, ai.name, p.max); };
+    grid.appendChild(card);
+  });
+
+  document.getElementById('stepPicker').style.display = 'block';
+  document.getElementById('stepForm').style.display = 'none';
+  document.getElementById('confView').style.display = 'none';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function toggleAI(id, name, max) {
+  var idx = selectedAIs.findIndex(function(a){return a.id===id;});
+  if(idx > -1) {
+    selectedAIs.splice(idx, 1);
+  } else {
+    if(selectedAIs.length >= max) return;
+    selectedAIs.push({id:id, name:name});
+  }
+  // Update cards
+  document.querySelectorAll('.ai-card').forEach(function(card) {
+    var cid = card.dataset.id;
+    var isSelected = selectedAIs.some(function(a){return a.id===cid;});
+    card.classList.toggle('selected', isSelected);
+    if(!isSelected && selectedAIs.length >= max) {
+      card.classList.add('disabled');
+    } else {
+      card.classList.remove('disabled');
+    }
+  });
+  document.getElementById('aiCount').textContent = selectedAIs.length;
+  document.getElementById('btnNext').disabled = selectedAIs.length < 1;
+}
+
+function goToStep2() {
+  var p = PLAN_AI[curPlan];
+  var names = selectedAIs.map(function(a){return a.name;}).join(', ');
+  document.getElementById('selectedSummary').innerHTML = '<strong>Your selection</strong>' + p.label + ' · ' + p.price + '<br>' + names;
+  document.getElementById('stepPicker').style.display = 'none';
+  document.getElementById('stepForm').style.display = 'block';
+}
+
+function goToStep1() {
+  document.getElementById('stepPicker').style.display = 'block';
+  document.getElementById('stepForm').style.display = 'none';
+}
+
+function openModal(product, price, bundle) {
+  // Legacy — map old product calls to plan modal
+  var plan = 'starter';
+  if(price && (price.indexOf('297') > -1)) plan = 'growth';
+  if(price && (price.indexOf('497') > -1)) plan = 'full';
+  openPlanModal(plan);
+}
+
+function openCustomModal() { openPlanModal('full'); }
+
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal();});
+async function submitForm(){
+  var n=document.getElementById('fName').value,e=document.getElementById('fEmail').value;
+  if(!n||!e){alert('Please enter your name and email.');return;}
+
+  var p = PLAN_AI[curPlan];
+  var aiNames = selectedAIs.map(function(a){return a.name;}).join(', ');
+
+  // Save order to backend
+  try {
+    await fetch('/api/order', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: n,
+        email: e,
+        website: document.getElementById('fWeb').value,
+        language: document.getElementById('fLang').value,
+        notes: document.getElementById('fNotes').value,
+        product: p.label + ' — ' + aiNames,
+        price: p.price
+      })
+    });
+  } catch(err) { console.log('Order save failed, continuing...'); }
+
+  document.getElementById('stepForm').style.display='none';
+  document.getElementById('confView').style.display='block';
+  document.getElementById('payBtn').style.display='';
+  document.getElementById('cryptoBtn').style.display='';
+  document.querySelector('#confView .conf h3').textContent='You\'re all set!';
+  var planPayLinks = {starter:'https://buy.stripe.com/4gMaEX0cheCIgXZddK7Vm00',growth:'https://buy.stripe.com/fZu6oH6AF2U04bd5Li7Vm04',full:'https://buy.stripe.com/5kQ7sL6AFcuAePR4He7Vm06'};
+  var planCryptoLinks = {starter:'https://nowpayments.io/payment/?iid=4711449871',growth:'https://nowpayments.io/payment/?iid=4711449871',full:'https://nowpayments.io/payment/?iid=4711449871'};
+  document.getElementById('payBtn').onclick=function(){window.open(planPayLinks[curPlan]||'#','_blank');};
+  document.getElementById('cryptoBtn').onclick=function(){window.open(planCryptoLinks[curPlan]||'#','_blank');};
+}
+
+function toggleFaq(el){var item=el.parentElement,isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(i){i.classList.remove('open');});if(!isOpen)item.classList.add('open');}
+
+var chatHistory=[];var cwOpen=false;
+function toggleChat(){cwOpen=!cwOpen;var box=document.getElementById('cwbox');box.style.display=cwOpen?'block':'none';}
+function addMsg(text,type){var msgs=document.getElementById('cwmsgs'),d=document.createElement('div');d.className='cwm '+type;d.innerHTML='<div class="cwm-b">'+text+'</div>';msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
+function showTyping(){var msgs=document.getElementById('cwmsgs'),d=document.createElement('div');d.className='cwm b';d.id='typing-ind';d.innerHTML='<div class="cwm-typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
+function removeTyping(){var t=document.getElementById('typing-ind');if(t)t.remove();}
+
+function askQ(q){document.getElementById('cwopts').style.display='none';addMsg(q,'u');sendToAI(q);}
+function sendChat(){var inp=document.getElementById('cwinput'),text=inp.value.trim();if(!text)return;inp.value='';addMsg(text,'u');sendToAI(text);}
+
+var vcOpen=false,vcHistory=[],recognition=null,isListening=false,isSpeaking=false;
+var synth=window.speechSynthesis;
+
+function toggleVoice(){vcOpen=!vcOpen;document.getElementById('vcbox').style.display=vcOpen?'block':'none';if(vcOpen&&!recognition)initSR();}
+function endCall(){vcOpen=false;document.getElementById('vcbox').style.display='none';if(recognition)try{recognition.stop();}catch(e){}if(synth)synth.cancel();isListening=false;isSpeaking=false;updMic();}
+function setVCS(t){var e=document.getElementById('vcst');if(e)e.textContent=t;}
+function addVCM(t,type){var m=document.getElementById('vcmsgs'),d=document.createElement('div');d.className='vcm '+type;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function updMic(){var b=document.getElementById('vcmic');if(!b)return;if(isListening){b.textContent='\uD83D\uDD34 Listening...';b.classList.add('on');}else{b.textContent='\uD83C\uDF99\uFE0F Tap to speak';b.classList.remove('on');}}
+
+var bestVoice = null;
+var voicesLoaded = false;
+
+// Pre-load and cache the best voice
+function loadBestVoice() {
+  if(voicesLoaded) return;
+  var voices = synth ? synth.getVoices() : [];
+  if(!voices.length) return;
+  voicesLoaded = true;
+
+  // Priority order: most natural-sounding English voices
+  var priorities = [
+    // Microsoft Edge / Windows natural voices
+    function(v){ return v.name.indexOf('Natural')>-1 && v.lang.startsWith('en'); },
+    function(v){ return v.name.indexOf('Neural')>-1 && v.lang.startsWith('en'); },
+    // Google Chrome high-quality voices
+    function(v){ return v.name.indexOf('Google UK English Male')>-1; },
+    function(v){ return v.name.indexOf('Google UK English Female')>-1; },
+    function(v){ return v.name.indexOf('Google US English')>-1; },
+    // macOS premium voices
+    function(v){ return v.name.indexOf('Daniel')>-1 && v.lang.startsWith('en'); },
+    function(v){ return v.name.indexOf('Samantha')>-1; },
+    function(v){ return (v.name.indexOf('Premium')>-1 || v.name.indexOf('Enhanced')>-1) && v.lang.startsWith('en'); },
+    // Any English voice as fallback
+    function(v){ return v.lang === 'en-GB'; },
+    function(v){ return v.lang === 'en-US'; },
+    function(v){ return v.lang.startsWith('en'); }
+  ];
+
+  for(var p = 0; p < priorities.length; p++) {
+    var found = voices.find(priorities[p]);
+    if(found) { bestVoice = found; console.log('Alex voice:', found.name); return; }
+  }
+}
+
+// Load voices when available
+if(synth) {
+  synth.onvoiceschanged = loadBestVoice;
+  loadBestVoice();
+}
+
+function initSR(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){setVCS('Use Chrome or Edge for voice');return;}
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='en-US';
+  recognition.continuous=false;
+  recognition.interimResults=true; // Show partial results for responsiveness
+  recognition.maxAlternatives=1;
+  recognition.onstart=function(){isListening=true;setVCS('Listening...');updMic();};
+  recognition.onresult=function(e){
+    var transcript = '';
+    var isFinal = false;
+    for(var i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+      if(e.results[i].isFinal) isFinal = true;
+    }
+    if(isFinal) {
+      isListening=false;updMic();
+      addVCM(transcript,'u');
+      sendVoiceAI(transcript);
+    } else {
+      setVCS(transcript + '...');
+    }
+  };
+  recognition.onerror=function(e){
+    isListening=false;
+    if(e.error==='no-speech') setVCS('Didn\'t catch that — try again');
+    else if(e.error==='aborted') {} // Intentional stop
+    else setVCS('Error: '+e.error+' — try again');
+    updMic();
+  };
+  recognition.onend=function(){isListening=false;updMic();};
+}
+
+function toggleMic(){
+  if(isSpeaking){if(synth)synth.cancel();isSpeaking=false;}
+  if(isListening){try{recognition.stop();}catch(e){}isListening=false;updMic();return;}
+  if(!recognition)initSR();
+  try{recognition.start();}catch(e){recognition=null;initSR();setTimeout(function(){try{if(recognition)recognition.start();}catch(e2){setVCS('Refresh the page and try again');}},500);}
+}
+
+function speakText(text){
+  if(!synth)return;
+  synth.cancel();
+  loadBestVoice(); // Ensure voice is loaded
+
+  // Clean text for natural speech
+  var clean = text
+    .replace(/[*_#`]/g,'')
+    .replace(/—/g,', ')
+    .replace(/–/g,', ')
+    .replace(/\.\.\./g,',')
+    .replace(/(\d+)%/g,'$1 percent')
+    .replace(/24\/7/g,'twenty four seven')
+    .replace(/\$/g,'')
+    .replace(/\/mo\b/g,' per month')
+    .replace(/\/yr\b/g,' per year')
+    .replace(/#(\d+)/g,'number $1')
+    .replace(/&/g,' and ')
+    .replace(/ROI/g,'return on investment')
+    .replace(/AI/g,'A.I.')
+    .replace(/CRM/g,'C.R.M.')
+    .replace(/FAQ/g,'F.A.Q.')
+    .trim();
+
+  // Split into sentences for more natural delivery with pauses
+  var sentences = clean.match(/[^.!?]+[.!?]+/g) || [clean];
+
+  var av = document.getElementById('vcav');
+  var totalIdx = 0;
+
+  function speakSentence(idx) {
+    if(idx >= sentences.length) {
+      isSpeaking = false;
+      setVCS('Your turn — tap the mic');
+      if(av) av.classList.remove('on');
+      // Auto-listen after Alex finishes speaking (more natural conversation flow)
+      setTimeout(function(){
+        if(!isListening && vcOpen) {
+          try { if(recognition) recognition.start(); }
+          catch(e) {}
+        }
+      }, 1200);
+      return;
+    }
+
+    var utt = new SpeechSynthesisUtterance(sentences[idx].trim());
+    utt.rate = 0.95; // Slightly slower for clarity and naturalness
+    utt.pitch = 1.0;
+    utt.volume = 1.0;
+    if(bestVoice) utt.voice = bestVoice;
+
+    utt.onstart = function(){
+      isSpeaking = true;
+      setVCS('Alex is speaking...');
+      if(av) av.classList.add('on');
+    };
+    utt.onend = function(){
+      // Small pause between sentences for natural rhythm
+      setTimeout(function(){ speakSentence(idx + 1); }, 200);
+    };
+    utt.onerror = function(e){
+      isSpeaking = false;
+      console.log('TTS error:', e.error);
+      speakSentence(idx + 1); // Skip to next sentence on error
+    };
+
+    synth.speak(utt);
+    // Chrome bug workaround
+    setTimeout(function(){ if(synth.paused) synth.resume(); }, 100);
+  }
+
+  speakSentence(0);
+}
+// ── SCROLL REVEAL ANIMATIONS ──
+var revealObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if(entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal,.reveal-left').forEach(function(el) {
+  revealObserver.observe(el);
+});
+
+// ── ANIMATED NUMBER COUNTERS ──
+var countersRan = false;
+function animateCounters() {
+  if(countersRan) return;
+  var blocks = document.querySelectorAll('.nbig');
+  if(!blocks.length) return;
+  countersRan = true;
+  blocks.forEach(function(el) {
+    var text = el.textContent.trim();
+    var match = text.match(/(\d+)/);
+    if(!match) return;
+    var target = parseInt(match[1]);
+    var prefix = text.substring(0, text.indexOf(match[1]));
+    var suffix = text.substring(text.indexOf(match[1]) + match[1].length);
+    var current = 0;
+    var step = Math.ceil(target / 40);
+    var interval = setInterval(function() {
+      current += step;
+      if(current >= target) { current = target; clearInterval(interval); }
+      el.textContent = prefix + current + suffix;
+    }, 35);
+  });
+}
+var counterObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if(entry.isIntersecting) { animateCounters(); counterObserver.unobserve(entry.target); }
+  });
+}, { threshold: 0.3 });
+var numbersSection = document.querySelector('.numbers');
+if(numbersSection) counterObserver.observe(numbersSection);
+
+// ── AUTO-OPEN CHAT AFTER 30 SECONDS ──
+var chatAutoOpened = false;
+setTimeout(function() {
+  if(!cwOpen && !chatAutoOpened) {
+    chatAutoOpened = true;
+    cwOpen = true;
+    var box = document.getElementById('cwbox');
+    if(box) { box.style.display = 'block'; box.classList.add('open'); }
+  }
+}, 30000);
+
+// ── CHAT NOTIFICATION BADGE ──
+var cwbtn = document.getElementById('cwbtn');
+if(cwbtn && !cwOpen) {
+  var notif = document.createElement('div');
+  notif.className = 'chat-notif';
+  notif.textContent = '1';
+  notif.id = 'chatNotif';
+  cwbtn.style.position = 'relative';
+  cwbtn.appendChild(notif);
+}
+var origToggleChat = toggleChat;
+toggleChat = function() {
+  origToggleChat();
+  var n = document.getElementById('chatNotif');
+  if(n) n.remove();
+};
+
+// ── FLOATING SOCIAL PROOF TOASTS ──
+var spToasts = [
+  { ico:'🦷', name:'Dr. Patel\'s Dental', city:'Birmingham', action:'just started with Klivio', time:'12 minutes ago' },
+  { ico:'🏠', name:'HomePoint Estates', city:'London', action:'captured 8 new leads today', time:'34 minutes ago' },
+  { ico:'⚖️', name:'Clarke & Partners', city:'Manchester', action:'set up AI Lead Responder', time:'1 hour ago' },
+  { ico:'🏋️', name:'FitZone Gym', city:'Leeds', action:'recovered 12 missed enquiries', time:'2 hours ago' },
+  { ico:'🔧', name:'ProTrade Plumbing', city:'Bristol', action:'went live with Voice Assistant', time:'3 hours ago' },
+  { ico:'🍽️', name:'The Oak Restaurant', city:'Edinburgh', action:'automated all reservations', time:'4 hours ago' }
+];
+var toastDiv = document.createElement('div');
+toastDiv.className = 'sp-toast';
+toastDiv.innerHTML = '<div class="sp-toast-ico"></div><div class="sp-toast-text"></div>';
+document.body.appendChild(toastDiv);
+var toastIdx = 0;
+function showSPToast() {
+  var t = spToasts[toastIdx % spToasts.length];
+  toastDiv.querySelector('.sp-toast-ico').textContent = t.ico;
+  toastDiv.querySelector('.sp-toast-text').innerHTML = '<strong>' + t.name + '</strong> in ' + t.city + ' ' + t.action + '<div class="sp-toast-time">' + t.time + '</div>';
+  toastDiv.classList.add('show');
+  setTimeout(function() { toastDiv.classList.remove('show'); }, 5000);
+  toastIdx++;
+}
+// First toast after 15 seconds, then every 45 seconds
+setTimeout(function() {
+  showSPToast();
+  setInterval(showSPToast, 45000);
+}, 15000);
+
+// ── HEADER SCROLL EFFECT ──
+var header = document.querySelector('header');
+window.addEventListener('scroll', function() {
+  if(window.scrollY > 80) {
+    header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.06)';
+  } else {
+    header.style.boxShadow = 'none';
+  }
+});
+
+// ── SMOOTH ANCHOR SCROLL (offset for fixed header + urgency bar) ──
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var id = this.getAttribute('href');
+    if(id === '#') return;
+    var target = document.querySelector(id);
+    if(target) {
+      e.preventDefault();
+      var offset = 100;
+      var pos = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: pos, behavior: 'smooth' });
+    }
+  });
+});
+
+</script>
+
+<!-- VOICE WIDGET -->
+<div id="vcbox">
+  <div class="vch">
+    <div class="vcav" id="vcav">&#127897;</div>
+    <div class="vchi"><h4>Alex &mdash; Klivio</h4><small id="vcst">Tap the mic to start talking</small></div>
+  </div>
+  <div class="vcmsgs" id="vcmsgs">
+    <div class="vcm a">Hey! I'm Alex from Klivio. Tap the mic and tell me about your business &mdash; I'll talk you through how we can help.</div>
+  </div>
+  <div class="vcbtns">
+    <button class="vcmic" id="vcmic" onclick="toggleMic()">&#127897; Tap to speak</button>
+    <button class="vcend" onclick="endCall()">End call</button>
+  </div>
+</div>
+<button id="vcbtn" onclick="toggleVoice()" title="Talk to Alex">&#128222;</button>
+
+<!-- CHATBOT WIDGET -->
+<style>
+#kb-btn{position:fixed;bottom:28px;right:28px;z-index:9998;width:56px;height:56px;border-radius:50%;background:var(--dark);color:var(--gold);border:none;cursor:pointer;font-size:24px;box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:all .2s;display:flex;align-items:center;justify-content:center}
+#kb-btn:hover{background:var(--gold);color:var(--dark);transform:scale(1.08)}
+#kb-btn .kb-badge{position:absolute;top:-4px;right:-4px;background:var(--rust);color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+#kb-box{position:fixed;bottom:96px;right:28px;z-index:9997;width:340px;max-height:520px;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,0.15);display:none;flex-direction:column;overflow:hidden}
+#kb-box.open{display:flex}
+#kb-head{background:var(--dark);color:white;padding:16px 18px;display:flex;align-items:center;gap:12px}
+#kb-head .kb-av{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--dark);flex-shrink:0}
+#kb-head .kb-name{font-weight:600;font-size:14px}
+#kb-head .kb-status{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px}
+#kb-head .kb-close{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;line-height:1;padding:0}
+#kb-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;max-height:360px}
+.kb-msg{max-width:85%;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5;font-family:'Figtree',sans-serif}
+.kb-msg.bot{background:#f4f4f4;color:var(--dark);align-self:flex-start;border-bottom-left-radius:3px}
+.kb-msg.user{background:var(--dark);color:white;align-self:flex-end;border-bottom-right-radius:3px}
+.kb-msg.typing{background:#f4f4f4;color:var(--muted);font-style:italic}
+#kb-form{display:flex;border-top:1px solid var(--border);padding:10px 12px;gap:8px}
+#kb-input{flex:1;border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-size:13px;font-family:'Figtree',sans-serif;outline:none;resize:none}
+#kb-input:focus{border-color:var(--gold)}
+#kb-send{background:var(--dark);color:white;border:none;border-radius:6px;padding:9px 14px;cursor:pointer;font-size:16px;transition:background .2s;flex-shrink:0}
+#kb-send:hover{background:var(--gold);color:var(--dark)}
+.kb-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
+.kb-qbtn{background:white;border:1.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:'Figtree',sans-serif;color:var(--dark);transition:all .2s}
+.kb-qbtn:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+
+<button id="kb-btn" onclick="kbToggle()">
+  💬
+  <div class="kb-badge">1</div>
+</button>
+
+<div id="kb-box">
+  <div id="kb-head">
+    <div class="kb-av">K</div>
+    <div>
+      <div class="kb-name">Klivio AI</div>
+      <div class="kb-status">● Online — replies instantly</div>
+    </div>
+    <button class="kb-close" onclick="kbToggle()">×</button>
+  </div>
+  <div id="kb-msgs">
+    <div class="kb-msg bot">Hi! I'm Klivio's AI assistant. We build AI workers for UK businesses — lead responders, chatbots, voice AI, and more.<br><br>What does your business do? I'll tell you exactly which product fits.</div>
+  </div>
+  <div class="kb-quick" id="kb-quick">
+    <button class="kb-qbtn" onclick="kbQuick('What do you do?')">What do you do?</button>
+    <button class="kb-qbtn" onclick="kbQuick('How much does it cost?')">Pricing</button>
+    <button class="kb-qbtn" onclick="kbQuick('How fast is setup?')">Setup time</button>
+    <button class="kb-qbtn" onclick="kbQuick('I run a dental practice')">Dental</button>
+    <button class="kb-qbtn" onclick="kbQuick('I run a law firm')">Legal</button>
+    <button class="kb-qbtn" onclick="kbQuick('I run an estate agency')">Estate agent</button>
+  </div>
+  <form id="kb-form" onsubmit="kbSend(event)">
+    <input id="kb-input" placeholder="Ask anything..." autocomplete="off" maxlength="500"/>
+    <button type="submit" id="kb-send">➤</button>
+  </form>
+</div>
+
+<script>
+var kbOpen = false;
+var kbSessionId = 'kb_' + Math.random().toString(36).slice(2);
+
+function kbToggle() {
+  kbOpen = !kbOpen;
+  document.getElementById('kb-box').classList.toggle('open', kbOpen);
+  document.querySelector('#kb-btn .kb-badge').style.display = 'none';
+  if (kbOpen) document.getElementById('kb-input').focus();
+}
+
+function kbQuick(msg) {
+  document.getElementById('kb-quick').style.display = 'none';
+  kbAppend(msg, 'user');
+  kbAsk(msg);
+}
+
+function kbAppend(text, role) {
+  var msgs = document.getElementById('kb-msgs');
+  var d = document.createElement('div');
+  d.className = 'kb-msg ' + role;
+  d.textContent = text;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+
+function kbSend(e) {
+  e.preventDefault();
+  var input = document.getElementById('kb-input');
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  document.getElementById('kb-quick').style.display = 'none';
+  kbAppend(msg, 'user');
+  kbAsk(msg);
+}
+
+function kbAsk(msg) {
+  var typing = kbAppend('Typing...', 'bot typing');
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId: kbSessionId, message: msg })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    typing.className = 'kb-msg bot';
+    typing.textContent = data.reply || "Sorry, I'm having a moment. Email us at hello@klivio.bond";
+    document.getElementById('kb-msgs').scrollTop = 9999;
+  })
+  .catch(function() {
+    typing.className = 'kb-msg bot';
+    typing.textContent = "Connection issue. Email us at hello@klivio.bond and we'll get back to you fast.";
+  });
+}
+
+// Show badge after 30 seconds if not opened
+setTimeout(function() {
+  if (!kbOpen) {
+    document.querySelector('#kb-btn .kb-badge').style.display = 'flex';
+  }
+}, 30000);
+</script>
+
+</body>
+</html>

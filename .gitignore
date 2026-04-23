@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/
+leadgen/data/
+leadgen/accounts.js
+*.log

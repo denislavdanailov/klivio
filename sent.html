@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klivio — Sent Emails</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0e0d0b;color:#e8e4dc;font-family:'Inter',system-ui,sans-serif;font-size:14px;min-height:100vh}
+  .topbar{background:#1a1814;border-bottom:1px solid #2a2520;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .topbar h1{font-size:18px;color:#c9a84c;font-weight:600;letter-spacing:-0.3px}
+  .topbar .nav{display:flex;gap:12px}
+  .topbar a{color:#8a8070;text-decoration:none;font-size:13px;padding:6px 14px;border-radius:6px;transition:all .2s}
+  .topbar a:hover,.topbar a.active{background:#2a2520;color:#e8e4dc}
+  .login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
+  .login input{background:#1a1814;border:1px solid #2a2520;color:#e8e4dc;padding:12px 16px;border-radius:8px;width:280px;font-size:14px;outline:none}
+  .login input:focus{border-color:#c9a84c}
+  .login button{background:#c9a84c;color:#1a1814;border:none;padding:12px 28px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;width:280px}
+  .login button:hover{background:#d4b05f}
+  .main{padding:24px 28px}
+  .stats{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+  .stat{background:#1a1814;border:1px solid #2a2520;border-radius:10px;padding:16px 20px;min-width:140px}
+  .stat .n{font-size:28px;font-weight:700;color:#c9a84c;line-height:1}
+  .stat .l{font-size:12px;color:#8a8070;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+  .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .filters input{background:#1a1814;border:1px solid #2a2520;color:#e8e4dc;padding:8px 14px;border-radius:8px;font-size:13px;outline:none;width:260px}
+  .filters input:focus{border-color:#c9a84c}
+  .filters select{background:#1a1814;border:1px solid #2a2520;color:#e8e4dc;padding:8px 12px;border-radius:8px;font-size:13px;outline:none}
+  .filters .count{color:#8a8070;font-size:13px;margin-left:auto}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#6a6055;border-bottom:1px solid #2a2520;position:sticky;top:57px;background:#0e0d0b;z-index:5}
+  tr{border-bottom:1px solid #1e1c18;cursor:pointer;transition:background .15s}
+  tr:hover{background:#141210}
+  td{padding:12px 14px;vertical-align:middle}
+  .biz{font-weight:500;color:#e8e4dc;font-size:13px}
+  .email-addr{color:#8a8070;font-size:12px;margin-top:2px}
+  .subject{color:#c9a84c;font-size:13px}
+  .weakness{color:#8a8070;font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .product-badge{display:inline-block;background:#2a2520;border:1px solid #3a3028;color:#c9a84c;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;white-space:nowrap}
+  .provider{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+  .provider.brevo{background:#1a2d3a;color:#4da6d4}
+  .provider.turbosmtp{background:#2d1a3a;color:#a44dd4}
+  .provider.outlook{background:#1a2d2a;color:#4dd4a4}
+  .time{color:#6a6055;font-size:12px;white-space:nowrap}
+  .from{color:#8a8070;font-size:12px}
+
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#1a1814;border:1px solid #2a2520;border-radius:14px;padding:28px;max-width:620px;width:90%;max-height:85vh;overflow-y:auto;position:relative}
+  .modal h2{font-size:16px;font-weight:600;color:#e8e4dc;margin-bottom:4px}
+  .modal .meta{color:#8a8070;font-size:12px;margin-bottom:20px}
+  .modal .label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#6a6055;margin-top:16px;margin-bottom:6px}
+  .modal .value{color:#e8e4dc;font-size:13px;line-height:1.6}
+  .modal .body-text{background:#0e0d0b;border:1px solid #2a2520;border-radius:8px;padding:16px;font-size:13px;color:#c4bfb6;line-height:1.7;white-space:pre-wrap;font-family:inherit}
+  .modal .close{position:absolute;top:16px;right:16px;background:none;border:none;color:#6a6055;cursor:pointer;font-size:20px;line-height:1}
+  .modal .close:hover{color:#e8e4dc}
+  .empty{text-align:center;padding:60px 20px;color:#6a6055}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📨 Sent Emails</h1>
+  <div class="nav">
+    <a href="/admin">Orders</a>
+    <a href="/leads">Leads</a>
+    <a href="/sent" class="active">Sent Emails</a>
+    <a href="/campaign">Campaign</a>
+  </div>
+</div>
+
+<div id="loginView" class="login">
+  <input id="keyInput" type="password" placeholder="Admin key" onkeydown="if(event.key==='Enter')login()">
+  <button onclick="login()">Enter →</button>
+</div>
+
+<div id="mainView" class="main" style="display:none">
+  <div class="stats" id="statsBar"></div>
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search business, email, subject..." oninput="render()">
+    <select id="provFilter" onchange="render()">
+      <option value="">All providers</option>
+      <option value="brevo">Brevo</option>
+      <option value="turbosmtp">TurboSMTP</option>
+      <option value="outlook">Outlook</option>
+    </select>
+    <select id="indFilter" onchange="render()">
+      <option value="">All industries</option>
+    </select>
+    <span class="count" id="countLabel"></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Business</th>
+        <th>Subject</th>
+        <th>Product</th>
+        <th>Sent from</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="emptyMsg" class="empty" style="display:none">No emails match your filter.</div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent">
+    <button class="close" onclick="closeModal()">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let ADMIN_KEY = '';
+let data = [];
+
+function login() {
+  ADMIN_KEY = document.getElementById('keyInput').value.trim();
+  fetch('/api/sent', { headers: { 'x-admin-key': ADMIN_KEY } })
+    .then(r => { if (!r.ok) throw new Error('Unauthorized'); return r.json(); })
+    .then(d => {
+      data = d;
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('mainView').style.display = 'block';
+      localStorage.setItem('klivio_admin_key', ADMIN_KEY);
+      buildStats();
+      buildIndustryFilter();
+      render();
+    })
+    .catch(() => alert('Wrong key'));
+}
+
+function buildStats() {
+  const byProv = {};
+  const byInd = {};
+  data.forEach(e => {
+    byProv[e.sentProvider || 'unknown'] = (byProv[e.sentProvider || 'unknown'] || 0) + 1;
+    byInd[e.industry || 'generic'] = (byInd[e.industry || 'generic'] || 0) + 1;
+  });
+  const bar = document.getElementById('statsBar');
+  const items = [
+    { n: data.length, l: 'Total sent' },
+    { n: byProv['brevo'] || 0, l: 'via Brevo' },
+    { n: byProv['turbosmtp'] || 0, l: 'via TurboSMTP' },
+    { n: Object.keys(byInd).length, l: 'Industries' },
+  ];
+  bar.innerHTML = items.map(i => `<div class="stat"><div class="n">${i.n}</div><div class="l">${i.l}</div></div>`).join('');
+}
+
+function buildIndustryFilter() {
+  const industries = [...new Set(data.map(e => e.industry).filter(Boolean))].sort();
+  const sel = document.getElementById('indFilter');
+  industries.forEach(ind => {
+    const o = document.createElement('option');
+    o.value = ind; o.textContent = ind.charAt(0).toUpperCase() + ind.slice(1);
+    sel.appendChild(o);
+  });
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const prov = document.getElementById('provFilter').value;
+  const ind = document.getElementById('indFilter').value;
+
+  const filtered = data.filter(e => {
+    if (prov && e.sentProvider !== prov) return false;
+    if (ind && e.industry !== ind) return false;
+    if (q) {
+      const hay = [e.business, e.email, e.sentSubject, e.sentProduct, e.sentWeakness].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('countLabel').textContent = `${filtered.length} of ${data.length}`;
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('emptyMsg');
+
+  if (!filtered.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((e, i) => `
+    <tr onclick="openModal(${i}, ${data.indexOf(e)})">
+      <td>
+        <div class="biz">${e.business || '—'}</div>
+        <div class="email-addr">${e.email}</div>
+      </td>
+      <td>
+        <div class="subject">${e.sentSubject || '—'}</div>
+        <div class="weakness">${e.sentWeakness || ''}</div>
+      </td>
+      <td><span class="product-badge">${e.sentProduct || '—'}</span></td>
+      <td>
+        <div class="from">${e.sentAccount || e.sentFrom || '—'}</div>
+        <span class="provider ${e.sentProvider || ''}">${e.sentProvider || '—'}</span>
+      </td>
+      <td class="time">${formatTime(e.sentAt)}</td>
+    </tr>
+  `).join('');
+}
+
+function formatTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + '<br><small>' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) + '</small>';
+}
+
+function openModal(rowIdx, dataIdx) {
+  const e = data[dataIdx];
+  document.getElementById('modalBody').innerHTML = `
+    <h2>${e.business || 'Unknown business'}</h2>
+    <div class="meta">${e.email} · ${e.industry || 'generic'} · ${formatTime(e.sentAt).replace('<br><small>','  ').replace('</small>','')}</div>
+
+    <div class="label">Subject</div>
+    <div class="value">${e.sentSubject || '—'}</div>
+
+    <div class="label">Problem identified</div>
+    <div class="value">${e.sentWeakness || '—'}</div>
+
+    <div class="label">Product offered</div>
+    <div class="value"><span class="product-badge">${e.sentProduct || '—'}</span></div>
+
+    <div class="label">Sent from</div>
+    <div class="value">${e.sentAccount || '—'} &lt;${e.sentFrom || '—'}&gt; via <span class="provider ${e.sentProvider}">${e.sentProvider || '—'}</span></div>
+
+    ${e.website ? `<div class="label">Their website</div><div class="value"><a href="${e.website}" target="_blank" style="color:#c9a84c">${e.website}</a></div>` : ''}
+
+    <div class="label">Email body</div>
+    <div class="body-text">${e.sentBody ? e.sentBody.replace(/</g,'&lt;') : '<em style="color:#6a6055">Body not stored for this email (sent before logging was enabled)</em>'}</div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// Auto-login if key saved
+const savedKey = localStorage.getItem('klivio_admin_key');
+if (savedKey) { document.getElementById('keyInput').value = savedKey; login(); }
+</script>
+</body>
+</html>

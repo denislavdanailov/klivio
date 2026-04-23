@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klivio — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0f0e0c;color:#e8e4dc;min-height:100vh}
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#1a1815;border:1px solid rgba(200,168,75,0.2);border-radius:8px;padding:40px;width:320px}
+.login-box h2{font-size:20px;color:#C8A84B;margin-bottom:24px}
+.login-box input{width:100%;background:#111;border:1px solid #333;color:#fff;padding:10px 14px;border-radius:4px;font-size:14px;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:#C8A84B}
+.login-box button{width:100%;background:#C8A84B;color:#0f0e0c;border:none;padding:11px;border-radius:4px;font-weight:700;font-size:14px;cursor:pointer}
+.login-box button:hover{background:#e2c87a}
+.login-box .err{color:#e57373;font-size:13px;margin-top:8px}
+
+.app{display:none;padding:32px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+header h1{font-size:22px;color:#C8A84B;letter-spacing:-0.5px}
+.stats{display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+.stat{background:#1a1815;border:1px solid #2a2620;border-radius:6px;padding:16px 24px;min-width:120px}
+.stat-n{font-size:28px;font-weight:700;color:#C8A84B}
+.stat-l{font-size:12px;color:#666;margin-top:2px}
+
+.filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{background:#1a1815;border:1px solid #2a2620;color:#888;padding:7px 16px;border-radius:4px;font-size:13px;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:#C8A84B;border-color:#C8A84B;color:#0f0e0c;font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;color:#555;font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #1e1c18}
+td{padding:12px 14px;border-bottom:1px solid #161411;vertical-align:top}
+tr:hover td{background:rgba(200,168,75,0.03)}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:600;letter-spacing:0.5px}
+.badge-pending{background:rgba(200,168,75,0.15);color:#C8A84B}
+.badge-in_progress{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-waiting_client{background:rgba(245,158,11,0.15);color:#fbbf24}
+.badge-completed{background:rgba(34,197,94,0.15);color:#4ade80}
+.badge-cancelled{background:rgba(239,68,68,0.15);color:#f87171}
+
+.deadline{font-size:12px;color:#888}
+.deadline.overdue{color:#f87171}
+.deadline.urgent{color:#fbbf24}
+.deadline.ok{color:#4ade80}
+
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.action-btn{background:transparent;border:1px solid #2a2620;color:#888;padding:4px 10px;border-radius:3px;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.action-btn:hover{border-color:#C8A84B;color:#C8A84B}
+.action-btn.complete:hover{border-color:#4ade80;color:#4ade80}
+.action-btn.cancel:hover{border-color:#f87171;color:#f87171}
+
+.client-name{font-weight:600;color:#e8e4dc}
+.client-email{font-size:12px;color:#666;margin-top:2px}
+.product-name{color:#C8A84B;font-weight:500}
+.price{color:#888;font-size:12px}
+.notes{font-size:12px;color:#666;max-width:200px;word-break:break-word}
+
+.empty{text-align:center;padding:60px;color:#444;font-size:15px}
+.refresh-btn{background:transparent;border:1px solid #2a2620;color:#888;padding:7px 16px;border-radius:4px;font-size:13px;cursor:pointer}
+.refresh-btn:hover{border-color:#C8A84B;color:#C8A84B}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-box">
+    <h2>Klivio Admin</h2>
+    <input type="password" id="keyInput" placeholder="Admin key" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">Enter →</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appScreen">
+  <header>
+    <h1>Klivio Orders</h1>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/leads" style="font-size:13px;color:#c9a84c;text-decoration:none;padding:6px 14px;border:1px solid #3a3028;border-radius:6px">🎯 Leads</a>
+      <a href="/campaign" style="font-size:13px;color:#c9a84c;text-decoration:none;padding:6px 14px;border:1px solid #3a3028;border-radius:6px">📊 Campaign</a>
+      <a href="/sent" style="font-size:13px;color:#c9a84c;text-decoration:none;padding:6px 14px;border:1px solid #3a3028;border-radius:6px">📨 Sent Emails</a>
+      <span id="lastRefresh" style="font-size:12px;color:#444"></span>
+      <button class="refresh-btn" onclick="loadOrders()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('pending',this)">Pending</button>
+    <button class="filter-btn" onclick="setFilter('in_progress',this)">In Progress</button>
+    <button class="filter-btn" onclick="setFilter('waiting_client',this)">Waiting Client</button>
+    <button class="filter-btn" onclick="setFilter('completed',this)">Completed</button>
+    <button class="filter-btn" onclick="setFilter('cancelled',this)">Cancelled</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Product</th>
+        <th>Status</th>
+        <th>Deadline</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="ordersBody"></tbody>
+  </table>
+  <div class="empty" id="emptyMsg" style="display:none">No orders yet.</div>
+</div>
+
+<script>
+let adminKey = '';
+let allOrders = [];
+let currentFilter = 'all';
+
+function login() {
+  const key = document.getElementById('keyInput').value.trim();
+  if (!key) return;
+  adminKey = key;
+  loadOrders();
+}
+
+async function loadOrders() {
+  try {
+    const r = await fetch('/api/orders', { headers: { 'x-admin-key': adminKey } });
+    if (r.status === 401) {
+      document.getElementById('loginErr').textContent = 'Wrong key.';
+      adminKey = '';
+      return;
+    }
+    allOrders = await r.json();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    document.getElementById('lastRefresh').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    renderStats();
+    renderOrders();
+  } catch(e) {
+    document.getElementById('loginErr').textContent = 'Connection error.';
+  }
+}
+
+function renderStats() {
+  const counts = { total: allOrders.length, pending: 0, in_progress: 0, waiting_client: 0, completed: 0 };
+  let overdue = 0;
+  allOrders.forEach(o => {
+    if (counts[o.status] !== undefined) counts[o.status]++;
+    if (o.status !== 'completed' && o.status !== 'cancelled' && new Date(o.deadline) < new Date()) overdue++;
+  });
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-n">${counts.total}</div><div class="stat-l">Total Orders</div></div>
+    <div class="stat"><div class="stat-n" style="color:#C8A84B">${counts.pending}</div><div class="stat-l">Pending</div></div>
+    <div class="stat"><div class="stat-n" style="color:#60a5fa">${counts.in_progress}</div><div class="stat-l">In Progress</div></div>
+    <div class="stat"><div class="stat-n" style="color:#fbbf24">${counts.waiting_client}</div><div class="stat-l">Waiting Client</div></div>
+    <div class="stat"><div class="stat-n" style="color:#4ade80">${counts.completed}</div><div class="stat-l">Completed</div></div>
+    ${overdue ? `<div class="stat"><div class="stat-n" style="color:#f87171">${overdue}</div><div class="stat-l">Overdue</div></div>` : ''}
+  `;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+function renderOrders() {
+  const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+  const tbody = document.getElementById('ordersBody');
+  const empty = document.getElementById('emptyMsg');
+  if (!filtered.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(o => {
+    const deadline = new Date(o.deadline);
+    const now = new Date();
+    const daysLeft = Math.ceil((deadline - now) / 86400000);
+    let deadlineClass = 'ok', deadlineText = '';
+    if (o.status === 'completed' || o.status === 'cancelled') {
+      deadlineText = 'Done';
+      deadlineClass = '';
+    } else if (daysLeft < 0) {
+      deadlineText = `${Math.abs(daysLeft)}d overdue`;
+      deadlineClass = 'overdue';
+    } else if (daysLeft <= 1) {
+      deadlineText = daysLeft === 0 ? 'Due today' : 'Due tomorrow';
+      deadlineClass = 'urgent';
+    } else {
+      deadlineText = `${daysLeft} days left`;
+      deadlineClass = 'ok';
+    }
+
+    const created = new Date(o.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    const deadlineFmt = deadline.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+
+    return `<tr>
+      <td>
+        <div class="client-name">${esc(o.name)}</div>
+        <div class="client-email"><a href="mailto:${esc(o.email)}" style="color:#555;text-decoration:none">${esc(o.email)}</a></div>
+        ${o.website ? `<div class="client-email"><a href="${esc(o.website)}" target="_blank" style="color:#C8A84B;text-decoration:none">${esc(o.website.replace(/^https?:\/\//,''))}</a></div>` : ''}
+        <div style="font-size:11px;color:#333;margin-top:4px">${created}</div>
+      </td>
+      <td>
+        <div class="product-name">${esc(o.product)}</div>
+        <div class="price">${esc(o.price)}</div>
+        <div style="font-size:11px;color:#333;margin-top:2px">${esc(o.language)}</div>
+      </td>
+      <td><span class="badge badge-${o.status}">${o.status.replace('_',' ')}</span></td>
+      <td>
+        <div style="font-size:13px;color:#888">${deadlineFmt}</div>
+        <div class="deadline ${deadlineClass}">${deadlineText}</div>
+      </td>
+      <td class="notes">${esc(o.notes) || '<span style="color:#333">—</span>'}</td>
+      <td>
+        <div class="actions">
+          ${o.status !== 'in_progress' ? `<button class="action-btn" onclick="updateStatus('${o.id}','in_progress')">▶ Start</button>` : ''}
+          ${o.status !== 'waiting_client' ? `<button class="action-btn" onclick="updateStatus('${o.id}','waiting_client')">⏳ Waiting</button>` : ''}
+          ${o.status !== 'completed' ? `<button class="action-btn complete" onclick="updateStatus('${o.id}','completed')">✓ Done</button>` : ''}
+          ${o.status !== 'cancelled' ? `<button class="action-btn cancel" onclick="updateStatus('${o.id}','cancelled')">✕</button>` : ''}
+          <button class="action-btn" onclick="copyInfo('${o.id}')">⎘ Copy</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateStatus(id, status) {
+  await fetch(`/api/order/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+    body: JSON.stringify({ status })
+  });
+  await loadOrders();
+}
+
+function copyInfo(id) {
+  const o = allOrders.find(x => x.id === id);
+  if (!o) return;
+  const text = `Order: ${o.id}\nClient: ${o.name}\nEmail: ${o.email}\nProduct: ${o.product} (${o.price})\nWebsite: ${o.website || 'N/A'}\nLanguage: ${o.language}\nNotes: ${o.notes || 'None'}\nDeadline: ${new Date(o.deadline).toLocaleDateString('en-GB')}`;
+  navigator.clipboard.writeText(text);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-refresh every 60 seconds
+setInterval(() => { if (adminKey) loadOrders(); }, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klivio — Campaign Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0e0d0b;color:#e8e4dc;font-family:'Inter',system-ui,sans-serif;font-size:14px;min-height:100vh}
+.topbar{background:#1a1814;border-bottom:1px solid #2a2520;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:18px;color:#c9a84c;font-weight:600}
+.topbar .nav{display:flex;gap:12px}
+.topbar a{color:#8a8070;text-decoration:none;font-size:13px;padding:6px 14px;border-radius:6px}
+.topbar a:hover,.topbar a.active{background:#2a2520;color:#e8e4dc}
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
+.login input{background:#1a1814;border:1px solid #2a2520;color:#e8e4dc;padding:12px 16px;border-radius:8px;width:280px;outline:none}
+.login button{background:#c9a84c;color:#1a1814;border:none;padding:12px 28px;border-radius:8px;font-weight:600;cursor:pointer;width:280px}
+.main{padding:24px 28px}
+.top-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.s{background:#1a1814;border:1px solid #2a2520;border-radius:10px;padding:18px}
+.s .n{font-size:30px;font-weight:700;color:#c9a84c;line-height:1}
+.s .l{font-size:12px;color:#8a8070;margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
+.s.warn .n{color:#fbbf24}
+.s.ok .n{color:#4dd4a4}
+h2{font-size:14px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:.8px;margin:24px 0 12px}
+.accounts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.acc{background:#1a1814;border:1px solid #2a2520;border-radius:8px;padding:14px 16px}
+.acc .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.acc .nm{font-weight:600;color:#e8e4dc;font-size:13px}
+.acc .em{color:#8a8070;font-size:11px;font-family:monospace}
+.acc .prov{font-size:10px;padding:2px 8px;border-radius:4px;background:#2a2520;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px}
+.acc .prov.brevo{color:#4da6d4}
+.acc .prov.turbosmtp{color:#a44dd4}
+.acc .prov.outlook{color:#4dd4a4}
+.bar{background:#0e0d0b;height:6px;border-radius:3px;overflow:hidden;margin-top:8px}
+.bar .fill{height:100%;background:linear-gradient(90deg,#c9a84c,#e8c47a);transition:width .3s}
+.bar .fill.warn{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.bar .fill.full{background:linear-gradient(90deg,#dc2626,#b91c1c)}
+.acc .nums{display:flex;justify-content:space-between;font-size:11px;color:#8a8070;margin-top:6px}
+.acc .warmup{display:inline-block;margin-left:6px;padding:1px 6px;background:#2d1a3a;color:#a44dd4;font-size:9px;border-radius:3px;text-transform:uppercase}
+.chart{background:#1a1814;border:1px solid #2a2520;border-radius:10px;padding:16px;margin-bottom:20px}
+.chart-bars{display:flex;gap:4px;align-items:flex-end;height:160px;margin-top:12px}
+.chart-bar{flex:1;background:linear-gradient(180deg,#c9a84c,#8a7434);border-radius:4px 4px 0 0;position:relative;min-height:2px}
+.chart-bar:hover{background:linear-gradient(180deg,#e8c47a,#c9a84c)}
+.chart-bar .val{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:#c9a84c}
+.chart-bar .dt{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:#6a6055;white-space:nowrap}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.tbl{background:#1a1814;border:1px solid #2a2520;border-radius:8px;overflow:hidden}
+.tbl table{width:100%;border-collapse:collapse}
+.tbl td{padding:8px 14px;border-bottom:1px solid #2a2520;font-size:13px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:first-child{color:#e8e4dc}
+.tbl td:last-child{color:#c9a84c;text-align:right;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📊 Campaign Dashboard</h1>
+  <div class="nav">
+    <a href="/admin">Orders</a>
+    <a href="/leads">Leads</a>
+    <a href="/sent">Sent Emails</a>
+    <a href="/campaign" class="active">Campaign</a>
+  </div>
+</div>
+
+<div id="loginView" class="login">
+  <input id="keyInput" type="password" placeholder="Admin key" onkeydown="if(event.key==='Enter')login()">
+  <button onclick="login()">Enter →</button>
+</div>
+
+<div id="mainView" class="main" style="display:none">
+  <div class="top-stats" id="topStats"></div>
+
+  <h2>📈 Emails sent per day (last 14 days)</h2>
+  <div class="chart" id="chart"></div>
+
+  <h2>💌 Account Status</h2>
+  <div class="accounts-grid" id="accounts"></div>
+
+  <h2>🎯 Lead Distribution</h2>
+  <div class="two-col">
+    <div class="tbl">
+      <table id="indTable"><thead><tr><td style="color:#6a6055;font-size:11px;text-transform:uppercase">Industry</td><td style="color:#6a6055;font-size:11px;text-transform:uppercase">Count</td></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="tbl">
+      <table id="cityTable"><thead><tr><td style="color:#6a6055;font-size:11px;text-transform:uppercase">City</td><td style="color:#6a6055;font-size:11px;text-transform:uppercase">Count</td></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+let KEY='';
+function login(){
+  KEY=document.getElementById('keyInput').value.trim();
+  fetch('/api/campaign-stats',{headers:{'x-admin-key':KEY}})
+    .then(r=>{if(!r.ok)throw 0;return r.json()})
+    .then(render)
+    .catch(()=>alert('Wrong key'));
+}
+function render(d){
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('mainView').style.display='block';
+  localStorage.setItem('klivio_admin_key',KEY);
+
+  const a=d.accounts;
+  document.getElementById('topStats').innerHTML=`
+    <div class="s ok"><div class="n">${a.totalToday}</div><div class="l">Sent today</div></div>
+    <div class="s"><div class="n">${a.totalCapacity}</div><div class="l">Capacity today</div></div>
+    <div class="s"><div class="n">${a.fullCapacity}</div><div class="l">Max capacity (full)</div></div>
+    <div class="s"><div class="n">${d.leads.total}</div><div class="l">Total leads</div></div>
+    <div class="s warn"><div class="n">${d.leads.byStatus.new||0}</div><div class="l">Ready to send</div></div>
+    <div class="s ok"><div class="n">${d.leads.byStatus.sent||0}</div><div class="l">Already sent</div></div>
+  `;
+
+  // Daily chart
+  const dates=Object.keys(d.sentByDate).sort().slice(-14);
+  const maxV=Math.max(1,...dates.map(dt=>d.sentByDate[dt]));
+  document.getElementById('chart').innerHTML=`
+    <div class="chart-bars">
+      ${dates.map(dt=>{
+        const v=d.sentByDate[dt];
+        const h=Math.max(2,(v/maxV)*140);
+        return `<div class="chart-bar" style="height:${h}px" title="${dt}: ${v}">
+          <div class="val">${v}</div>
+          <div class="dt">${dt.slice(5)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="height:24px"></div>
+  `;
+
+  // Accounts grid
+  document.getElementById('accounts').innerHTML=a.breakdown.map(ac=>{
+    const pct=ac.limit>0?(ac.sent/ac.limit)*100:0;
+    const cls=pct>=100?'full':pct>=80?'warn':'';
+    return `<div class="acc">
+      <div class="head">
+        <div>
+          <div class="nm">${ac.name}${ac.warming?'<span class="warmup">warmup</span>':''}</div>
+          <div class="em">${ac.email}</div>
+        </div>
+        <span class="prov ${ac.provider}">${ac.provider}</span>
+      </div>
+      <div class="bar"><div class="fill ${cls}" style="width:${Math.min(100,pct)}%"></div></div>
+      <div class="nums"><span>Sent: ${ac.sent}/${ac.limit}${ac.warming?' (of '+ac.fullLimit+')':''}</span><span>${ac.remaining} left</span></div>
+    </div>`;
+  }).join('');
+
+  // Tables
+  const ind=Object.entries(d.leads.byIndustry).sort((a,b)=>b[1]-a[1]);
+  const cty=Object.entries(d.leads.byCity).sort((a,b)=>b[1]-a[1]);
+  document.querySelector('#indTable tbody').innerHTML=ind.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  document.querySelector('#cityTable tbody').innerHTML=cty.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+}
+const saved=localStorage.getItem('klivio_admin_key');
+if(saved){document.getElementById('keyInput').value=saved;login()}
+</script>
+</body>
+</html>

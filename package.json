@@ -1,0 +1,21 @@
+{
+  "name": "klivio",
+  "version": "1.0.0",
+  "description": "Klivio — AI Workers for Business",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "leadgen": "node leadgen/run.js",
+    "leadgen:send": "node leadgen/run.js send",
+    "leadgen:stats": "node leadgen/run.js stats",
+    "campaign": "node leadgen/campaign.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.0",
+    "emailjs": "^5.0.0",
+    "express": "^4.21.0",
+    "nodemailer": "^6.9.0"
+  }
+}
