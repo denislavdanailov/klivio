@@ -1,0 +1,30 @@
+[build]
+  publish = "."
+  command = "echo 'static site'"
+
+# Proxy API calls → Railway server
+[[redirects]]
+  from = "/api/*"
+  to = "https://klivio-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+# Dashboard → Railway
+[[redirects]]
+  from = "/control"
+  to = "https://klivio-production.up.railway.app/control"
+  status = 200
+  force = true
+
+# Campaign stats for dashboard
+[[redirects]]
+  from = "/campaign*"
+  to = "https://klivio-production.up.railway.app/campaign:splat"
+  status = 200
+  force = true
+
+# SPA fallback — index.html for unmatched routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
