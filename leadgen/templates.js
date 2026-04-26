@@ -15,7 +15,7 @@ const TEMPLATES = {
 
 I was looking at dental practices in your area and noticed something most clinics struggle with — missed phone calls during procedures.
 
-Studies show the average dental practice misses 30-40% of incoming calls. At roughly $300-500 per new patient, that's $3,000-8,000/month walking out the door.
+Studies show the average dental practice misses 30-40% of incoming calls. At roughly £300-500 per new patient, that's £3,000-8,000/month walking out the door.
 
 We built an AI system that answers your phone 24/7, books appointments, and sends you a summary — all for less than a receptionist's daily wage.
 
@@ -24,7 +24,7 @@ Would it be worth a 5-minute chat to see if this fits {{business}}?
 Best,
 {{sender}}
 Klivio — AI Workers for Business
-klivio.bond`,
+klivio.online`,
 
       `Hi {{name}},
 
@@ -37,7 +37,7 @@ We help dental practices capture every call with an AI receptionist that sounds 
 Worth a look? Happy to share a quick demo.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -59,7 +59,7 @@ We build AI systems that respond to every enquiry in under 2 minutes — even at
 Could this work for {{business}}? Happy to show you in 5 minutes.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
 
       `Hi {{name}},
 
@@ -72,7 +72,7 @@ Setup takes under a week and costs less than a part-time admin.
 Would {{business}} benefit from never missing another lead? Happy to chat briefly.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -94,7 +94,7 @@ One firm went from losing 60% of after-hours leads to capturing 95%.
 Worth a 5-minute conversation to see if this fits {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
 
       `Hi {{name}},
 
@@ -107,7 +107,7 @@ No contracts, no setup fees. Live in under a week.
 Could this help {{business}}? Happy to show you a quick demo.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -129,7 +129,7 @@ Setup takes 3-5 days. Costs less than one evening's lost bookings.
 Interested to see how it works for {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -151,7 +151,7 @@ Gyms using this see 30% more trial bookings because the bot engages visitors ins
 Worth a quick look for {{business}}? Takes 5 minutes to show you.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -173,7 +173,7 @@ No app to install, no tech needed. Live in 3-5 days.
 Could this help {{business}}? Happy to show you how it works.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -195,7 +195,7 @@ Stores using this recover 15-25% of abandoned carts.
 Worth a quick look for {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -217,7 +217,7 @@ No setup fees, cancel anytime. Live in under a week.
 Could this work for {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -239,7 +239,7 @@ Practices using this book 20-30% more appointments. Setup in 3-5 days.
 Worth a conversation for {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -261,7 +261,7 @@ We build AI systems that respond to every enquiry in under 2 minutes, 24/7. It a
 Would this be useful for {{business}}? Happy to show you in 5 minutes.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -283,7 +283,7 @@ Cleaning companies using this capture 30-40% more clients. Setup in under a week
 Could this help {{business}}? Happy to show you how it works.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -305,7 +305,7 @@ No contracts, no setup fees. Live in under a week.
 Worth a quick chat for {{business}}?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -327,7 +327,7 @@ Brokers using this convert 30-40% more leads. No tech needed on your end.
 Could this help {{business}}? Happy to show you a quick demo.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 
@@ -349,20 +349,20 @@ We build AI systems that respond to every enquiry in under 2 minutes, 24/7. No s
 Would it be worth 5 minutes to see if this fits your business?
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
 
       `Hi {{name}},
 
 I've been looking at businesses like {{business}} and noticed a pattern — most lose 30-50% of leads simply from slow response times.
 
-We built AI workers that handle enquiries, answer calls, and follow up with leads — all automatically, 24/7. From $197/month, no contracts.
+We built AI workers that handle enquiries, answer calls, and follow up with leads — all automatically, 24/7. From £197/month, no contracts.
 
 Most of our clients see ROI in the first 2 weeks.
 
 Curious to learn more? Happy to send a quick overview.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
     ],
   },
 };
@@ -381,7 +381,7 @@ If you're curious, I can show you exactly how it works in 5 minutes — no commi
 Either way, no pressure at all.
 
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
 };
 
 const FOLLOWUP_3 = {
@@ -394,7 +394,7 @@ If the timing is better down the road, we'll be here.
 
 All the best,
 {{sender}}
-Klivio — klivio.bond`,
+Klivio — klivio.online`,
 };
 
 const INDUSTRY_DESC = {

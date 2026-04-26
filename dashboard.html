@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klivio — Control Centre</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0a08;--bg2:#131210;--bg3:#1a1814;--bg4:#201e19;
+  --border:#252320;--gold:#c9a84c;--gold2:#e8c87a;
+  --text:#e8e4dc;--muted:#6b6456;--dim:#3a3530;
+  --green:#4dd4a4;--red:#f87171;--blue:#60a5fa;--orange:#fb923c;
+}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+
+/* ── LOCK ── */
+#lock{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
+#lock h2{color:var(--gold);font-size:18px;letter-spacing:-.3px}
+#lock input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:11px 16px;border-radius:8px;width:260px;outline:none;font-size:14px}
+#lock input:focus{border-color:var(--gold)}
+#lock button{background:var(--gold);color:var(--bg);border:none;padding:11px;border-radius:8px;font-weight:700;width:260px;cursor:pointer;font-size:14px}
+#lock .err{color:var(--red);font-size:12px}
+
+/* ── LAYOUT ── */
+#app{display:none}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;height:52px}
+.topbar .logo{color:var(--gold);font-weight:700;font-size:16px;letter-spacing:-.4px;margin-right:32px}
+.topbar .logo span{color:var(--muted);font-weight:400}
+.nav-tab{color:var(--muted);text-decoration:none;padding:0 16px;height:52px;display:flex;align-items:center;font-size:13px;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.topbar-r{margin-left:auto;display:flex;align-items:center;gap:12px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.live-label{font-size:11px;color:var(--green)}
+.refresh-btn{background:var(--bg4);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+.refresh-btn:hover{color:var(--text);border-color:var(--gold)}
+
+/* ── PAGES ── */
+.page{display:none;padding:24px}
+.page.on{display:block}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:24px}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.sc .n{font-size:32px;font-weight:700;line-height:1}
+.sc .l{font-size:11px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.6px}
+.sc .sub{font-size:11px;color:var(--muted);margin-top:8px}
+.sc.gold .n{color:var(--gold)}
+.sc.grn  .n{color:var(--green)}
+.sc.red  .n{color:var(--red)}
+.sc.blue .n{color:var(--blue)}
+.sc.orn  .n{color:var(--orange)}
+
+/* ── SECTION TITLES ── */
+h2{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:24px 0 12px}
+
+/* ── ACCOUNTS GRID ── */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.acc{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.acc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.acc-name{font-weight:600;font-size:13px}
+.acc-email{font-size:11px;color:var(--muted);font-family:monospace}
+.prov-tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.prov-brevo{background:rgba(77,166,212,.12);color:#4da6d4}
+.prov-turbosmtp{background:rgba(164,77,212,.12);color:#a44dd4}
+.bar-wrap{background:var(--bg);height:5px;border-radius:3px;overflow:hidden;margin:8px 0 5px}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.bar-fill.warn{background:linear-gradient(90deg,#fb923c,#f97316)}
+.bar-fill.full{background:linear-gradient(90deg,var(--red),#dc2626)}
+.acc-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.acc-status{font-size:10px;padding:2px 7px;border-radius:3px}
+.acc-ok{background:rgba(77,212,164,.1);color:var(--green)}
+.acc-err{background:rgba(248,113,113,.1);color:var(--red)}
+
+/* ── TABLE ── */
+.tbl-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+tbody td{padding:11px 16px;border-bottom:1px solid rgba(37,35,32,.6);vertical-align:top;line-height:1.5}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(201,168,76,.02)}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
+.b-new{background:rgba(96,165,250,.12);color:var(--blue)}
+.b-sent{background:rgba(201,168,76,.12);color:var(--gold)}
+.b-replied{background:rgba(77,212,164,.12);color:var(--green)}
+.b-booked{background:rgba(77,212,164,.2);color:#2dd4bf}
+.b-error{background:rgba(248,113,113,.12);color:var(--red)}
+.b-duplicate{background:rgba(107,100,86,.12);color:var(--muted)}
+.b-brevo{background:rgba(77,166,212,.12);color:#4da6d4}
+.b-turbosmtp{background:rgba(164,77,212,.12);color:#a44dd4}
+
+/* ── EMAIL PREVIEW ── */
+.email-preview{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:12px;color:var(--muted);max-height:80px;overflow:hidden;position:relative;white-space:pre-wrap;line-height:1.6}
+.email-preview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(transparent,var(--bg3))}
+
+/* ── FUNNEL ── */
+.funnel{display:flex;gap:0;align-items:stretch}
+.funnel-step{flex:1;background:var(--bg3);border:1px solid var(--border);padding:20px;text-align:center;position:relative}
+.funnel-step:not(:last-child)::after{content:'→';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:18px;z-index:1}
+.funnel-step:first-child{border-radius:10px 0 0 10px}
+.funnel-step:last-child{border-radius:0 10px 10px 0}
+.funnel-n{font-size:28px;font-weight:700;color:var(--gold)}
+.funnel-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.funnel-pct{font-size:12px;color:var(--green);margin-top:6px}
+
+/* ── CHART BAR ── */
+.chart{display:flex;flex-direction:column;gap:6px}
+.chart-row{display:flex;align-items:center;gap:10px}
+.chart-label{width:100px;text-align:right;font-size:12px;color:var(--muted);flex-shrink:0}
+.chart-bar-bg{flex:1;background:var(--bg);height:22px;border-radius:4px;overflow:hidden}
+.chart-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:4px;transition:width .4s;display:flex;align-items:center;padding:0 8px;min-width:2px}
+.chart-val{font-size:11px;font-weight:600;color:var(--bg);white-space:nowrap}
+
+/* ── VOICE CALLS ── */
+.call-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;gap:16px;align-items:flex-start}
+.call-icon{font-size:22px;flex-shrink:0}
+.call-info{flex:1}
+.call-meta{font-size:11px;color:var(--muted);margin-top:4px}
+.call-dur{font-size:12px;color:var(--green);font-weight:600}
+
+/* ── REVENUE ── */
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rev-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center}
+.rev-plan{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.rev-price{font-size:28px;font-weight:700;color:var(--gold)}
+.rev-count{font-size:13px;color:var(--green);margin-top:6px}
+.rev-total{font-size:13px;color:var(--text);margin-top:2px}
+
+/* ── ACTIVITY FEED ── */
+.feed{display:flex;flex-direction:column;gap:0}
+.feed-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:flex-start}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.feed-dot.gold{background:var(--gold)}
+.feed-dot.grn{background:var(--green)}
+.feed-dot.blue{background:var(--blue)}
+.feed-dot.red{background:var(--red)}
+.feed-text{flex:1;line-height:1.5}
+.feed-time{font-size:11px;color:var(--muted);flex-shrink:0}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty .ico{font-size:36px;margin-bottom:12px}
+.empty p{font-size:13px}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .funnel{flex-direction:column}
+  .funnel-step::after{display:none}
+  .funnel-step:first-child,.funnel-step:last-child,.funnel-step{border-radius:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <h2>🔐 Klivio Control Centre</h2>
+  <input type="password" id="pw" placeholder="Admin key..." onkeydown="if(event.key==='Enter')login()">
+  <button onclick="login()">Enter</button>
+  <span class="err" id="err"></span>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="logo">Klivio <span>Control</span></span>
+    <span class="nav-tab on" onclick="nav('overview')"   id="t-overview">Overview</span>
+    <span class="nav-tab"    onclick="nav('accounts')"   id="t-accounts">Accounts</span>
+    <span class="nav-tab"    onclick="nav('emails')"     id="t-emails">Sent Emails</span>
+    <span class="nav-tab"    onclick="nav('leads')"      id="t-leads">Leads</span>
+    <span class="nav-tab"    onclick="nav('revenue')"    id="t-revenue">Revenue</span>
+    <span class="nav-tab"    onclick="nav('voice')"      id="t-voice">Voice AI</span>
+    <div class="topbar-r">
+      <div class="pulse"></div><span class="live-label">LIVE</span>
+      <button class="refresh-btn" onclick="loadAll()">⟳ Refresh</button>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="page on" id="p-overview">
+    <div class="stats-row" id="ov-stats">
+      <div class="sc gold"><div class="n" id="ov-sent-today">—</div><div class="l">Emails Today</div><div class="sub" id="ov-cap-today">— capacity</div></div>
+      <div class="sc blue"><div class="n" id="ov-total-sent">—</div><div class="l">Total Sent</div><div class="sub">All time</div></div>
+      <div class="sc grn"><div class="n" id="ov-replies">—</div><div class="l">Replies</div><div class="sub" id="ov-reply-rate">—% reply rate</div></div>
+      <div class="sc orn"><div class="n" id="ov-leads-new">—</div><div class="l">Leads Queued</div><div class="sub">Ready to send</div></div>
+      <div class="sc grn"><div class="n" id="ov-orders">—</div><div class="l">Orders</div><div class="sub" id="ov-mrr">£0 MRR</div></div>
+      <div class="sc blue"><div class="n" id="ov-accounts">12</div><div class="l">Active Senders</div><div class="sub" id="ov-suspended">11 suspended</div></div>
+    </div>
+
+    <h2>Lead Funnel</h2>
+    <div class="funnel" id="funnel">
+      <div class="funnel-step"><div class="funnel-n" id="fn-total">—</div><div class="funnel-l">Total Leads</div></div>
+      <div class="funnel-step"><div class="funnel-n" id="fn-sent">—</div><div class="funnel-l">Sent</div><div class="funnel-pct" id="fn-sent-pct"></div></div>
+      <div class="funnel-step"><div class="funnel-n" id="fn-replied">—</div><div class="funnel-l">Replied</div><div class="funnel-pct" id="fn-replied-pct"></div></div>
+      <div class="funnel-step"><div class="funnel-n" id="fn-booked">—</div><div class="funnel-l">Booked</div><div class="funnel-pct" id="fn-booked-pct"></div></div>
+      <div class="funnel-step"><div class="funnel-n" id="fn-closed">—</div><div class="funnel-l">Closed</div><div class="funnel-pct" id="fn-closed-pct"></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div>
+        <h2>Emails by Industry</h2>
+        <div id="industry-chart" class="chart"></div>
+      </div>
+      <div>
+        <h2>Emails by Day (last 7)</h2>
+        <div id="daily-chart" class="chart"></div>
+      </div>
+    </div>
+
+    <h2>Recent Activity</h2>
+    <div class="tbl-wrap"><div class="feed" id="activity-feed"></div></div>
+  </div>
+
+  <!-- ACCOUNTS -->
+  <div class="page" id="p-accounts">
+    <div class="stats-row">
+      <div class="sc gold"><div class="n" id="acc-active">—</div><div class="l">Active Senders</div></div>
+      <div class="sc grn"><div class="n" id="acc-today">—</div><div class="l">Sent Today</div></div>
+      <div class="sc blue"><div class="n" id="acc-capacity">—</div><div class="l">Daily Capacity</div></div>
+      <div class="sc orn"><div class="n" id="acc-remaining">—</div><div class="l">Remaining Today</div></div>
+    </div>
+    <h2>Sender Accounts</h2>
+    <div class="acc-grid" id="acc-grid"></div>
+  </div>
+
+  <!-- SENT EMAILS -->
+  <div class="page" id="p-emails">
+    <div class="stats-row">
+      <div class="sc gold"><div class="n" id="em-total">—</div><div class="l">Total Sent</div></div>
+      <div class="sc grn"><div class="n" id="em-groq">—</div><div class="l">AI Personalised</div></div>
+      <div class="sc blue"><div class="n" id="em-tmpl">—</div><div class="l">Template</div></div>
+    </div>
+    <h2>Sent Emails</h2>
+    <div style="margin-bottom:12px;display:flex;gap:8px">
+      <input id="em-search" placeholder="Search business, subject, email..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:7px;width:300px;outline:none;font-size:13px" oninput="renderEmails()">
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Business</th><th>Subject</th><th>From</th><th>Provider</th><th>Sent</th><th>Body Preview</th>
+        </tr></thead>
+        <tbody id="em-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div class="page" id="p-leads">
+    <div class="stats-row">
+      <div class="sc gold"><div class="n" id="ld-total">—</div><div class="l">Total Leads</div></div>
+      <div class="sc blue"><div class="n" id="ld-new">—</div><div class="l">Queued (New)</div></div>
+      <div class="sc grn"><div class="n" id="ld-sent">—</div><div class="l">Sent</div></div>
+      <div class="sc orn"><div class="n" id="ld-replied">—</div><div class="l">Replied</div></div>
+    </div>
+    <h2>All Leads</h2>
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <input id="ld-search" placeholder="Search..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:7px;width:240px;outline:none;font-size:13px" oninput="renderLeads()">
+      <select id="ld-filter" onchange="renderLeads()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:7px;outline:none;font-size:13px">
+        <option value="">All statuses</option>
+        <option value="new">New</option>
+        <option value="sent">Sent</option>
+        <option value="replied">Replied</option>
+        <option value="booked">Booked</option>
+        <option value="error">Error</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Business</th><th>Email</th><th>Industry</th><th>City</th><th>Status</th><th>Updated</th>
+        </tr></thead>
+        <tbody id="ld-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REVENUE -->
+  <div class="page" id="p-revenue">
+    <div class="stats-row">
+      <div class="sc gold"><div class="n" id="rv-mrr">£0</div><div class="l">Monthly Recurring</div></div>
+      <div class="sc grn"><div class="n" id="rv-orders">—</div><div class="l">Total Orders</div></div>
+      <div class="sc blue"><div class="n" id="rv-pending">—</div><div class="l">Pending</div></div>
+      <div class="sc orn"><div class="n" id="rv-completed">—</div><div class="l">Completed</div></div>
+    </div>
+    <h2>Plan Breakdown</h2>
+    <div class="rev-grid" id="rev-plans"></div>
+    <h2>Orders</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Client</th><th>Product</th><th>Price</th><th>Status</th><th>Deadline</th><th>Created</th>
+        </tr></thead>
+        <tbody id="rv-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VOICE AI -->
+  <div class="page" id="p-voice">
+    <div class="stats-row">
+      <div class="sc gold"><div class="n" id="vc-total">0</div><div class="l">Total Calls</div></div>
+      <div class="sc grn"><div class="n" id="vc-today">0</div><div class="l">Today</div></div>
+      <div class="sc blue"><div class="n" id="vc-avg">0s</div><div class="l">Avg Duration</div></div>
+    </div>
+    <h2>Voice AI Config</h2>
+    <div class="tbl-wrap" style="padding:20px">
+      <table>
+        <tbody>
+          <tr><td style="color:var(--muted);width:160px">Phone Number</td><td id="vc-phone" style="font-family:monospace">+17623123367</td></tr>
+          <tr><td style="color:var(--muted)">Inbound Webhook</td><td style="font-family:monospace">klivio.online/api/voice</td></tr>
+          <tr><td style="color:var(--muted)">AI Model</td><td>Groq llama-3.3-70b-versatile</td></tr>
+          <tr><td style="color:var(--muted)">Voice</td><td>Google.en-GB-Neural2-B (British male)</td></tr>
+          <tr><td style="color:var(--muted)">Max call duration</td><td>170 seconds</td></tr>
+          <tr><td style="color:var(--muted)">Status</td><td><span id="vc-status" class="badge b-replied">Configured</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h2>Recent Calls</h2>
+    <div id="vc-calls">
+      <div class="empty"><div class="ico">📞</div><p>No calls yet. Configure Twilio webhook to<br><code style="color:var(--gold)">klivio.online/api/voice</code></p></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ADMIN = 'klivio-admin-2026';
+let KEY = '';
+let allSent = [], allLeads = [], allOrders = [], campStats = {};
+
+// ── AUTH ──
+function login() {
+  const v = document.getElementById('pw').value;
+  fetch('/api/orders', { headers: { 'x-admin-key': v } })
+    .then(r => {
+      if (r.ok) { KEY = v; document.getElementById('lock').style.display = 'none'; document.getElementById('app').style.display = 'block'; loadAll(); setInterval(loadAll, 30000); }
+      else { document.getElementById('err').textContent = 'Wrong key'; }
+    }).catch(() => document.getElementById('err').textContent = 'Server offline');
+}
+document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+
+// ── NAV ──
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.getElementById('t-'+id).classList.add('on');
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  await Promise.all([loadStats(), loadSent(), loadLeadsData(), loadOrders()]);
+  renderAll();
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/campaign-stats', { headers: {'x-admin-key': KEY} });
+    if (r.ok) campStats = await r.json();
+  } catch {}
+}
+async function loadSent() {
+  try {
+    const r = await fetch('/api/sent', { headers: {'x-admin-key': KEY} });
+    if (r.ok) allSent = await r.json();
+  } catch {}
+}
+async function loadLeadsData() {
+  try {
+    const r = await fetch('/api/leads', { headers: {'x-admin-key': KEY} });
+    if (r.ok) allLeads = await r.json();
+  } catch {}
+}
+async function loadOrders() {
+  try {
+    const r = await fetch('/api/orders', { headers: {'x-admin-key': KEY} });
+    if (r.ok) allOrders = await r.json();
+  } catch {}
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderOverview();
+  renderAccounts();
+  renderEmails();
+  renderLeads();
+  renderRevenue();
+}
+
+// ── OVERVIEW ──
+function renderOverview() {
+  const s = campStats;
+  const accounts = s.accounts || [];
+  const totalToday = accounts.reduce((a, acc) => a + (acc.today || 0), 0);
+  const totalCap   = accounts.reduce((a, acc) => a + (acc.limit || 300), 0);
+  const totalSent  = allSent.length;
+  const byStatus   = s.leads?.byStatus || {};
+  const replied    = (byStatus.replied || 0) + (byStatus.booked || 0);
+  const totalLeads = allLeads.length;
+  const newLeads   = allLeads.filter(l => l.status === 'new').length;
+  const sentLeads  = allLeads.filter(l => l.status === 'sent').length;
+  const repliedLeads = allLeads.filter(l => l.status === 'replied').length;
+  const bookedLeads  = allLeads.filter(l => l.status === 'booked').length;
+  const closedLeads  = allLeads.filter(l => l.status === 'closed').length;
+
+  // Stats row
+  document.getElementById('ov-sent-today').textContent = totalToday;
+  document.getElementById('ov-cap-today').textContent   = totalCap + ' capacity';
+  document.getElementById('ov-total-sent').textContent  = totalSent;
+  document.getElementById('ov-replies').textContent     = replied;
+  const replyRate = totalSent > 0 ? ((replied / totalSent) * 100).toFixed(1) : '0';
+  document.getElementById('ov-reply-rate').textContent  = replyRate + '% reply rate';
+  document.getElementById('ov-leads-new').textContent   = newLeads;
+
+  // Orders / MRR
+  const activeOrders = allOrders.filter(o => o.status !== 'cancelled');
+  document.getElementById('ov-orders').textContent = activeOrders.length;
+  const mrr = activeOrders.reduce((a, o) => a + parsePrice(o.price), 0);
+  document.getElementById('ov-mrr').textContent = '£' + mrr.toLocaleString() + ' MRR';
+
+  // Funnel
+  document.getElementById('fn-total').textContent   = totalLeads;
+  document.getElementById('fn-sent').textContent    = sentLeads + totalSent;
+  document.getElementById('fn-replied').textContent = repliedLeads;
+  document.getElementById('fn-booked').textContent  = bookedLeads;
+  document.getElementById('fn-closed').textContent  = closedLeads;
+  const base = sentLeads + totalSent || 1;
+  document.getElementById('fn-sent-pct').textContent    = pct(sentLeads + totalSent, totalLeads);
+  document.getElementById('fn-replied-pct').textContent = pct(repliedLeads, base);
+  document.getElementById('fn-booked-pct').textContent  = pct(bookedLeads, base);
+  document.getElementById('fn-closed-pct').textContent  = pct(closedLeads, base);
+
+  // Industry chart
+  const byInd = s.leads?.byIndustry || {};
+  const sortedInd = Object.entries(byInd).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const maxInd = Math.max(...sortedInd.map(e => e[1]), 1);
+  document.getElementById('industry-chart').innerHTML = sortedInd.map(([ind, n]) =>
+    `<div class="chart-row">
+      <span class="chart-label">${ind}</span>
+      <div class="chart-bar-bg"><div class="chart-bar" style="width:${(n/maxInd*100)}%"><span class="chart-val">${n}</span></div></div>
+    </div>`
+  ).join('') || '<div class="empty" style="padding:20px"><p>No data yet</p></div>';
+
+  // Daily chart
+  const byDate = s.sentByDate || {};
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    days.push({ label: d.toLocaleDateString('en-GB',{weekday:'short'}), n: byDate[key] || 0 });
+  }
+  const maxDay = Math.max(...days.map(d => d.n), 1);
+  document.getElementById('daily-chart').innerHTML = days.map(d =>
+    `<div class="chart-row">
+      <span class="chart-label">${d.label}</span>
+      <div class="chart-bar-bg"><div class="chart-bar" style="width:${(d.n/maxDay*100)}%"><span class="chart-val">${d.n||''}</span></div></div>
+    </div>`
+  ).join('');
+
+  // Activity feed
+  const feedItems = [];
+  allSent.slice(0,20).forEach(e => {
+    feedItems.push({ time: e.sentAt, color:'gold', text:`Email sent to <b>${esc(e.business)}</b> — ${esc(e.sentSubject||'(no subject)')}` });
+  });
+  allOrders.slice(0,5).forEach(o => {
+    feedItems.push({ time: o.createdAt, color:'grn', text:`New order: <b>${esc(o.product)}</b> — ${esc(o.name)} (${esc(o.price)})` });
+  });
+  feedItems.sort((a,b) => new Date(b.time||0) - new Date(a.time||0));
+  document.getElementById('activity-feed').innerHTML = feedItems.slice(0,15).map(f =>
+    `<div class="feed-item">
+      <div class="feed-dot ${f.color}"></div>
+      <div class="feed-text">${f.text}</div>
+      <div class="feed-time">${relTime(f.time)}</div>
+    </div>`
+  ).join('') || '<div class="empty" style="padding:32px"><div class="ico">📭</div><p>No activity yet — launch the campaign!</p></div>';
+}
+
+// ── ACCOUNTS ──
+function renderAccounts() {
+  const accounts = (campStats.accounts || []);
+  const totalToday = accounts.reduce((a, acc) => a + (acc.today || 0), 0);
+  const totalCap   = accounts.reduce((a, acc) => a + (acc.limit || 300), 0);
+  document.getElementById('acc-active').textContent    = accounts.length;
+  document.getElementById('acc-today').textContent     = totalToday;
+  document.getElementById('acc-capacity').textContent  = totalCap;
+  document.getElementById('acc-remaining').textContent = Math.max(0, totalCap - totalToday);
+
+  document.getElementById('acc-grid').innerHTML = accounts.map(acc => {
+    const pct = acc.limit > 0 ? acc.today / acc.limit : 0;
+    const fillClass = pct >= 1 ? 'full' : pct >= 0.75 ? 'warn' : '';
+    return `<div class="acc">
+      <div class="acc-head">
+        <div>
+          <div class="acc-name">${esc(acc.name||acc.id)}</div>
+          <div class="acc-email">${esc(acc.email||'')}</div>
+        </div>
+        <span class="prov-tag prov-${acc.provider}">${acc.provider}</span>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill ${fillClass}" style="width:${Math.min(100,pct*100)}%"></div></div>
+      <div class="acc-nums">
+        <span>${acc.today||0} sent today</span>
+        <span>${acc.limit||300}/day limit</span>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty" style="padding:40px"><div class="ico">📭</div><p>No account data. Run the campaign first.</p></div>';
+}
+
+// ── EMAILS ──
+function renderEmails() {
+  const q = (document.getElementById('em-search')?.value || '').toLowerCase();
+  const filtered = allSent.filter(e =>
+    !q || (e.business||'').toLowerCase().includes(q) ||
+          (e.sentSubject||'').toLowerCase().includes(q) ||
+          (e.email||'').toLowerCase().includes(q)
+  );
+  const groq = allSent.filter(e => e.sentVia === 'groq').length;
+  const tmpl = allSent.length - groq;
+  document.getElementById('em-total').textContent = allSent.length;
+  document.getElementById('em-groq').textContent  = groq;
+  document.getElementById('em-tmpl').textContent  = tmpl;
+
+  document.getElementById('em-tbody').innerHTML = filtered.slice(0,100).map(e =>
+    `<tr>
+      <td><b>${esc(e.business||'?')}</b><br><span style="color:var(--muted);font-size:11px">${esc(e.email||'')}</span></td>
+      <td>${esc(e.sentSubject||'—')}</td>
+      <td style="font-family:monospace;font-size:11px">${esc(e.sentFrom||'—')}</td>
+      <td><span class="badge b-${e.sentProvider||'brevo'}">${e.sentProvider||'—'}</span></td>
+      <td style="white-space:nowrap;color:var(--muted)">${relTime(e.sentAt)}</td>
+      <td><div class="email-preview">${esc(e.sentBody||'—')}</div></td>
+    </tr>`
+  ).join('') || `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No emails sent yet</td></tr>`;
+}
+
+// ── LEADS ──
+function renderLeads() {
+  const q = (document.getElementById('ld-search')?.value || '').toLowerCase();
+  const f = document.getElementById('ld-filter')?.value || '';
+  const filtered = allLeads.filter(l =>
+    (!f || l.status === f) &&
+    (!q || (l.business||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q))
+  );
+  const byStatus = {};
+  allLeads.forEach(l => byStatus[l.status] = (byStatus[l.status]||0)+1);
+
+  document.getElementById('ld-total').textContent   = allLeads.length;
+  document.getElementById('ld-new').textContent     = byStatus.new || 0;
+  document.getElementById('ld-sent').textContent    = byStatus.sent || 0;
+  document.getElementById('ld-replied').textContent = byStatus.replied || 0;
+
+  document.getElementById('ld-tbody').innerHTML = filtered.slice(0,200).map(l =>
+    `<tr>
+      <td><b>${esc(l.business||'?')}</b></td>
+      <td style="font-family:monospace;font-size:11px">${esc(l.email||'')}</td>
+      <td>${esc(l.industry||'—')}</td>
+      <td>${esc(l.city||'—')}</td>
+      <td><span class="badge b-${l.status||'new'}">${l.status||'new'}</span></td>
+      <td style="color:var(--muted)">${relTime(l.updatedAt||l.createdAt)}</td>
+    </tr>`
+  ).join('') || `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No leads yet — run the finder</td></tr>`;
+}
+
+// ── REVENUE ──
+function renderRevenue() {
+  const planMap = { '£197': 0, '£297': 0, '£497': 0 };
+  let totalMRR = 0;
+  allOrders.filter(o => o.status !== 'cancelled').forEach(o => {
+    const price = parsePrice(o.price);
+    const key = '£' + price;
+    if (planMap[key] !== undefined) planMap[key]++;
+    totalMRR += price;
+  });
+
+  document.getElementById('rv-mrr').textContent       = '£' + totalMRR.toLocaleString();
+  document.getElementById('rv-orders').textContent    = allOrders.length;
+  document.getElementById('rv-pending').textContent   = allOrders.filter(o => o.status === 'pending').length;
+  document.getElementById('rv-completed').textContent = allOrders.filter(o => o.status === 'completed').length;
+
+  const planDefs = [
+    { key: '£197', name: 'Starter',     price: '£197/mo', color: '#c9a84c' },
+    { key: '£297', name: 'Growth ⭐',   price: '£297/mo', color: '#4dd4a4' },
+    { key: '£497', name: 'Full System', price: '£497/mo', color: '#60a5fa' },
+  ];
+  document.getElementById('rev-plans').innerHTML = planDefs.map(p => {
+    const count = planMap[p.key] || 0;
+    return `<div class="rev-card">
+      <div class="rev-plan">${p.name}</div>
+      <div class="rev-price" style="color:${p.color}">${p.price}</div>
+      <div class="rev-count">${count} active ${count===1?'client':'clients'}</div>
+      <div class="rev-total">£${(parsePriceStr(p.price)*count).toLocaleString()}/mo</div>
+    </div>`;
+  }).join('');
+
+  const statusColors = { pending:'gold', in_progress:'blue', waiting_client:'orn', completed:'grn', cancelled:'red' };
+  document.getElementById('rv-tbody').innerHTML = allOrders.map(o =>
+    `<tr>
+      <td><b>${esc(o.name||'?')}</b><br><span style="color:var(--muted);font-size:11px">${esc(o.email||'')}</span></td>
+      <td>${esc(o.product||'—')}</td>
+      <td style="color:var(--gold);font-weight:600">${esc(o.price||'—')}</td>
+      <td><span class="badge b-${statusColors[o.status]||'new'}">${o.status||'—'}</span></td>
+      <td style="color:${new Date(o.deadline) < new Date() ? 'var(--red)' : 'var(--muted)'}">${fmtDate(o.deadline)}</td>
+      <td style="color:var(--muted)">${relTime(o.createdAt)}</td>
+    </tr>`
+  ).join('') || `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No orders yet</td></tr>`;
+}
+
+// ── HELPERS ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function parsePriceStr(s) { return parseInt((s||'0').replace(/[£$,]/g,'')) || 0; }
+function parsePrice(s) { return parsePriceStr(s); }
+function pct(n, total) { return total > 0 ? ((n/total)*100).toFixed(1)+'%' : '—'; }
+function fmtDate(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function relTime(s) {
+  if (!s) return '—';
+  const diff = Date.now() - new Date(s);
+  if (diff < 60000)   return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000)return Math.floor(diff/3600000) + 'h ago';
+  return Math.floor(diff/86400000) + 'd ago';
+}
+</script>
+</body>
+</html>

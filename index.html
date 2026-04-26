@@ -8,7 +8,7 @@
 <meta property="og:title" content="Klivio — AI That Works While You Sleep">
 <meta property="og:description" content="AI automation for businesses. Respond to every lead in under 2 minutes, 24/7. Setup in 2-7 days.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://klivio.bond">
+<meta property="og:url" content="https://klivio.online">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -756,7 +756,7 @@ footer{background:#111009;padding:56px 80px;border-top:1px solid rgba(200,168,75
       <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Still misses calls and messages</span></div>
       <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Needs training, management, HR overhead</span></div>
       <div class="vs-row"><span class="vs-ico">✕</span><span class="vs-txt">Takes weeks to hire and onboard</span></div>
-      <div class="vs-price bad">$26,000+<span style="font-size:18px;color:rgba(255,255,255,0.3)">/yr</span></div>
+      <div class="vs-price bad">£26,000+<span style="font-size:18px;color:rgba(255,255,255,0.3)">/yr</span></div>
       <div class="vs-note">Per employee, before taxes &amp; benefits</div>
     </div>
     <div class="vs-divider"></div>
@@ -962,7 +962,7 @@ footer{background:#111009;padding:56px 80px;border-top:1px solid rgba(200,168,75
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">How do I pay? <span class="faq-ico">+</span></div>
-        <div class="faq-a">Stripe (credit/debit card), PayPal, or Crypto (USDT, USDC, BTC, ETH). Payment is made after we confirm your setup details.</div>
+        <div class="faq-a">Card via Stripe — secure checkout, no contracts, cancel anytime. All major UK and international cards accepted. No setup fees.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">What if it doesn't work for me? <span class="faq-ico">+</span></div>
@@ -1009,7 +1009,7 @@ footer{background:#111009;padding:56px 80px;border-top:1px solid rgba(200,168,75
       <h4>Connect</h4>
       <a href="https://t.me/klivio" target="_blank">Telegram</a>
       <a href="#">LinkedIn</a>
-      <a href="mailto:hello@klivio.bond">Email</a>
+      <a href="mailto:hello@klivio.online">Email</a>
     </div>
   </div>
   <div class="foot-bottom">
@@ -1070,9 +1070,9 @@ footer{background:#111009;padding:56px 80px;border-top:1px solid rgba(200,168,75
           <div class="conf-step"><div class="conf-num">2</div><div>You share access to your tools — takes about 10 minutes</div></div>
           <div class="conf-step"><div class="conf-num">3</div><div>We build and deliver your system in 2–7 days</div></div>
         </div>
-        <button class="pay-btn" id="payBtn">💳 Complete payment →</button>
-        <button class="pay-btn" id="cryptoBtn" style="background:#f7931a;margin-bottom:10px">₿ Pay with Crypto (USDT/BTC/ETH) →</button>
-        <button class="chat-btn2" onclick="window.open('https://t.me/klivio','_blank')">💬 Questions? Chat with us on Telegram</button>
+        <button class="pay-btn" id="payBtn">💳 Complete payment securely →</button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin:10px 0;font-weight:300">🔒 Secure checkout · Cancel anytime · No contracts</div>
+        <button class="chat-btn2" onclick="document.getElementById('cwbtn').click();document.querySelector('.modal.open')?.classList.remove('open');">💬 Have a question first? Chat with us</button>
       </div>
     </div>
   </div>
@@ -1129,83 +1129,83 @@ var alex = {
 // ── INDUSTRY DETECTION ──
 var industryMap = {
   dental: { keys:['dental','dentist','teeth','clinic','tooth','orthodont','hygien','oral','implant'], label:'Dental',
-    pain:'Missed calls during procedures lose you 3–5 bookings a week — that\'s $2,000+ in revenue gone.',
+    pain:'Missed calls during procedures lose you 3–5 bookings a week — that\'s £2,000+ in revenue gone.',
     product:'Voice Assistant + AI Lead Responder',
-    result:'Our dental clients typically see 15–25 extra bookings per month within the first 30 days. One practice in London added $12K/month just from capturing after-hours calls.',
-    bundle:'Growth',price:'$297/mo'},
+    result:'Our dental clients typically see 15–25 extra bookings per month within the first 30 days. One practice in London added £12K/month just from capturing after-hours calls.',
+    bundle:'Growth',price:'£297/mo'},
   realestate: { keys:['real estate','property','estate agent','realtor','agent','letting','landlord','rental','mortgage broker','house','flat','apartment','valuation','apprais'], label:'Real Estate',
     pain:'A lead that doesn\'t get a reply in 5 minutes is 10× less likely to convert. Your competitors are responding faster.',
     product:'Valuation Bot + AI Lead Responder',
     result:'Estate agents using Klivio capture 40–60% more valuation leads because the bot engages them instantly — before they even think about calling someone else.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   law: { keys:['law','lawyer','solicitor','legal','attorney','barrister','paralegal','litigation','injury','divorce','conveyancing'], label:'Legal',
     pain:'People looking for a lawyer at 10pm don\'t wait until morning — they call the next firm on Google. Every missed enquiry is a case lost.',
     product:'AI Lead Responder + Live Chat Assistant',
     result:'Law firms using our system qualify leads 24/7 without a receptionist. One firm went from losing 60% of after-hours leads to capturing 95%.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   hospitality: { keys:['hotel','hospitality','restaurant','bar','pub','cafe','catering','event','venue','booking','reservation','guest'], label:'Hospitality',
     pain:'During peak service, the phone rings unanswered. That\'s a table, a booking, a private event — gone to the place that picked up.',
     product:'Voice Assistant + AI Chatbot',
     result:'Restaurants and hotels use our AI to handle reservations and enquiries 24/7. No more voicemails, no more lost bookings during busy service.',
-    bundle:'Full System',price:'$497/mo'},
+    bundle:'Full System',price:'£497/mo'},
   automotive: { keys:['car','auto','dealer','vehicle','mechanic','garage','mot','service','bodyshop','tyre','tire','dealership'], label:'Automotive',
     pain:'Someone looking for a car or a service slot will call 3 places and go with whoever answers first. If that\'s not you, it\'s your competitor.',
     product:'AI Lead Responder + Follow-Up Automator',
     result:'Dealerships using Klivio respond to every enquiry in under 2 minutes and follow up on day 1, 3, and 7 — turning cold leads into showroom visits.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   fitness: { keys:['gym','fitness','spas','yoga','pilates','personal trainer','pt','wellness','beauty','salon','barber','hair','nail','massage','physio'], label:'Fitness & Wellness',
     pain:'Members enquire, don\'t hear back fast enough, and sign up at the gym down the road. Speed wins in fitness.',
     product:'AI Chatbot + Follow-Up Automator',
     result:'Gyms and wellness centres using our chatbot convert 30% more website visitors into trial sessions — because the bot answers instantly, 24/7.',
-    bundle:'Starter',price:'$197/mo'},
+    bundle:'Starter',price:'£197/mo'},
   construction: { keys:['construction','builder','plumber','electrician','roofer','contractor','tradesman','trades','hvac','landscap','cleaning','handyman','painting','renovation'], label:'Trades & Construction',
     pain:'You\'re on a job site, phone rings, you can\'t answer. By the time you call back, they\'ve found someone else.',
     product:'Voice Assistant + AI Lead Responder',
     result:'Tradesmen using Klivio never miss a lead again — the AI answers, qualifies, and books the callback for you. All while you\'re on site.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   ecommerce: { keys:['ecommerce','e-commerce','online store','shopify','woocommerce','amazon','dropship','retail','shop','store','product','sell online'], label:'E-commerce',
     pain:'Cart abandonment averages 70%. Most of those people just needed a quick answer or a small nudge.',
     product:'AI Chatbot 24/7 + Follow-Up Automator',
     result:'E-commerce stores using our chatbot recover 15–25% of abandoned carts just by engaging visitors in real time and following up automatically.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   education: { keys:['school','education','tutor','course','training','coach','teach','academy','university','college','learning','student'], label:'Education',
     pain:'Prospective students enquire and expect a fast response. If they don\'t get one, they enroll somewhere else.',
     product:'AI Lead Responder + AI Chatbot',
     result:'Education providers using Klivio respond to every enquiry instantly and nurture leads through automated follow-ups until they enroll.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   insurance: { keys:['insurance','broker','underwrite','policy','claim','cover','premium','risk','actuar'], label:'Insurance',
     pain:'Insurance leads go cold fast — if you don\'t respond in minutes, they\'ve already got 3 other quotes.',
     product:'AI Lead Responder + Cold Outreach Setup',
     result:'Insurance brokers using Klivio capture and qualify leads 24/7, then follow up automatically until the policy is signed.',
-    bundle:'Full System',price:'$497/mo'},
+    bundle:'Full System',price:'£497/mo'},
   healthcare: { keys:['doctor','gp','medical','health','patient','nhs','private practice','optician','pharmacy','therapist','psycholog','counsel','chiropract'], label:'Healthcare',
     pain:'Patients calling after hours get voicemail and call the next clinic. Every missed call is a lost patient — and lost recurring revenue.',
     product:'Voice Assistant + AI Lead Responder',
     result:'Healthcare practices using our AI book 20–30% more appointments by capturing every after-hours enquiry automatically.',
-    bundle:'Growth',price:'$297/mo'},
+    bundle:'Growth',price:'£297/mo'},
   accounting: { keys:['account','bookkeep','tax','cpa','audit','financ','payroll','vat','hmrc'], label:'Accounting',
     pain:'During tax season you\'re drowning in calls. Off-season, leads slip through the cracks. Either way, you\'re leaving money on the table.',
     product:'AI Lead Responder + Review & Referral System',
     result:'Accounting firms using Klivio handle enquiries year-round and automatically generate Google reviews from happy clients — driving more organic leads.',
-    bundle:'Starter',price:'$197/mo'},
+    bundle:'Starter',price:'£197/mo'},
   recruitment: { keys:['recruit','staffing','hiring','hr','talent','headhunt','job','candidate','employ'], label:'Recruitment',
     pain:'Good candidates don\'t wait. If your response time is measured in hours, they\'ve already accepted somewhere else.',
     product:'AI Lead Responder + Cold Outreach Setup',
     result:'Recruitment agencies using Klivio engage candidates in under 2 minutes and run automated outreach to fill roles faster.',
-    bundle:'Full System',price:'$497/mo'},
+    bundle:'Full System',price:'£497/mo'},
   wedding: { keys:['wedding','bride','groom','event plan','photographer','videograph','florist','dj','entertainment'], label:'Wedding & Events',
     pain:'Couples enquiring about their wedding are emotional buyers — if they don\'t hear back fast, they book someone else within hours.',
     product:'AI Lead Responder + Follow-Up Automator',
     result:'Wedding vendors using Klivio respond instantly and follow up with personal touches — increasing booking rates by 35%.',
-    bundle:'Starter',price:'$197/mo'}
+    bundle:'Starter',price:'£197/mo'}
 };
 
 // ── OBJECTION HANDLING ──
 var objections = [
   { keys:['expensive','too much','can\'t afford','not worth','overpriced','pricey','costly','budget','tight budget','money'],
     reply: function(){
-      var cost = alex.industry ? industryMap[alex.industry].price : '$197/mo';
-      return "I totally get that — every dollar matters. But let me put it this way: "+cost+" is less than what most businesses lose from just ONE missed lead per month. If Klivio brings you even 2–3 extra clients, it pays for itself 5–10 times over. And there's no setup fee, no contract — cancel anytime. Would it help if I showed you the Starter at $197/mo?";
+      var cost = alex.industry ? industryMap[alex.industry].price : '£197/mo';
+      return "I totally get that — every pound matters. But let me put it this way: "+cost+" is less than what most businesses lose from just ONE missed lead per month. If Klivio brings you even 2–3 extra clients, it pays for itself 5–10 times over. And there's no setup fee, no contract — cancel anytime. Would it help if I showed you the Starter at £197/mo?";
     }},
   { keys:['not sure','think about','maybe later','need time','not ready','not now','consider','let me think'],
     reply: function(){
@@ -1221,7 +1221,7 @@ var objections = [
     }},
   { keys:['do it myself','diy','build my own','free tool','free alternative','chatgpt','make my own','why pay','build it myself','do myself','on my own'],
     reply: function(){
-      return "You absolutely could try to build it yourself — but here's what our clients learned the hard way: connecting APIs, maintaining uptime, handling edge cases, keeping it running 24/7... that eats 20–40 hours. Your time is worth more than $197/mo. We deliver a working system in 2–7 days and you never touch the tech. Focus on what you do best — we handle the AI.";
+      return "You absolutely could try to build it yourself — but here's what our clients learned the hard way: connecting APIs, maintaining uptime, handling edge cases, keeping it running 24/7... that eats 20–40 hours. Your time is worth more than £197/mo. We deliver a working system in 2–7 days and you never touch the tech. Focus on what you do best — we handle the AI.";
     }},
   { keys:['competitor','other company','alternative','comparison','better option','why you','why klivio','what makes you'],
     reply: function(){
@@ -1233,7 +1233,7 @@ var objections = [
     }},
   { keys:['small business','just me','solo','one person','freelance','startup','just started','new business','small team'],
     reply: function(){
-      return "That's exactly who Klivio is built for. You don't have a team to answer calls at 11pm — but your leads expect a reply. Our Starter at $197/mo gives you a full AI lead responder and follow-up system. It's like hiring a 24/7 assistant for less than the cost of a coffee per day. Most solo operators see 3–5 extra clients per month from this alone.";
+      return "That's exactly who Klivio is built for. You don't have a team to answer calls at 11pm — but your leads expect a reply. Our Starter at £197/mo gives you a full AI lead responder and follow-up system. It's like hiring a 24/7 assistant for less than the cost of a coffee per day. Most solo operators see 3–5 extra clients per month from this alone.";
     }},
   { keys:['contract','lock in','commitment','annual','long term','cancel','trap','stuck'],
     reply: function(){
@@ -1244,23 +1244,23 @@ var objections = [
 // ── PRODUCT KNOWLEDGE (deep) ──
 var products = [
   { keys:['lead respond','lead responder','respond to lead','missed lead','lead notif','enquir','inquiry','enquiry'],
-    reply: "The AI Lead Responder is our #1 seller — and for good reason. Here's what it does: the moment someone sends you a message, email, or form submission, the AI responds in under 2 minutes with a personalised reply. It qualifies the lead (asks budget, timeline, needs), sends you a clean summary, and even books a call if needed. Day or night, weekends, holidays — it never stops. That's $197/mo. Most clients see 40–60% more booked appointments within the first month. Want me to show you how it'd look for your business?"},
+    reply: "The AI Lead Responder is our #1 seller — and for good reason. Here's what it does: the moment someone sends you a message, email, or form submission, the AI responds in under 2 minutes with a personalised reply. It qualifies the lead (asks budget, timeline, needs), sends you a clean summary, and even books a call if needed. Day or night, weekends, holidays — it never stops. That's £197/mo. Most clients see 40–60% more booked appointments within the first month. Want me to show you how it'd look for your business?"},
   { keys:['follow up','follow-up','followup','nurture','chase','drip','sequence'],
-    reply: "Here's a stat that'll blow your mind: 80% of sales require 5+ follow-ups, but 44% of salespeople give up after just one. The Follow-Up Automator fixes this completely. It sends personalised, natural-sounding messages on Day 1, 3, and 7 after every interaction. Not spammy — smart. It references what the lead said, adjusts tone, and pushes toward a booking. $197/mo. The ROI is usually 10-20× because you're closing leads you would've lost."},
+    reply: "Here's a stat that'll blow your mind: 80% of sales require 5+ follow-ups, but 44% of salespeople give up after just one. The Follow-Up Automator fixes this completely. It sends personalised, natural-sounding messages on Day 1, 3, and 7 after every interaction. Not spammy — smart. It references what the lead said, adjusts tone, and pushes toward a booking. £197/mo. The ROI is usually 10-20× because you're closing leads you would've lost."},
   { keys:['chatbot','chat bot','chat widget','website chat','live chat','website bot','site chat'],
-    reply: "The AI Chatbot 24/7 is basically what you're talking to right now — except customised for YOUR business. It sits on your website, answers visitor questions instantly, captures contact info, qualifies leads, and books appointments. It learns your FAQ, your tone, your services. Visitors who engage with a chatbot are 3× more likely to convert. $297/mo, live on your site in days."},
+    reply: "The AI Chatbot 24/7 is basically what you're talking to right now — except customised for YOUR business. It sits on your website, answers visitor questions instantly, captures contact info, qualifies leads, and books appointments. It learns your FAQ, your tone, your services. Visitors who engage with a chatbot are 3× more likely to convert. £297/mo, live on your site in days."},
   { keys:['review','google review','referral','reputation','testimonial','star','rating'],
-    reply: "Google reviews are the #1 trust signal for local businesses — but asking for them manually is awkward and inconsistent. The Review & Referral System sends an automatic, friendly request right after a job is done — when the client is happiest. Then it activates a referral offer too. Most businesses 3× their reviews in 2 months and get a steady stream of word-of-mouth leads. $197/mo. What's your current Google rating?"},
+    reply: "Google reviews are the #1 trust signal for local businesses — but asking for them manually is awkward and inconsistent. The Review & Referral System sends an automatic, friendly request right after a job is done — when the client is happiest. Then it activates a referral offer too. Most businesses 3× their reviews in 2 months and get a steady stream of word-of-mouth leads. £197/mo. What's your current Google rating?"},
   { keys:['valuation','property value','estimate','home worth','house price','instant quote','property estimate'],
-    reply: "The Valuation Bot is a lead magnet on steroids. A visitor lands on your site, enters their postcode, answers a few questions, and gets an instant property estimate. While they're reading it, you already have their name, email, and phone. By the time your competitor even sees the lead, you've already engaged them. $297/mo — and it integrates with your existing valuation tools."},
+    reply: "The Valuation Bot is a lead magnet on steroids. A visitor lands on your site, enters their postcode, answers a few questions, and gets an instant property estimate. While they're reading it, you already have their name, email, and phone. By the time your competitor even sees the lead, you've already engaged them. £297/mo — and it integrates with your existing valuation tools."},
   { keys:['report','pdf','document','generate report','branded','proposal'],
-    reply: "The Report Generator takes your data input and produces a professional, branded PDF report in seconds. What used to take hours of manual work — done instantly. Whether it's property reports, consultation summaries, or client proposals, it uses your branding, your templates, your data. $297/mo. How many reports does your team produce per week?"},
+    reply: "The Report Generator takes your data input and produces a professional, branded PDF report in seconds. What used to take hours of manual work — done instantly. Whether it's property reports, consultation summaries, or client proposals, it uses your branding, your templates, your data. £297/mo. How many reports does your team produce per week?"},
   { keys:['cold email','outreach','email campaign','prospect','email system','cold outreach','lead gen','generate leads','find clients','new clients','more clients','get clients'],
-    reply: "The Cold Outreach Setup is our done-for-you lead generation machine. We set up everything: dedicated sending domains, warm-up sequences, prospect lists targeted to your ideal client, and AI-personalised emails that actually get replies. You don't touch a thing — we handle the tech, the copy, and the targeting. $497/mo. Most clients see their first qualified replies within 2 weeks. What's your ideal client look like?"},
+    reply: "The Cold Outreach Setup is our done-for-you lead generation machine. We set up everything: dedicated sending domains, warm-up sequences, prospect lists targeted to your ideal client, and AI-personalised emails that actually get replies. You don't touch a thing — we handle the tech, the copy, and the targeting. £497/mo. Most clients see their first qualified replies within 2 weeks. What's your ideal client look like?"},
   { keys:['voice','phone','call','answer','ring','receptionist','missed call','voicemail','telephone'],
-    reply: "The Voice Assistant answers your business phone 24/7 with a natural, human-sounding AI voice. It handles FAQs, books appointments, takes messages, and only escalates real emergencies to you. No more missed calls, no more voicemail black holes, no more paying a receptionist to sit there during quiet hours. $497/mo — and yes, callers genuinely can't tell it's AI. Want to hear a demo?"},
+    reply: "The Voice Assistant answers your business phone 24/7 with a natural, human-sounding AI voice. It handles FAQs, books appointments, takes messages, and only escalates real emergencies to you. No more missed calls, no more voicemail black holes, no more paying a receptionist to sit there during quiet hours. £497/mo — and yes, callers genuinely can't tell it's AI. Want to hear a demo?"},
   { keys:['live chat assist','chat assist','website assist'],
-    reply: "The Live Chat Assistant is a smart AI widget embedded on your site — it answers questions instantly using your business knowledge, captures leads, and routes urgent queries to you. Think of it as a salesperson that never leaves your website. $297/mo, and we train it on your business so the answers are spot-on."}
+    reply: "The Live Chat Assistant is a smart AI widget embedded on your site — it answers questions instantly using your business knowledge, captures leads, and routes urgent queries to you. Think of it as a salesperson that never leaves your website. £297/mo, and we train it on your business so the answers are spot-on."}
 ];
 
 // ── CLOSING SEQUENCES ──
@@ -1454,7 +1454,7 @@ function alexReply(text) {
   if(alex.msgCount > 4 && alex.closingAttempts === 0) {
     alex.closingAttempts++;
     var bundle = alex.industry ? industryMap[alex.industry].bundle : 'Growth';
-    var price = alex.industry ? industryMap[alex.industry].price : '$297/mo';
+    var price = alex.industry ? industryMap[alex.industry].price : '£297/mo';
     return greeting+"Let me cut to the chase — I think the "+bundle+" bundle at "+price+" is perfect for you. It covers everything you need, and we'll have it live in under a week. Click 'Get Started' above and let's make it happen. You'll wonder why you didn't do this sooner.";
   }
 
@@ -1519,7 +1519,7 @@ async function sendVoiceAI(userText) {
 }
 
 const payLinks = {'AI Lead Responder':'https://buy.stripe.com/14A7sL3De9ErfmAa8RgQE0a','Follow-Up Automator':'https://buy.stripe.com/eVqfZh0r22bZgqE0yhgQE0b','Review & Referral System':'https://buy.stripe.com/8x27sLflW6sfb6k6WFgQE0c','AI Chatbot 24/7':'https://buy.stripe.com/fZu6oHa1C4k7b6k0yhgQE0d','Valuation Bot':'https://buy.stripe.com/9B6fZhflW3g34HWa8RgQE0e','Report Generator':'https://buy.stripe.com/5kQdR91v617V8Yc5SBgQE0f','Cold Outreach Setup':'https://buy.stripe.com/eVq6oHehSdUH2zOdl3gQE0g','Live Chat Assistant':'https://buy.stripe.com/4gMdR92za5oba2g80JgQE0h','Voice Assistant':'https://buy.stripe.com/6oUfZh4Hi4k7fmAdl3gQE0i','Starter Bundle':'https://buy.stripe.com/14A7sL3De9ErfmAa8RgQE0a','Growth Bundle':'https://buy.stripe.com/fZu6oHa1C4k7b6k0yhgQE0d','Full System Bundle':'https://buy.stripe.com/eVq6oHehSdUH2zOdl3gQE0g'};
-const cryptoLinks = {'AI Lead Responder':'https://nowpayments.io/payment/?iid=4711449871','Follow-Up Automator':'https://nowpayments.io/payment/?iid=4626925781','AI Chatbot 24/7':'https://nowpayments.io/payment/?iid=4796531272','Review & Referral System':'https://nowpayments.io/payment/?iid=5780943496','Valuation Bot':'https://nowpayments.io/payment/?iid=5303187088','Report Generator':'https://nowpayments.io/payment/?iid=5585445329','Cold Outreach Setup':'https://nowpayments.io/payment/?iid=4784857105','Live Chat Assistant':'https://nowpayments.io/payment/?iid=4749983919','Voice Assistant':'https://nowpayments.io/payment/?iid=5354107003','Starter Bundle':'https://nowpayments.io/payment/?iid=4711449871','Growth Bundle':'https://nowpayments.io/payment/?iid=4711449871','Full System Bundle':'https://nowpayments.io/payment/?iid=4711449871'};
+// crypto removed — Stripe only
 // ── PLAN → AI PICKER MODAL ──
 var curPlan = 'starter';
 var selectedAIs = [];
@@ -1673,12 +1673,9 @@ async function submitForm(){
   document.getElementById('stepForm').style.display='none';
   document.getElementById('confView').style.display='block';
   document.getElementById('payBtn').style.display='';
-  document.getElementById('cryptoBtn').style.display='';
   document.querySelector('#confView .conf h3').textContent='You\'re all set!';
   var planPayLinks = {starter:'https://buy.stripe.com/4gMaEX0cheCIgXZddK7Vm00',growth:'https://buy.stripe.com/fZu6oH6AF2U04bd5Li7Vm04',full:'https://buy.stripe.com/5kQ7sL6AFcuAePR4He7Vm06'};
-  var planCryptoLinks = {starter:'https://nowpayments.io/payment/?iid=4711449871',growth:'https://nowpayments.io/payment/?iid=4711449871',full:'https://nowpayments.io/payment/?iid=4711449871'};
   document.getElementById('payBtn').onclick=function(){window.open(planPayLinks[curPlan]||'#','_blank');};
-  document.getElementById('cryptoBtn').onclick=function(){window.open(planCryptoLinks[curPlan]||'#','_blank');};
 }
 
 function toggleFaq(el){var item=el.parentElement,isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(i){i.classList.remove('open');});if(!isOpen)item.classList.add('open');}
@@ -2105,12 +2102,12 @@ function kbAsk(msg) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     typing.className = 'kb-msg bot';
-    typing.textContent = data.reply || "Sorry, I'm having a moment. Email us at hello@klivio.bond";
+    typing.textContent = data.reply || "Sorry, I'm having a moment. Email us at hello@klivio.online";
     document.getElementById('kb-msgs').scrollTop = 9999;
   })
   .catch(function() {
     typing.className = 'kb-msg bot';
-    typing.textContent = "Connection issue. Email us at hello@klivio.bond and we'll get back to you fast.";
+    typing.textContent = "Connection issue. Email us at hello@klivio.online and we'll get back to you fast.";
   });
 }
 

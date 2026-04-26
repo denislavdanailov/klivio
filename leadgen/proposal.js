@@ -14,7 +14,7 @@ const PROPOSALS_DIR = path.join(__dirname, '..', 'public', 'proposals');
 if (!fs.existsSync(PROPOSALS_DIR)) fs.mkdirSync(PROPOSALS_DIR, { recursive: true });
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const BASE_URL = process.env.BASE_URL || 'https://klivio.bond';
+const BASE_URL = process.env.BASE_URL || 'https://klivio.online';
 const CAL_LINK = process.env.CAL_LINK || 'https://cal.com/klivio/intro';
 const STRIPE_LINK = process.env.STRIPE_LINK || 'https://buy.stripe.com/klivio-starter';
 
@@ -207,7 +207,7 @@ function renderHtml(lead, product, productName, copy) {
     </div>
 
     <div class="footer">
-      This proposal is valid for 7 days · Klivio · hello@klivio.bond<br>
+      This proposal is valid for 7 days · Klivio · hello@klivio.online<br>
       <small>Questions? Just reply to our email — we'll respond within the hour.</small>
     </div>
   </div>

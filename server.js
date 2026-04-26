@@ -1,12 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { chat } = require('./chatbot');
 const { handleInbound, handleGather, handleStatus } = require('./voice');
 
 const app = express();
+
+// ── Raw body for Stripe webhook (must be before express.json) ──
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.static(__dirname, { index: 'index.html' }));
 
@@ -118,6 +122,126 @@ const notifyTransport = nodemailer.createTransport({
   }
 });
 
+// ── Stripe plan → product mapping ──
+const STRIPE_PLAN_MAP = {
+  19700: { product: 'AI Lead Responder',    price: '£197/mo', plan: 'Starter'     },
+  29700: { product: 'AI Chatbot',           price: '£297/mo', plan: 'Growth'      },
+  49700: { product: 'Voice Assistant',      price: '£497/mo', plan: 'Full System' },
+};
+
+function planFromAmount(pence) {
+  // Round to nearest hundred to handle currency variations
+  const rounded = Math.round(pence / 100) * 100;
+  return STRIPE_PLAN_MAP[rounded] || STRIPE_PLAN_MAP[19700];
+}
+
+// ── POST /api/stripe/webhook ──
+app.post('/api/stripe/webhook', async (req, res) => {
+  const sig       = req.headers['stripe-signature'];
+  const secret    = process.env.STRIPE_WEBHOOK_SECRET;
+  let event;
+
+  try {
+    if (secret && sig) {
+      // Verify signature using Node crypto (no stripe npm needed)
+      const parts     = sig.split(',').reduce((acc, p) => { const [k,v] = p.split('='); acc[k] = v; return acc; }, {});
+      const timestamp = parts.t;
+      const v1sig     = parts.v1;
+      const payload   = `${timestamp}.${req.body.toString()}`;
+      const expected  = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+      if (!crypto.timingSafeEqual(Buffer.from(v1sig,'hex'), Buffer.from(expected,'hex'))) {
+        return res.status(400).send('Webhook signature mismatch');
+      }
+      event = JSON.parse(req.body.toString());
+    } else {
+      // Dev mode — no signature check
+      event = JSON.parse(req.body.toString());
+    }
+  } catch (err) {
+    console.error('Stripe webhook parse error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session      = event.data.object;
+    const customerEmail = session.customer_details?.email || '';
+    const customerName  = session.customer_details?.name  || 'Customer';
+    const amountPence   = session.amount_total || 19700;
+
+    const plan         = planFromAmount(amountPence);
+    const product      = session.metadata?.product || plan.product;
+    const price        = plan.price;
+
+    const deliveryDays = DELIVERY_DAYS[product] || 5;
+    const deadline     = addBusinessDays(new Date(), deliveryDays);
+
+    const order = {
+      id:           session.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 7)),
+      name:         customerName,
+      email:        customerEmail,
+      website:      session.metadata?.website  || '',
+      language:     'English',
+      notes:        `Stripe checkout: ${session.id}`,
+      product,
+      price,
+      status:       'pending',
+      deadline:     deadline.toISOString(),
+      deliveryDays,
+      createdAt:    new Date().toISOString(),
+      updatedAt:    new Date().toISOString(),
+      statusHistory: [{ status: 'pending', at: new Date().toISOString() }],
+    };
+
+    // Deduplicate by Stripe session ID
+    const orders = readOrders();
+    if (!orders.find(o => o.id === order.id)) {
+      orders.push(order);
+      writeOrders(orders);
+      console.log(`[Stripe] New order: ${product} — ${customerName} <${customerEmail}>`);
+    }
+
+    // Send onboarding emails
+    if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS) {
+      const firstName = customerName.split(' ')[0];
+      const questions = (ONBOARDING[product] || []).map(q => `<li style="margin-bottom:8px">${q}</li>`).join('');
+
+      // Notify admin
+      notifyTransport.sendMail({
+        from:    '"Klivio Orders" <james@klivio.bond>',
+        to:      process.env.NOTIFY_EMAIL || 'hello@klivio.online',
+        subject: `💳 Stripe: ${product} — ${customerName}`,
+        html: `<div style="font-family:sans-serif;max-width:560px">
+          <h2 style="color:#1C1A17">Stripe Order #${order.id}</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:8px;color:#777">Product</td><td style="padding:8px"><b>${product}</b> (${price})</td></tr>
+            <tr style="background:#f9f9f9"><td style="padding:8px;color:#777">Client</td><td style="padding:8px">${customerName} — ${customerEmail}</td></tr>
+            <tr><td style="padding:8px;color:#777">Deadline</td><td style="padding:8px"><b style="color:#B5522A">${formatDate(deadline)} (${deliveryDays} biz days)</b></td></tr>
+            <tr style="background:#f9f9f9"><td style="padding:8px;color:#777">Stripe Session</td><td style="padding:8px;font-family:monospace;font-size:12px">${session.id}</td></tr>
+          </table>
+        </div>`,
+      }).catch(e => console.error('Admin notify failed:', e.message));
+
+      // Onboarding email to client
+      notifyTransport.sendMail({
+        from:    '"James at Klivio" <james@klivio.bond>',
+        to:      customerEmail,
+        subject: `Your ${product} — a few quick questions`,
+        html: `<div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px;color:#1C1A17">
+          <h2 style="margin-bottom:4px">Hey ${firstName}, we're on it.</h2>
+          <p style="color:#777;margin-top:0">Order confirmed — <b>${product}</b> · Deadline: <b>${formatDate(deadline)}</b></p>
+          <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+          <p>To get started, we just need a few quick answers. <b>Reply to this email</b> with your answers and we'll handle everything else.</p>
+          <ol style="line-height:1.8;padding-left:20px">${questions}</ol>
+          <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+          <p style="font-size:13px;color:#999">Order ID: ${order.id} · Questions? <a href="https://t.me/klivio" style="color:#C8A84B">Message us on Telegram</a></p>
+        </div>`,
+      }).catch(e => console.error('Client onboarding email failed:', e.message));
+    }
+  }
+
+  res.json({ received: true });
+});
+
 // ── POST /api/order ──
 app.post('/api/order', async (req, res) => {
   try {
@@ -154,7 +278,7 @@ app.post('/api/order', async (req, res) => {
       // Notify admin
       notifyTransport.sendMail({
         from: '"Klivio Orders" <james@klivio.bond>',
-        to: process.env.NOTIFY_EMAIL || 'hello@klivio.bond',
+        to: process.env.NOTIFY_EMAIL || 'hello@klivio.online',
         subject: `🆕 New Order: ${product} — ${name}`,
         html: `<div style="font-family:sans-serif;max-width:560px">
           <h2 style="color:#1C1A17">New Order #${order.id}</h2>
@@ -297,6 +421,11 @@ app.get('/api/campaign-stats', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Control Centre (unified dashboard) ──
+app.get('/control', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
 // ── Admin dashboard ──
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
@@ -335,7 +464,7 @@ app.post('/api/chat', async (req, res) => {
     const reply = await chat(sessionId, message);
     res.json({ reply });
   } catch (e) {
-    res.json({ reply: "Sorry, I'm having a moment. Try again or email us at hello@klivio.bond" });
+    res.json({ reply: "Sorry, I'm having a moment. Try again or email us at hello@klivio.online" });
   }
 });
 

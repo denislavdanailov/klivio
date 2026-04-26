@@ -116,7 +116,7 @@ async function handleGather(req, res) {
 
   if (isOverTimeLimit(callSid)) {
     cleanSession(callSid);
-    return res.type('text/xml').send(twimlSayHangup("I don't want to take more of your time. Check out klivio.bond for more info. Have a great day!"));
+    return res.type('text/xml').send(twimlSayHangup("I don't want to take more of your time. Check out klivio.online for more info. Have a great day!"));
   }
 
   const noSignals = ['not interested', 'no thank you', 'no thanks', 'remove me', "don't call", 'goodbye', 'bye', 'go away'];

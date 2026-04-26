@@ -17,5 +17,8 @@
     "emailjs": "^5.0.0",
     "express": "^4.21.0",
     "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@railway/cli": "^4.40.2"
   }
 }

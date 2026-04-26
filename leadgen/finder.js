@@ -195,19 +195,19 @@ const CITIES = {
 // ── OSM amenity/shop tags by industry ──
 const INDUSTRY_TAGS = {
   dental:      ['[amenity=dentist]'],
-  law:         ['[amenity=lawyers]','[office=lawyer]'],
-  accounting:  ['[office=accountant]','[office=financial]'],
-  fitness:     ['[leisure=fitness_centre]','[leisure=sports_centre]'],
+  law:         ['[office=lawyer]','[office=solicitor]','[office=legal_services]'],
+  accounting:  ['[office=accountant]','[office=tax_advisor]','[office=financial]'],
+  fitness:     ['[leisure=fitness_centre]','[leisure=sports_centre]','[leisure=gym]'],
   restaurant:  ['[amenity=restaurant]','[amenity=cafe]'],
-  beauty:      ['[shop=beauty]','[shop=hairdresser]','[amenity=beauty]'],
-  medical:     ['[amenity=clinic]','[amenity=doctors]','[healthcare=doctor]'],
-  automotive:  ['[shop=car_repair]','[shop=tyres]','[shop=car]'],
-  realestate:  ['[office=estate_agent]'],
-  education:   ['[amenity=kindergarten]','[office=tutoring]','[amenity=language_school]'],
+  beauty:      ['[shop=beauty]','[shop=hairdresser]','[amenity=beauty]','[shop=cosmetics]'],
+  medical:     ['[amenity=clinic]','[amenity=doctors]','[healthcare=doctor]','[amenity=physiotherapist]'],
+  automotive:  ['[shop=car_repair]','[shop=tyres]','[shop=car]','[craft=car_repair]'],
+  realestate:  ['[office=estate_agent]','[office=property_management]'],
+  education:   ['[amenity=kindergarten]','[office=tutoring]','[amenity=language_school]','[amenity=driving_school]'],
   pharmacy:    ['[amenity=pharmacy]'],
   optician:    ['[shop=optician]'],
-  hotel:       ['[tourism=hotel]','[tourism=guest_house]'],
-  cleaning:    ['[shop=dry_cleaning]','[office=cleaning]'],
+  hotel:       ['[tourism=hotel]','[tourism=guest_house]','[tourism=bed_and_breakfast]'],
+  cleaning:    ['[shop=dry_cleaning]','[office=cleaning]','[craft=cleaning]'],
   veterinary:  ['[amenity=veterinary]'],
   taxi:        ['[amenity=taxi]'],
   insurance:   ['[office=insurance]'],
@@ -215,6 +215,13 @@ const INDUSTRY_TAGS = {
   travel:      ['[shop=travel_agency]','[office=travel_agent]'],
   photography: ['[shop=photo]','[craft=photographer]'],
   wedding:     ['[shop=wedding]'],
+  // Trades — craft tags
+  trades:      ['[craft=plumber]','[craft=electrician]','[craft=builder]','[craft=carpenter]','[craft=painter]','[craft=roofer]','[craft=glazier]'],
+  plumber:     ['[craft=plumber]'],
+  electrician: ['[craft=electrician]'],
+  builder:     ['[craft=builder]','[craft=construction]'],
+  // IT / tech support
+  it:          ['[office=it]','[office=technology]','[craft=computer_repair]'],
 };
 
 const OVERPASS_SERVERS = [
@@ -321,6 +328,151 @@ async function processOsmElements(elements, industry, city, leads, concurrency =
   return { direct, scraped };
 }
 
+// ── Google UK search for businesses — fallback when OSM has no data ──
+async function googleUkSearch(industry, city, maxResults = 15) {
+  const queries = [
+    `${industry} ${city} UK email contact`,
+    `"${industry}" "${city}" site:co.uk OR site:.uk email`,
+    `${industry} ${city} England "info@" OR "enquiries@" OR "hello@"`,
+  ];
+
+  const allHits = [];
+  const seen = new Set();
+
+  for (const q of queries) {
+    await new Promise(resolve => {
+      const url = `https://www.google.co.uk/search?q=${encodeURIComponent(q)}&num=20&hl=en-GB&gl=gb`;
+      https.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Accept-Language': 'en-GB,en;q=0.9',
+          'Accept-Encoding': 'identity',
+          'Referer': 'https://www.google.co.uk/',
+        },
+      }, res => {
+        let d = '';
+        res.setEncoding('utf-8');
+        res.on('data', c => d += c);
+        res.on('end', () => {
+          try {
+            const $ = cheerio.load(d);
+            // Google result links are in <div class="g"> → <a href>
+            $('div.g a[href], div[data-sokoban-container] a[href], a[href*="http"]').each((_, el) => {
+              const href = $(el).attr('href') || '';
+              // Extract actual URL (Google wraps in /url?q=...)
+              let url2 = href;
+              if (href.includes('/url?q=')) {
+                try { url2 = decodeURIComponent(href.split('/url?q=')[1].split('&')[0]); } catch {}
+              }
+              if (!url2.startsWith('http')) return;
+              if (/google\.|bing\.com|facebook\.com|linkedin\.com|twitter\.|youtube\.|wikipedia\.|gov\.uk|bbc\.co\.|yell\.com|yelp\.com|tripadvisor|checkatrade|trustpilot|companies|companies-house/i.test(url2)) return;
+              if (seen.has(url2)) return;
+              // Only .co.uk or .uk domains for UK focus
+              const title = $(el).find('h3').text().trim() || $(el).text().trim().slice(0, 80);
+              if (title.length < 3) return;
+              seen.add(url2);
+              allHits.push({ title, url: url2 });
+            });
+          } catch {}
+          resolve();
+        });
+        res.on('error', () => resolve());
+      }).on('error', () => resolve());
+    });
+    await sleep(2000 + Math.random() * 2000);
+    if (allHits.length >= maxResults) break;
+  }
+
+  return allHits.slice(0, maxResults);
+}
+
+// ── Bing UK search fallback ──
+async function bingUkSearch(industry, city, maxResults = 15) {
+  const q = encodeURIComponent(`${industry} ${city} UK contact email`);
+  const url = `https://www.bing.com/search?q=${q}&mkt=en-GB&cc=GB&setlang=en-GB&count=20&first=1`;
+
+  return new Promise(resolve => {
+    const req = https.request(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Accept-Encoding': 'identity',
+        'Cache-Control': 'no-cache',
+        'Referer': 'https://www.bing.com/',
+      },
+    }, res => {
+      let d = '';
+      res.setEncoding('utf-8');
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const $ = cheerio.load(d);
+          const hits = [];
+          const seen = new Set();
+
+          // Primary: h2 links in result items
+          $('h2 a[href]').each((_, el) => {
+            const href = $(el).attr('href') || '';
+            if (!href.startsWith('http')) return;
+            if (/bing\.com|microsoft\.|facebook\.com|linkedin\.com|twitter\.|youtube\.|wikipedia\.|gov\.uk|yell\.com|yelp\.com|tripadvisor|checkatrade|trustpilot/i.test(href)) return;
+            if (seen.has(href)) return;
+            seen.add(href);
+            const title = $(el).text().trim();
+            if (title.length > 3) hits.push({ title, url: href });
+          });
+
+          // Fallback: cite elements if h2 gave nothing
+          if (hits.length === 0) {
+            $('cite').each((_, el) => {
+              const raw = $(el).text().trim();
+              const domain = raw.split('›')[0].trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+              if (domain && domain.includes('.') && !domain.includes('bing') && !domain.includes('microsoft')) {
+                const url2 = `https://${domain}`;
+                if (!seen.has(url2)) { seen.add(url2); hits.push({ title: domain, url: url2 }); }
+              }
+            });
+          }
+
+          resolve(hits.slice(0, maxResults));
+        } catch { resolve([]); }
+      });
+      res.on('error', () => resolve([]));
+    });
+    req.on('error', () => resolve([]));
+    req.setTimeout(15000, () => { req.destroy(); resolve([]); });
+    req.end();
+  });
+}
+
+// ── Web search → scrape emails (Google UK first, Bing fallback) ──
+async function webSearchFindLeads(industry, city, leads, maxUrls = 12) {
+  process.stdout.write(`  → Google UK "${industry} ${city}"... `);
+  let hits = await googleUkSearch(industry, city, maxUrls);
+
+  if (hits.length < 3) {
+    process.stdout.write(`(${hits.length} Google, trying Bing)... `);
+    const bingHits = await bingUkSearch(industry, city, maxUrls);
+    // Merge, dedupe
+    const seen = new Set(hits.map(h => h.url));
+    for (const h of bingHits) { if (!seen.has(h.url)) { seen.add(h.url); hits.push(h); } }
+  }
+
+  process.stdout.write(`${hits.length} URLs found, scraping...`);
+  let added = 0;
+  for (const hit of hits.slice(0, maxUrls)) {
+    try {
+      const n = await scrapeWebsite(hit.url, hit.title, industry, city, leads);
+      if (n > 0) { added += n; process.stdout.write(`.`); }
+    } catch {}
+    await sleep(1500);
+  }
+  console.log(` → +${added} web-search leads`);
+  saveLeads(leads);
+  return added;
+}
+
 // ── Find leads for one city + industry ──
 async function findLeads(city, industry, limit = 200) {
   const leads = loadLeads();
@@ -333,6 +485,7 @@ async function findLeads(city, industry, limit = 200) {
   }
 
   const tags = INDUSTRY_TAGS[industry] || [`[amenity=${industry}]`];
+  let osmAdded = 0;
 
   for (const tag of tags) {
     process.stdout.write(`  → OSM ${city}/${industry}${tag}... `);
@@ -341,8 +494,14 @@ async function findLeads(city, industry, limit = 200) {
     process.stdout.write(`${elements.length} total, ${withData.length} with data `);
     const { direct, scraped } = await processOsmElements(withData, industry, city, leads);
     console.log(` → +${direct} direct, +${scraped} scraped`);
+    osmAdded += direct + scraped;
     saveLeads(leads);
     await sleep(2000);
+  }
+
+  // Web search fallback: if OSM found fewer than 3 leads, search Google/Bing
+  if (osmAdded < 3) {
+    await webSearchFindLeads(industry, city, leads, 12);
   }
 
   return leads.length - before;

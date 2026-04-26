@@ -228,7 +228,7 @@ async function runFollowups({ dryRun = false, limit = 9999 } = {}) {
       productName: lead.sentProduct || 'AI Lead Responder',
       productPrice: '£197/mo',
       senderName: (lead.sentAccount || 'James').split(' ')[0],
-      senderEmail: lead.sentFrom || 'hello@klivio.bond',
+      senderEmail: lead.sentFrom || 'hello@klivio.online',
     };
 
     const body = await generateFollowup(step, data);

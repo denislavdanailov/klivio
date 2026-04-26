@@ -150,7 +150,7 @@ function buildReport(targetDate) {
     msg += '\n';
   }
 
-  msg += `_Dashboard: https://klivio.bond/campaign_`;
+  msg += `_Dashboard: https://klivio.online/campaign_`;
 
   return msg;
 }

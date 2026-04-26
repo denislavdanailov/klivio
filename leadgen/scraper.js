@@ -214,35 +214,141 @@ async function scrapeUrls(urls, industry = 'generic') {
   return results;
 }
 
-// ── Scrape Yell.com (UK Yellow Pages) for businesses ──
+// ── Google UK search scraper — most reliable free search for UK results ──
+async function googleUkSearch(query, maxResults = 15) {
+  const https = require('https');
+  const q     = encodeURIComponent(query + ' site:co.uk OR site:.uk OR UK');
+  const url   = `https://www.google.co.uk/search?q=${q}&num=20&hl=en-GB&gl=gb`;
+  return new Promise(resolve => {
+    https.get(url, {
+      headers: {
+        'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept':          'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Accept-Encoding': 'identity',
+        'Referer':         'https://www.google.co.uk/',
+      },
+    }, res => {
+      let d = '';
+      res.setEncoding('utf-8');
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const $ = cheerio.load(d);
+          const hits = [];
+          const seen = new Set();
+          $('a[href]').each((_, el) => {
+            let href = $(el).attr('href') || '';
+            // Google wraps real URLs in /url?q=
+            if (href.includes('/url?q=')) {
+              try { href = decodeURIComponent(href.split('/url?q=')[1].split('&')[0]); } catch { return; }
+            }
+            if (!href.startsWith('http')) return;
+            if (/google\.|bing\.com|facebook\.com|linkedin\.|twitter\.|youtube\.|wikipedia\.|\.gov\.uk|bbc\.co\.|yell\.com|yelp\.com|tripadvisor|checkatrade|trustpilot|companies-house/i.test(href)) return;
+            if (seen.has(href)) return;
+            seen.add(href);
+            const title = $(el).find('h3').text().trim() || $(el).text().trim().slice(0, 80);
+            if (title.length > 3) hits.push({ title, url: href, snippet: '' });
+          });
+          resolve(hits.slice(0, maxResults));
+        } catch { resolve([]); }
+      });
+      res.on('error', () => resolve([]));
+    }).on('error', () => resolve([]));
+  });
+}
+
+// ── Bing UK search scraper — fallback ──
+async function bingSearch(query, maxResults = 15) {
+  const https = require('https');
+  const q     = encodeURIComponent(query);
+  const url   = `https://www.bing.com/search?q=${q}&mkt=en-GB&cc=GB&setlang=en-GB&count=20&first=1`;
+  return new Promise((resolve) => {
+    const req = https.request(url, {
+      headers: {
+        'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept':          'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Accept-Encoding': 'identity',
+        'Cache-Control':   'no-cache',
+        'Referer':         'https://www.bing.com/',
+      },
+    }, res => {
+      let d = '';
+      res.setEncoding('utf-8');
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const $ = cheerio.load(d);
+          const hits = [];
+          const seen = new Set();
+          // Primary selector: h2 a links (direct result URLs in modern Bing)
+          $('h2 a[href]').each((_, el) => {
+            const href = $(el).attr('href') || '';
+            if (!href.startsWith('http')) return;
+            if (/bing\.com|microsoft\.|facebook\.com|linkedin\.|twitter\.|youtube\.|wikipedia\.|gov\.uk|yell\.com|tripadvisor|checkatrade/i.test(href)) return;
+            if (seen.has(href)) return;
+            seen.add(href);
+            hits.push({ title: $(el).text().trim(), url: href, snippet: '' });
+          });
+          // Fallback: cite elements
+          if (hits.length === 0) {
+            $('cite').each((_, el) => {
+              const raw    = $(el).text().trim();
+              const domain = raw.split('›')[0].trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+              const href   = domain ? `https://${domain}` : '';
+              if (href && !seen.has(href) && !href.includes('bing.com') && !href.includes('microsoft')) {
+                seen.add(href);
+                hits.push({ title: domain, url: href, snippet: '' });
+              }
+            });
+          }
+          resolve(hits.slice(0, maxResults));
+        } catch { resolve([]); }
+      });
+    });
+    req.on('error', () => resolve([]));
+    req.setTimeout(15000, () => { req.destroy(); resolve([]); });
+    req.end();
+  });
+}
+
+// ── scrapeYell → replaced with Google UK + Bing multi-query finder ──
 async function scrapeYell(category, location, pages = 3) {
   const results = [];
-  const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  const seen    = new Set();
 
-  for (let page = 1; page <= pages; page++) {
-    const url = `https://www.yell.com/ucs/UcsSearchAction.do?scrambleSeed=&keywords=${encodeURIComponent(category)}&location=${encodeURIComponent(location)}&pageNum=${page}`;
-    try {
-      console.log(`  Yell page ${page}...`);
-      const resp = await fetch(url, { headers: { 'User-Agent': ua, 'Accept': 'text/html' } });
-      const html = await resp.text();
-      const $ = cheerio.load(html);
+  const queries = [
+    `${category} ${location} UK email contact`,
+    `${category} ${location} "info@" OR "enquiries@" OR "hello@"`,
+    `"${category}" "${location}" site:co.uk contact`,
+  ];
 
-      // Extract business listings
-      $('.businessCapsule--mainRow, .businessCapsule').each((_, el) => {
-        const name = $(el).find('.businessCapsule--name, h2').text().trim();
-        const website = $(el).find('a[href*="website"]').attr('href') ||
-                        $(el).find('a.businessCapsule--ctaLink').attr('href') || '';
-        const phone = $(el).find('.businessCapsule--phone, a[href^="tel:"]').text().trim();
+  const SKIP = /yell\.com|checkatrade|yelp|tripadvisor|facebook\.com|linkedin\.com|google\.|wikipedia|trustpilot|companies-house/i;
 
-        if (name) {
-          results.push({ name, website: website.startsWith('http') ? website : '', phone });
-        }
-      });
+  for (const q of queries.slice(0, pages)) {
+    // Try Google UK first (better UK targeting)
+    console.log(`  Google UK: "${q}"`);
+    let hits = await googleUkSearch(q, 12);
+    console.log(`  → ${hits.length} Google results`);
 
-      await sleep(2000 + Math.random() * 2000);
-    } catch (err) {
-      console.log(`  Page ${page} error: ${err.message}`);
+    // Bing fallback if Google gave fewer than 3
+    if (hits.length < 3) {
+      console.log(`  Bing fallback: "${q}"`);
+      const bingHits = await bingSearch(q, 12);
+      console.log(`  → ${bingHits.length} Bing results`);
+      const bingSeen = new Set(hits.map(h => h.url));
+      for (const h of bingHits) { if (!bingSeen.has(h.url)) hits.push(h); }
     }
+
+    for (const h of hits) {
+      if (seen.has(h.url)) continue;
+      if (SKIP.test(h.url)) continue;
+      seen.add(h.url);
+      const name = h.title.split(/[|\-–—]/)[0].trim();
+      if (name.length > 3) results.push({ name, website: h.url, phone: '' });
+    }
+    await sleep(2000 + Math.random() * 2000);
   }
 
   return results;

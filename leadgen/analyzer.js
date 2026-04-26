@@ -5,13 +5,13 @@ const http = require('http');
 const cheerio = require('cheerio');
 
 const PRODUCTS = {
-  chat:     { name: 'Live Chat Assistant',      price: '$297/mo' },
-  booking:  { name: 'AI Lead Responder',        price: '$197/mo' },
-  followup: { name: 'Follow-Up Automator',      price: '$197/mo' },
-  reviews:  { name: 'Review & Referral System', price: '$197/mo' },
-  valuation:{ name: 'Valuation Bot',            price: '$297/mo' },
-  voice:    { name: 'Voice Assistant',          price: '$497/mo' },
-  chatbot:  { name: 'AI Chatbot',               price: '$297/mo' },
+  chat:     { name: 'Live Chat Assistant',      price: '£297/mo' },
+  booking:  { name: 'AI Lead Responder',        price: '£197/mo' },
+  followup: { name: 'Follow-Up Automator',      price: '£197/mo' },
+  reviews:  { name: 'Review & Referral System', price: '£197/mo' },
+  valuation:{ name: 'Valuation Bot',            price: '£297/mo' },
+  voice:    { name: 'Voice Assistant',          price: '£497/mo' },
+  chatbot:  { name: 'AI Chatbot',               price: '£297/mo' },
 };
 
 // ── Industry → priority weaknesses (what hurts most in this vertical) ──

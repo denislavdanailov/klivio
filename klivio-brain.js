@@ -7,8 +7,8 @@ const KLIVIO = {
   // ── Company ──
   name: 'Klivio',
   tagline: 'AI That Works While You Sleep',
-  website: 'https://klivio.bond',
-  email: 'hello@klivio.bond',
+  website: 'https://klivio.online',
+  email: 'hello@klivio.online',
   description: 'Klivio builds AI workers for UK businesses — systems that respond to every enquiry in under 2 minutes, 24/7. No staff. No missed leads. Setup in 2-7 days.',
 
   // ── Products ──
@@ -148,7 +148,7 @@ const KLIVIO = {
     },
     {
       q: 'How do I pay?',
-      a: 'Card via Stripe, or crypto (USDT, BTC, ETH). No PayPal — we keep it simple.',
+      a: 'Card via Stripe — secure checkout, no contract, cancel anytime. UK-issued cards welcome.',
     },
     {
       q: 'Can I upgrade my plan later?',

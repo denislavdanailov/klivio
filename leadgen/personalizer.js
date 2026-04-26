@@ -125,23 +125,16 @@ function getContext(industry) {
   return INDUSTRY_CONTEXT[key] || Object.values(INDUSTRY_CONTEXT).find((_, i) => key.includes(Object.keys(INDUSTRY_CONTEXT)[i])) || INDUSTRY_CONTEXT.default;
 }
 
-// ── Subject line styles (A/B-testable) ──
-const SUBJECT_STYLES = [
-  (d) => `${d.business} — quick question`,
-  (d) => `Question about ${d.business}`,
-  (d) => `${d.contactName ? d.contactName.split(' ')[0] + ', ' : ''}noticed something about your site`,
-  (d) => `For ${d.business}`,
-  (d) => `Re: ${d.business}`,
-  (d) => `quick one about ${d.business}`,
-  (d) => `${d.business} + missed enquiries`,
-  (d) => `saw ${d.business} online`,
-  (d) => `${d.contactName ? d.contactName.split(' ')[0] : 'Hey'} — 2-min question`,
-  (d) => `short question on ${d.business}`,
-];
+// ── Subject lines — research-backed from subject-bank.js ──
+const { getSubject } = require('./subject-bank');
 
 function generateSubject(data) {
-  const style = SUBJECT_STYLES[Math.floor(Math.random() * SUBJECT_STYLES.length)];
-  return style(data);
+  // Pull industry-specific subject from the bank, fill {{name}} / {{business}}
+  const raw  = getSubject(data.industry || 'generic');
+  const name = data.contactName ? data.contactName.split(' ')[0] : (data.business.split(' ')[0]);
+  return raw
+    .replace(/\{\{name\}\}/g,     name)
+    .replace(/\{\{business\}\}/g, data.business);
 }
 
 // ── Fallback templates (без Groq) — varied to avoid spam filters ──
@@ -170,7 +163,7 @@ Our fix is ${d.productName} at ${d.productPrice}. Usually live in 3 days, nothin
 ${ctx.cta}
 
 ${d.senderName}
-Klivio — klivio.bond`,
+Klivio`,
 
   (d, ctx) => `Hi ${d.contactName ? d.contactName.split(' ')[0] : 'there'},
 
@@ -293,15 +286,19 @@ STRUCTURE (3 short paragraphs, 90-140 words total):
 PERSONALIZATION RULES:
 - If you have their tagline or headline, quote or paraphrase it naturally in paragraph 1 (e.g., "Saw your 'trusted since 1998' line — impressive")
 - If they have 10+ years in business, mention it respectfully
+- If you have NO website context, open with a direct observation about the PROBLEM (not a compliment about the business)
+- NEVER invent compliments like "great reputation", "lovely website", "impressive work" — if you weren't given evidence, don't say it
 - Do NOT invent facts you weren't given. Only reference what's in the context above.
 
 HARD RULES:
 - Plain text only. No HTML, no bullets, no bold, no emojis.
 - Do NOT say "I hope this email finds you well" or any opener clichés.
 - Do NOT say "I stumbled across" or "I came across".
+- Do NOT say "it's clear that", "it's likely that", "you're probably" — be direct and specific.
 - Use contractions (we've, you're, it's) — sound human.
-- Max 140 words.
-- Sign off with exactly: "${data.senderName}\\nKlivio"
+- Max 130 words. Be punchy — every sentence must earn its place.
+- The final line (CTA) must be a standalone sentence ending with a question mark. Do NOT combine the pitch and CTA in one run-on sentence.
+- Sign off with EXACTLY two lines: first line "${data.senderName}", second line "Klivio". Nothing else.
 - Do NOT include a subject line.
 
 Output ONLY the email body.`;
