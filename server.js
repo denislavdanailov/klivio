@@ -148,8 +148,10 @@ app.post('/api/stripe/webhook', async (req, res) => {
       const timestamp = parts.t;
       const v1sig     = parts.v1;
       const payload   = `${timestamp}.${req.body.toString()}`;
-      const expected  = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-      if (!crypto.timingSafeEqual(Buffer.from(v1sig,'hex'), Buffer.from(expected,'hex'))) {
+      const expectedHex = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+      const bActual   = Buffer.from((v1sig||'').padEnd(expectedHex.length,'0'), 'hex');
+      const bExpected = Buffer.from(expectedHex, 'hex');
+      if (bActual.length !== bExpected.length || !crypto.timingSafeEqual(bActual, bExpected)) {
         return res.status(400).send('Webhook signature mismatch');
       }
       event = JSON.parse(req.body.toString());

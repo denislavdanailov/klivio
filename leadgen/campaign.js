@@ -49,6 +49,36 @@ async function runCampaign({ limit = 9999, dryRun = false } = {}) {
 
   const maxToSend = dryRun ? limit : Math.min(limit, remaining);
   const leads = loadLeads();
+
+  // ── Pre-dedup: mark any 'new' lead whose email is already in sent_log ──
+  const SENT_LOG = path.join(__dirname, 'data', 'sent_log.json');
+  let sentSet = new Set();
+  let sentDomains = new Set();
+  try {
+    const sl = JSON.parse(fs.readFileSync(SENT_LOG, 'utf-8'));
+    sl.forEach(e => {
+      if (e.to) sentSet.add(e.to.toLowerCase());
+      // Track domain to avoid multiple emails to same business
+      const dom = (e.to||'').split('@')[1];
+      if (dom) sentDomains.add(dom.toLowerCase());
+    });
+  } catch {}
+  let preMarked = 0;
+  leads.forEach(l => {
+    if (l.status !== 'new') return;
+    const email = (l.email||'').toLowerCase();
+    const domain = email.split('@')[1];
+    if (sentSet.has(email) || (domain && sentDomains.has(domain))) {
+      l.status = 'duplicate';
+      l.updatedAt = new Date().toISOString();
+      preMarked++;
+    }
+  });
+  if (preMarked > 0) {
+    saveLeads(leads);
+    log(`Pre-dedup: marked ${preMarked} already-sent leads as duplicate`);
+  }
+
   // Sort by lead score (highest first) — prioritize A-tier leads
   const toSend = leads
     .filter(l => l.status === 'new')

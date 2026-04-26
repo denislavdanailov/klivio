@@ -1,0 +1,10 @@
+node_modules
+marketing
+leadgen/data
+leadgen/accounts.js
+.env
+*.log
+.git
+logs
+skills
+
