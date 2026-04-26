@@ -528,7 +528,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ── Voice Webhooks (Twilio) ──
+// ── Voice Webhooks (Telnyx TeXML) ──
 app.post('/api/voice', handleInbound);
 app.post('/api/voice/gather', handleGather);
 app.post('/api/voice/status', handleStatus);

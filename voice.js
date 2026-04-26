@@ -1,4 +1,4 @@
-// ── Klivio Voice Bot — Twilio + Groq ──
+// ── Klivio Voice Bot — Telnyx TeXML + Groq ──
 require('dotenv').config();
 const https = require('https');
 const KLIVIO = require('./klivio-brain');
@@ -97,7 +97,7 @@ function escapeXml(str) {
 
 // ── Inbound call handler (initial greeting) ──
 function handleInbound(req, res) {
-  const callSid = req.body?.CallSid || 'unknown';
+  const callSid = req.body?.CallSid || req.body?.CallControlId || 'unknown';
   console.log(`[VOICE] Inbound call: ${callSid}`);
   getSession(callSid);
   const greeting = "Hey, thanks for calling Klivio — this is James. How can I help?";
@@ -106,8 +106,8 @@ function handleInbound(req, res) {
 
 // ── Gather handler (speech → AI → respond) ──
 async function handleGather(req, res) {
-  const callSid = req.body?.CallSid || 'unknown';
-  const speech = req.body?.SpeechResult || '';
+  const callSid = req.body?.CallSid || req.body?.CallControlId || 'unknown';
+  const speech = req.body?.SpeechResult || req.body?.speech_result || '';
   console.log(`[VOICE] Heard: "${speech}"`);
 
   if (!speech.trim()) {
@@ -138,8 +138,8 @@ async function handleGather(req, res) {
 
 // ── Status callback (cleanup on hangup) ──
 function handleStatus(req, res) {
-  const callSid = req.body?.CallSid;
-  const status = req.body?.CallStatus;
+  const callSid = req.body?.CallSid || req.body?.CallControlId;
+  const status = req.body?.CallStatus || req.body?.call_status;
   if (status === 'completed' || status === 'failed') {
     console.log(`[VOICE] Call ended: ${callSid}`);
     cleanSession(callSid);
