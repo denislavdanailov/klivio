@@ -1651,31 +1651,34 @@ async function submitForm(){
   if(!n||!e){alert('Please enter your name and email.');return;}
 
   var p = PLAN_AI[curPlan];
-  var aiNames = selectedAIs.map(function(a){return a.name;}).join(', ');
+  var btn = document.querySelector('#stepForm .modal-btn') || document.querySelector('#stepForm button');
+  var origTxt = btn ? btn.textContent : '';
+  if(btn){ btn.textContent='Loading...'; btn.disabled=true; }
 
-  // Save order to backend
   try {
-    await fetch('https://klivio-production.up.railway.app/api/order', {
+    var resp = await fetch('https://klivio-production.up.railway.app/api/checkout', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         name: n,
         email: e,
+        plan: curPlan,
         website: document.getElementById('fWeb').value,
         language: document.getElementById('fLang').value,
-        notes: document.getElementById('fNotes').value,
-        product: p.label + ' — ' + aiNames,
-        price: p.price
+        notes: document.getElementById('fNotes').value
       })
     });
-  } catch(err) { console.log('Order save failed, continuing...'); }
-
-  document.getElementById('stepForm').style.display='none';
-  document.getElementById('confView').style.display='block';
-  document.getElementById('payBtn').style.display='';
-  document.querySelector('#confView .conf h3').textContent='You\'re all set!';
-  var planPayLinks = {starter:'https://buy.stripe.com/4gMaEX0cheCIgXZddK7Vm00',growth:'https://buy.stripe.com/fZu6oH6AF2U04bd5Li7Vm04',full:'https://buy.stripe.com/5kQ7sL6AFcuAePR4He7Vm06'};
-  document.getElementById('payBtn').onclick=function(){window.open(planPayLinks[curPlan]||'#','_blank');};
+    var data = await resp.json();
+    if(data.url){
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Could not create checkout session');
+    }
+  } catch(err) {
+    console.error('Checkout error:', err);
+    if(btn){ btn.textContent=origTxt; btn.disabled=false; }
+    alert('Payment setup failed. Please try again or contact us on Telegram @klivio');
+  }
 }
 
 function toggleFaq(el){var item=el.parentElement,isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(i){i.classList.remove('open');});if(!isOpen)item.classList.add('open');}

@@ -255,6 +255,67 @@ app.post('/api/stripe/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
+// ── POST /api/checkout — create Stripe Checkout Session ──
+app.post('/api/checkout', async (req, res) => {
+  const { name, email, plan, website, language, notes } = req.body;
+  if (!name || !email || !plan) return res.status(400).json({ error: 'name, email and plan required' });
+
+  const PLANS = {
+    starter: { name: 'Klivio Starter — AI Lead Responder', amount: 19700 },
+    growth:  { name: 'Klivio Growth — AI Chatbot',         amount: 29700 },
+    full:    { name: 'Klivio Full System — Voice AI',      amount: 49700 },
+  };
+  const p = PLANS[plan] || PLANS.starter;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) return res.status(500).json({ error: 'Stripe not configured' });
+
+  try {
+    const https = require('https');
+    const params = new URLSearchParams({
+      mode: 'subscription',
+      'line_items[0][price_data][currency]': 'gbp',
+      'line_items[0][price_data][product_data][name]': p.name,
+      'line_items[0][price_data][unit_amount]': p.amount.toString(),
+      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][quantity]': '1',
+      customer_email: email,
+      success_url: `${process.env.BASE_URL || 'https://klivio.online'}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.BASE_URL || 'https://klivio.online'}/#pricing`,
+      'metadata[name]': name,
+      'metadata[email]': email,
+      'metadata[plan]': plan,
+      'metadata[website]': website || '',
+      'metadata[language]': language || 'English',
+      'metadata[notes]': (notes || '').slice(0, 500),
+    }).toString();
+
+    const url = await new Promise((resolve, reject) => {
+      const r = https.request({
+        hostname: 'api.stripe.com', path: '/v1/checkout/sessions', method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(stripeKey + ':').toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(params)
+        }
+      }, response => {
+        let d = ''; response.on('data', c => d += c);
+        response.on('end', () => {
+          const j = JSON.parse(d);
+          if (j.error) reject(new Error(j.error.message));
+          else resolve(j.url);
+        });
+      });
+      r.on('error', reject);
+      r.write(params); r.end();
+    });
+
+    res.json({ url });
+  } catch (e) {
+    console.error('Stripe checkout error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── POST /api/order ──
 app.post('/api/order', async (req, res) => {
   try {
