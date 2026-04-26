@@ -387,8 +387,11 @@ app.get('/api/leads', (req, res) => {
 app.get('/api/campaign-stats', (req, res) => {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const { getDailyStats } = require('./leadgen/sender');
-    const stats = getDailyStats();
+    let stats = { totalCapacity: 0, totalToday: 0, breakdown: [] };
+    try {
+      const { getDailyStats } = require('./leadgen/sender');
+      stats = getDailyStats();
+    } catch { /* accounts.js not available on this host — campaign runs locally */ }
     const leads = JSON.parse(fs.readFileSync(path.join(__dirname, 'leadgen', 'data', 'leads.json'), 'utf-8'));
     const byStatus = {};
     const byIndustry = {};
