@@ -9,10 +9,34 @@
   status = 200
   force = true
 
-# Dashboard → Railway
+# Dashboard + admin pages → Railway
 [[redirects]]
   from = "/control"
   to = "https://klivio-production.up.railway.app/control"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "https://klivio-production.up.railway.app/dashboard.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/admin.html"
+  to = "https://klivio-production.up.railway.app/admin.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/leads.html"
+  to = "https://klivio-production.up.railway.app/leads.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sent.html"
+  to = "https://klivio-production.up.railway.app/sent.html"
   status = 200
   force = true
 
