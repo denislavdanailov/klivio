@@ -9,6 +9,17 @@ const { handleInbound, handleGather, handleStatus } = require('./voice');
 
 const app = express();
 
+// ── CORS — allow klivio.online and localhost ──
+app.use((req, res, next) => {
+  const allowed = ['https://klivio.online', 'https://www.klivio.online', 'http://localhost:3000', 'http://localhost:8080'];
+  const origin = req.headers.origin;
+  if (origin && allowed.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // ── Raw body for Stripe webhook (must be before express.json) ──
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());

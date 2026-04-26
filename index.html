@@ -1655,7 +1655,7 @@ async function submitForm(){
 
   // Save order to backend
   try {
-    await fetch('/api/order', {
+    await fetch('https://klivio-production.up.railway.app/api/order', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -2094,7 +2094,7 @@ function kbSend(e) {
 
 function kbAsk(msg) {
   var typing = kbAppend('Typing...', 'bot typing');
-  fetch('/api/chat', {
+  fetch('https://klivio-production.up.railway.app/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId: kbSessionId, message: msg })
