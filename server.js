@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 // ── Raw body for Stripe webhook (must be before express.json) ──
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false })); // Telnyx/Twilio send form-urlencoded webhooks
 app.use(express.static(__dirname, { index: 'index.html' }));
 
 // ── Storage ──
