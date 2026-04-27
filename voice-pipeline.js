@@ -1,10 +1,9 @@
-// ── Klivio Voice Pipeline — Telnyx + Deepgram + Groq + Cartesia ──
-// Real-time: ~500ms latency, natural human voice, no choppy delays
+// ── Klivio Voice Pipeline — Telnyx Call Control + Groq + Cartesia ──
+// Call Control gather approach: speak → gather speech → AI → speak → repeat
 require('dotenv').config();
 const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
-const { createClient, LiveTranscriptionEvents } = require('@deepgram/sdk');
 const KLIVIO = require('./klivio-brain');
 
 const DOMAIN = process.env.SERVER_DOMAIN || 'klivio-production.up.railway.app';
@@ -61,7 +60,7 @@ function cartesiaTTS(text) {
       transcript: text,
       voice: {
         mode: 'id',
-        id: process.env.CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238', // "Archer" deep British male
+        id: process.env.CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238',
       },
       output_format: { container: 'mp3', bit_rate: 128000, sample_rate: 44100 },
       language: 'en',
@@ -80,7 +79,11 @@ function cartesiaTTS(text) {
     }, res => {
       const chunks = [];
       res.on('data', c => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('end', () => {
+        const buf = Buffer.concat(chunks);
+        if (buf.length < 100) reject(new Error(`Cartesia error: ${buf.toString()}`));
+        else resolve(buf);
+      });
     });
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(); reject(new Error('Cartesia TTS timeout')); });
@@ -104,7 +107,7 @@ function telnyxAction(callControlId, action, params = {}) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
       },
-      timeout: 6000,
+      timeout: 8000,
     }, res => {
       let d = '';
       res.on('data', c => d += c);
@@ -139,19 +142,37 @@ async function speakText(session, text) {
       urls: [audioUrl],
       client_state: clientState,
     });
-
-    // isSpeaking = false will be set when call.playback.ended fires
+    // isSpeaking = false is set when call.playback.ended fires
   } catch (e) {
     console.error('[PIPELINE] speakText error:', e.message);
-    session.isSpeaking = false; // fallback — don't block forever
+    session.isSpeaking = false;
+    // On TTS failure, still try to gather so the call doesn't die
+    if (!session.hanging && !session.cleanedUp) {
+      startGather(session);
+    }
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Handle final transcript from user
+// Start gathering caller's speech
+// ─────────────────────────────────────────────────────────────
+async function startGather(session) {
+  if (session.cleanedUp || session.hanging) return;
+  console.log('[PIPELINE] Gathering speech...');
+  await telnyxAction(session.callControlId, 'gather', {
+    input: ['speech'],
+    speech_timeout: 'auto',
+    speech_end_timeout: 1500,
+    language: 'en-US',
+    minimum_digits: 0,
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Handle speech from caller
 // ─────────────────────────────────────────────────────────────
 async function handleTranscript(session, transcript) {
-  if (session.isSpeaking || session.processing || session.cleanedUp) return;
+  if (session.processing || session.cleanedUp) return;
   session.processing = true;
 
   try {
@@ -184,79 +205,6 @@ async function handleTranscript(session, transcript) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// WebSocket handler — called from server.js on HTTP upgrade
-// ─────────────────────────────────────────────────────────────
-function handleMediaWebSocket(ws, callControlId) {
-  const session = sessions.get(callControlId);
-  if (!session) {
-    console.error('[PIPELINE] No session found for call:', callControlId);
-    ws.close();
-    return;
-  }
-  session.ws = ws;
-  console.log(`[PIPELINE] WS connected: ${callControlId}`);
-
-  // Deepgram live STT
-  const dg = createClient(process.env.DEEPGRAM_API_KEY);
-  const dgConn = dg.listen.live({
-    model: 'nova-2-phonecall',
-    language: 'en-US',
-    smart_format: true,
-    no_delay: true,
-    endpointing: 400,       // 400ms silence = end of utterance
-    interim_results: false,
-    encoding: 'mulaw',
-    sample_rate: 8000,
-    channels: 1,
-  });
-  session.dgConn = dgConn;
-
-  dgConn.on(LiveTranscriptionEvents.Open, () => {
-    console.log('[PIPELINE] Deepgram STT ready');
-    // Greet after 800ms (enough for audio to stabilise)
-    setTimeout(() => speakText(session, "Hey, thanks for calling Klivio — this is James. How can I help?"), 800);
-  });
-
-  dgConn.on(LiveTranscriptionEvents.Transcript, async (data) => {
-    const transcript = data.channel?.alternatives?.[0]?.transcript?.trim();
-    if (!transcript || !data.is_final) return;
-    await handleTranscript(session, transcript);
-  });
-
-  dgConn.on(LiveTranscriptionEvents.Error, err => {
-    console.error('[PIPELINE] Deepgram error:', err);
-  });
-
-  // Receive μ-law audio from Telnyx, forward to Deepgram
-  ws.on('message', (data) => {
-    try {
-      const msg = JSON.parse(data.toString());
-      if (msg.event === 'media' && !session.isSpeaking) {
-        const chunk = Buffer.from(msg.media.payload, 'base64');
-        if (dgConn.getReadyState() === 1) dgConn.send(chunk);
-      } else if (msg.event === 'stop') {
-        cleanup(session);
-      }
-    } catch {
-      // Raw binary audio (no JSON wrapper)
-      if (!session.isSpeaking && dgConn.getReadyState() === 1) {
-        dgConn.send(data);
-      }
-    }
-  });
-
-  ws.on('close', () => {
-    console.log(`[PIPELINE] WS closed: ${callControlId}`);
-    cleanup(session);
-  });
-
-  ws.on('error', err => {
-    console.error('[PIPELINE] WS error:', err.message);
-    cleanup(session);
-  });
-}
-
-// ─────────────────────────────────────────────────────────────
 // Call Control webhook — handles all Telnyx call events
 // ─────────────────────────────────────────────────────────────
 async function handleCallControlEvent(req, res) {
@@ -267,11 +215,10 @@ async function handleCallControlEvent(req, res) {
   const callControlId = payload?.call_control_id;
 
   if (!event || !callControlId) return;
-  console.log(`[CC] ${event} — ${callControlId}`);
+  console.log(`[CC] ${event} — ${callControlId.slice(0, 20)}...`);
 
   switch (event) {
     case 'call.initiated': {
-      // New inbound call — create session and answer
       sessions.set(callControlId, {
         callControlId,
         messages:    [],
@@ -286,11 +233,10 @@ async function handleCallControlEvent(req, res) {
     }
 
     case 'call.answered': {
-      // Start streaming audio to our WebSocket
-      await telnyxAction(callControlId, 'streaming_start', {
-        stream_url:   `wss://${DOMAIN}/api/voice/stream?call=${encodeURIComponent(callControlId)}`,
-        stream_track: 'inbound_track',
-      });
+      const session = sessions.get(callControlId);
+      if (!session) break;
+      // Speak greeting immediately — no WebSocket needed
+      await speakText(session, "Hey, thanks for calling Klivio — this is James. How can I help?");
       break;
     }
 
@@ -309,10 +255,36 @@ async function handleCallControlEvent(req, res) {
         } catch {}
       }
 
-      // If conversation is done, hang up after a brief pause
       if (session.hanging) {
+        // End of conversation — hang up
         setTimeout(() => telnyxAction(callControlId, 'hangup', {}), 800);
+      } else {
+        // Listen for caller's response
+        await startGather(session);
       }
+      break;
+    }
+
+    case 'call.gather.ended': {
+      const session = sessions.get(callControlId);
+      if (!session) break;
+
+      // Extract speech result from payload
+      const speechResult = payload?.speech_result
+        || payload?.digits
+        || '';
+
+      console.log(`[CC] Gather ended — speech: "${speechResult}"`);
+
+      if (!speechResult.trim()) {
+        // No speech detected
+        if (!session.hanging) {
+          await speakText(session, "I didn't quite catch that — could you say that again?");
+        }
+        break;
+      }
+
+      await handleTranscript(session, speechResult);
       break;
     }
 
@@ -323,13 +295,20 @@ async function handleCallControlEvent(req, res) {
     }
 
     case 'call.streaming.started':
-      console.log('[CC] Streaming started — Deepgram will connect via WS');
-      break;
-
     case 'call.streaming.stopped':
-      console.log('[CC] Streaming stopped');
+    case 'streaming.started':
+    case 'streaming.failed':
+      // Ignore — we're not using WebSocket streaming anymore
       break;
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// WebSocket handler — kept for compatibility but not used
+// ─────────────────────────────────────────────────────────────
+function handleMediaWebSocket(ws, callControlId) {
+  console.log('[PIPELINE] WS connected (not used in gather mode):', callControlId);
+  ws.close();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -338,9 +317,8 @@ async function handleCallControlEvent(req, res) {
 function cleanup(session) {
   if (session.cleanedUp) return;
   session.cleanedUp = true;
-  try { session.dgConn?.finish(); } catch {}
   sessions.delete(session.callControlId);
-  console.log(`[PIPELINE] Cleaned up: ${session.callControlId}`);
+  console.log(`[PIPELINE] Cleaned up: ${session.callControlId.slice(0, 20)}...`);
 }
 
 module.exports = { handleCallControlEvent, handleMediaWebSocket };
