@@ -32,7 +32,7 @@ function getAIResponse(messages) {
         { role: 'system', content: KLIVIO.prompts.phone({ agentName: 'James', callType: 'inbound' }) },
         ...messages.slice(-8),
       ],
-      max_tokens: 60,
+      max_tokens: 150,
       temperature: 0.85,
     });
     const req = https.request({
