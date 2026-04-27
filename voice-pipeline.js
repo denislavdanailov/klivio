@@ -138,10 +138,11 @@ async function speakText(session, text) {
     const audioUrl = `https://${DOMAIN}/api/voice/audio/${filename}`;
     const clientState = Buffer.from(filename).toString('base64');
 
-    await telnyxAction(session.callControlId, 'play_audio', {
+    const playResult = await telnyxAction(session.callControlId, 'play_audio', {
       urls: [audioUrl],
       client_state: clientState,
     });
+    console.log('[PIPELINE] play_audio response:', JSON.stringify(playResult).slice(0, 300));
     // isSpeaking = false is set when call.playback.ended fires
   } catch (e) {
     console.error('[PIPELINE] speakText error:', e.message);
