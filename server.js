@@ -544,11 +544,6 @@ app.get('/campaign', (req, res) => {
   res.sendFile(path.join(__dirname, 'campaign.html'));
 });
 
-// ── Fallback ──
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 // ── Voice: Telnyx Call Control webhooks ──
 app.post('/api/voice/cc', handleCallControlEvent);
 
@@ -574,6 +569,11 @@ app.post('/api/chat', async (req, res) => {
   } catch (e) {
     res.json({ reply: "Sorry, I'm having a moment. Try again or email us at hello@klivio.online" });
   }
+});
+
+// ── Fallback ──
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
