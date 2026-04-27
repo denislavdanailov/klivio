@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { chat } = require('./chatbot');
-const { handleCallControlEvent, handleMediaWebSocket } = require('./voice-pipeline');
+const { handleCallControlEvent, handleMediaWebSocket } = require('./voice-realtime');
 
 const app    = express();
 const server = http.createServer(app);
@@ -547,17 +547,6 @@ app.get('/campaign', (req, res) => {
 // ── Voice: Telnyx Call Control webhooks ──
 app.post('/api/voice/cc', handleCallControlEvent);
 
-// ── Voice: serve temp TTS audio files to Telnyx ──
-app.get('/api/voice/audio/:filename', (req, res) => {
-  const filename = path.basename(req.params.filename); // prevent path traversal
-  if (!filename.startsWith('klivio-') || !filename.endsWith('.mp3')) {
-    return res.status(404).send('Not found');
-  }
-  const filepath = path.join('/tmp', filename);
-  if (!fs.existsSync(filepath)) return res.status(404).send('Not found');
-  res.setHeader('Content-Type', 'audio/mpeg');
-  res.sendFile(filepath);
-});
 
 // ── Chatbot API ──
 app.post('/api/chat', async (req, res) => {
