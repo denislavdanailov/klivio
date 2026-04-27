@@ -1,5 +1,5 @@
 // ── Klivio Voice Pipeline — Telnyx Call Control + Groq + Cartesia ──
-// transcription_start for real STT → AI → playback_start TTS loop
+// transcription_start (Premium) → instant filler → AI → playback_start TTS loop
 require('dotenv').config();
 const https = require('https');
 const fs    = require('fs');
@@ -12,8 +12,11 @@ const DOMAIN = process.env.SERVER_DOMAIN || 'klivio-production.up.railway.app';
 //   a0e99841-438c-4a64-b679-ae501e7d6091 — Barbershop Man (casual, friendly)
 //   7cf0e2b1-8daf-4fe4-89ad-f6039398f359 — Newsman (professional)
 //   729651dc-c6c4-4987-aa9a-b0c30d4d4a88 — Movieman (deep)
-//   421b3369-f63f-4b03-8980-37a44df1d4e8 — Friendly Australian Man
 const VOICE_ID = process.env.CARTESIA_VOICE_ID || 'a0e99841-438c-4a64-b679-ae501e7d6091';
+
+// Filler phrases to mask LLM/TTS latency — short, natural acknowledgments
+const FILLER_PHRASES = ['Mm-hm.', 'Right.', 'Yeah.', 'Got it.', 'Mm.'];
+const FILLER_FILES = []; // populated on init
 
 // Active call sessions
 const sessions = new Map();
@@ -29,8 +32,8 @@ function getAIResponse(messages) {
         { role: 'system', content: KLIVIO.prompts.phone({ agentName: 'James', callType: 'inbound' }) },
         ...messages.slice(-8),
       ],
-      max_tokens: 70,
-      temperature: 0.8,
+      max_tokens: 60,
+      temperature: 0.85,
     });
     const req = https.request({
       hostname: 'api.groq.com',
@@ -41,12 +44,12 @@ function getAIResponse(messages) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
       },
-      timeout: 6000,
+      timeout: 5000,
     }, res => {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => {
-        try { resolve(JSON.parse(d).choices?.[0]?.message?.content?.trim() || "Could you say that again?"); }
+        try { resolve(JSON.parse(d).choices?.[0]?.message?.content?.trim() || "Sorry — could you say that again?"); }
         catch { resolve("Sorry, give me just a moment."); }
       });
     });
@@ -58,7 +61,7 @@ function getAIResponse(messages) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Cartesia TTS → MP3 buffer (with speed control for natural delivery)
+// Cartesia TTS → MP3 buffer
 // ─────────────────────────────────────────────────────────────
 function cartesiaTTS(text) {
   return new Promise((resolve, reject) => {
@@ -98,6 +101,26 @@ function cartesiaTTS(text) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Pre-generate filler audio files on boot (one-time cost)
+// ─────────────────────────────────────────────────────────────
+(async () => {
+  // Wait briefly for env vars / startup
+  await new Promise(r => setTimeout(r, 500));
+  for (let i = 0; i < FILLER_PHRASES.length; i++) {
+    try {
+      const audio = await cartesiaTTS(FILLER_PHRASES[i]);
+      const fname = `klivio-filler-${i}.mp3`;
+      fs.writeFileSync(path.join('/tmp', fname), audio);
+      FILLER_FILES.push(fname);
+      console.log(`[INIT] Filler ready: "${FILLER_PHRASES[i]}" → ${fname}`);
+    } catch (e) {
+      console.error(`[INIT] Filler "${FILLER_PHRASES[i]}" failed:`, e.message);
+    }
+  }
+  console.log(`[INIT] ${FILLER_FILES.length}/${FILLER_PHRASES.length} fillers ready`);
+})();
+
+// ─────────────────────────────────────────────────────────────
 // Telnyx Call Control API
 // ─────────────────────────────────────────────────────────────
 function telnyxAction(callControlId, action, params = {}) {
@@ -122,6 +145,20 @@ function telnyxAction(callControlId, action, params = {}) {
     req.on('timeout', () => { req.destroy(); resolve({}); });
     req.write(payload);
     req.end();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Play a random filler immediately (no await on caller path)
+// ─────────────────────────────────────────────────────────────
+async function playFiller(session) {
+  if (!FILLER_FILES.length || session.cleanedUp || session.hanging) return;
+  const fname = FILLER_FILES[Math.floor(Math.random() * FILLER_FILES.length)];
+  const audioUrl = `https://${DOMAIN}/api/voice/audio/${fname}`;
+  session.isSpeaking = true;
+  await telnyxAction(session.callControlId, 'playback_start', {
+    audio_url: audioUrl,
+    client_state: Buffer.from('filler:' + fname).toString('base64'),
   });
 }
 
@@ -162,7 +199,7 @@ async function speakText(session, text) {
 // Handle final transcript from caller
 // ─────────────────────────────────────────────────────────────
 async function handleTranscript(session, transcript) {
-  if (session.processing || session.cleanedUp || session.isSpeaking) return;
+  if (session.processing || session.cleanedUp) return;
   if (!transcript || transcript.trim().length < 2) return;
 
   session.processing = true;
@@ -228,17 +265,22 @@ async function handleCallControlEvent(req, res) {
       const session = sessions.get(callControlId);
       if (!session) break;
 
-      // Start continuous transcription (Google engine)
+      // Start continuous transcription — Telnyx Premium engine 'B' (better accents)
       const trxResult = await telnyxAction(callControlId, 'transcription_start', {
         language: 'en',
-        transcription_engine: 'A',
+        transcription_engine: 'B',
         interim_results_enabled: false,
       });
       if (trxResult?.errors) {
-        console.error('[CC] transcription_start error:', JSON.stringify(trxResult.errors));
-      } else {
-        session.transcribing = true;
+        console.error('[CC] transcription_start error (B):', JSON.stringify(trxResult.errors));
+        // Fallback to Google engine
+        await telnyxAction(callControlId, 'transcription_start', {
+          language: 'en-US',
+          transcription_engine: 'A',
+          interim_results_enabled: false,
+        });
       }
+      session.transcribing = true;
 
       // Speak greeting
       await speakText(session, "Hey, James here from Klivio — how can I help?");
@@ -256,19 +298,21 @@ async function handleCallControlEvent(req, res) {
       if (!session) break;
       session.isSpeaking = false;
 
-      // Clean up temp audio file
+      // Clean up temp audio file (but NOT pre-generated fillers)
       const clientState = payload?.client_state;
       if (clientState) {
         try {
-          const filename = Buffer.from(clientState, 'base64').toString();
-          fs.unlink(path.join('/tmp', filename), () => {});
+          const raw = Buffer.from(clientState, 'base64').toString();
+          if (!raw.startsWith('filler:')) {
+            fs.unlink(path.join('/tmp', raw), () => {});
+          }
         } catch {}
       }
 
       if (session.hanging) {
         setTimeout(() => telnyxAction(callControlId, 'hangup', {}), 600);
       }
-      // Otherwise: transcription is already running — just wait for caller
+      // Otherwise: transcription is always on — just wait for caller speech
       break;
     }
 
@@ -278,19 +322,23 @@ async function handleCallControlEvent(req, res) {
 
       const trxData = payload?.transcription_data || {};
       const transcript = trxData.transcript || '';
-      const isFinal = trxData.is_final !== false; // default true if undefined
+      const isFinal = trxData.is_final !== false;
 
       if (!transcript.trim()) break;
       console.log(`[CC] Transcript (final=${isFinal}): "${transcript}"`);
 
       if (!isFinal) break;
 
-      // Ignore caller speech while we're still talking (avoid AI hearing itself)
-      if (session.isSpeaking) {
-        console.log('[CC] Ignoring transcript — AI is speaking');
+      // Ignore caller speech while we're still talking
+      if (session.isSpeaking || session.processing) {
+        console.log('[CC] Ignoring transcript — AI is busy');
         break;
       }
 
+      // Fire filler IMMEDIATELY (parallel) to mask LLM+TTS latency
+      playFiller(session).catch(() => {});
+
+      // Process AI response in main flow (will interrupt filler when ready)
       await handleTranscript(session, transcript);
       break;
     }
@@ -301,7 +349,6 @@ async function handleCallControlEvent(req, res) {
       break;
     }
 
-    // Ignore unused legacy streaming events
     case 'call.streaming.started':
     case 'call.streaming.stopped':
     case 'streaming.started':
