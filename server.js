@@ -1,5 +1,7 @@
 require('dotenv').config();
-const express = require('express');
+const http     = require('http');
+const express  = require('express');
+const WebSocket = require('ws');
 const nodemailer = require('nodemailer');
 
 const ADMIN_KEY = process.env.ADMIN_KEY || 'klivio-admin-2026';
@@ -7,9 +9,25 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { chat } = require('./chatbot');
-const { handleInbound, handleGather, handleStatus } = require('./voice');
+const { handleCallControlEvent, handleMediaWebSocket } = require('./voice-pipeline');
 
-const app = express();
+const app    = express();
+const server = http.createServer(app);
+
+// ── WebSocket server for Telnyx media streaming ──
+const wss = new WebSocket.Server({ noServer: true });
+server.on('upgrade', (req, socket, head) => {
+  const url = new URL(req.url, `https://${req.headers.host}`);
+  if (url.pathname === '/api/voice/stream') {
+    const callControlId = url.searchParams.get('call');
+    if (!callControlId) { socket.destroy(); return; }
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      handleMediaWebSocket(ws, callControlId);
+    });
+  } else {
+    socket.destroy();
+  }
+});
 
 // ── CORS — allow klivio.online and localhost ──
 app.use((req, res, next) => {
@@ -531,10 +549,20 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ── Voice Webhooks (Telnyx TeXML) ──
-app.post('/api/voice', handleInbound);
-app.post('/api/voice/gather', handleGather);
-app.post('/api/voice/status', handleStatus);
+// ── Voice: Telnyx Call Control webhooks ──
+app.post('/api/voice/cc', handleCallControlEvent);
+
+// ── Voice: serve temp TTS audio files to Telnyx ──
+app.get('/api/voice/audio/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename); // prevent path traversal
+  if (!filename.startsWith('klivio-') || !filename.endsWith('.mp3')) {
+    return res.status(404).send('Not found');
+  }
+  const filepath = path.join('/tmp', filename);
+  if (!fs.existsSync(filepath)) return res.status(404).send('Not found');
+  res.setHeader('Content-Type', 'audio/mpeg');
+  res.sendFile(filepath);
+});
 
 // ── Chatbot API ──
 app.post('/api/chat', async (req, res) => {
@@ -549,4 +577,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Klivio running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Klivio running on http://localhost:${PORT}`));
