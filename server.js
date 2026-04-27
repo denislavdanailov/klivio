@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
+
+const ADMIN_KEY = process.env.ADMIN_KEY || 'klivio-admin-2026';
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -396,7 +398,7 @@ app.post('/api/order', async (req, res) => {
 
 // ── PUT /api/order/:id/status — Update order status ──
 app.put('/api/order/:id/status', (req, res) => {
-  if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   const { status, note } = req.body;
   const validStatuses = ['pending', 'in_progress', 'waiting_client', 'completed', 'cancelled'];
   if (!validStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' });
@@ -416,14 +418,14 @@ app.put('/api/order/:id/status', (req, res) => {
 
 // ── GET /api/orders ──
 app.get('/api/orders', (req, res) => {
-  if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   const orders = readOrders();
   res.json(orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
 });
 
 // ── GET /api/sent — sent campaign emails ──
 app.get('/api/sent', (req, res) => {
-  if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const leads = JSON.parse(fs.readFileSync(path.join(__dirname, 'leadgen', 'data', 'leads.json'), 'utf-8'));
     const sent = leads
@@ -450,7 +452,7 @@ app.get('/api/sent', (req, res) => {
 
 // ── GET /api/leads — all leads with stats ──
 app.get('/api/leads', (req, res) => {
-  if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const leads = JSON.parse(fs.readFileSync(path.join(__dirname, 'leadgen', 'data', 'leads.json'), 'utf-8'));
     res.json(leads);
@@ -459,7 +461,7 @@ app.get('/api/leads', (req, res) => {
 
 // ── GET /api/campaign-stats — sending stats per account + overall ──
 app.get('/api/campaign-stats', (req, res) => {
-  if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   try {
     let stats = { totalCapacity: 0, totalToday: 0, breakdown: [] };
     try {
