@@ -1,5 +1,5 @@
 // ── Klivio Voice Pipeline — Telnyx Call Control + Groq + Cartesia ──
-// Call Control gather approach: speak → gather speech → AI → speak → repeat
+// transcription_start for real STT → AI → playback_start TTS loop
 require('dotenv').config();
 const https = require('https');
 const fs    = require('fs');
@@ -8,7 +8,14 @@ const KLIVIO = require('./klivio-brain');
 
 const DOMAIN = process.env.SERVER_DOMAIN || 'klivio-production.up.railway.app';
 
-// Active call sessions: callControlId → session object
+// Cartesia voice — confirmed MALE voices (sonic-2):
+//   a0e99841-438c-4a64-b679-ae501e7d6091 — Barbershop Man (casual, friendly)
+//   7cf0e2b1-8daf-4fe4-89ad-f6039398f359 — Newsman (professional)
+//   729651dc-c6c4-4987-aa9a-b0c30d4d4a88 — Movieman (deep)
+//   421b3369-f63f-4b03-8980-37a44df1d4e8 — Friendly Australian Man
+const VOICE_ID = process.env.CARTESIA_VOICE_ID || 'a0e99841-438c-4a64-b679-ae501e7d6091';
+
+// Active call sessions
 const sessions = new Map();
 
 // ─────────────────────────────────────────────────────────────
@@ -22,8 +29,8 @@ function getAIResponse(messages) {
         { role: 'system', content: KLIVIO.prompts.phone({ agentName: 'James', callType: 'inbound' }) },
         ...messages.slice(-8),
       ],
-      max_tokens: 80,
-      temperature: 0.7,
+      max_tokens: 70,
+      temperature: 0.8,
     });
     const req = https.request({
       hostname: 'api.groq.com',
@@ -34,7 +41,7 @@ function getAIResponse(messages) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
       },
-      timeout: 8000,
+      timeout: 6000,
     }, res => {
       let d = '';
       res.on('data', c => d += c);
@@ -51,19 +58,17 @@ function getAIResponse(messages) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Cartesia TTS → MP3 buffer
+// Cartesia TTS → MP3 buffer (with speed control for natural delivery)
 // ─────────────────────────────────────────────────────────────
 function cartesiaTTS(text) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
       model_id: 'sonic-2',
       transcript: text,
-      voice: {
-        mode: 'id',
-        id: process.env.CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238',
-      },
+      voice: { mode: 'id', id: VOICE_ID },
       output_format: { container: 'mp3', bit_rate: 128000, sample_rate: 44100 },
       language: 'en',
+      speed: 'normal',
     });
     const req = https.request({
       hostname: 'api.cartesia.ai',
@@ -121,7 +126,7 @@ function telnyxAction(callControlId, action, params = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Speak: Cartesia → temp MP3 → Telnyx play_audio
+// Speak: Cartesia → temp MP3 → Telnyx playback_start
 // ─────────────────────────────────────────────────────────────
 async function speakText(session, text) {
   if (session.cleanedUp) return;
@@ -142,53 +147,38 @@ async function speakText(session, text) {
       audio_url: audioUrl,
       client_state: clientState,
     });
-    console.log('[PIPELINE] playback_start response:', JSON.stringify(playResult).slice(0, 300));
-    // isSpeaking = false is set when call.playback.ended fires
+
+    if (playResult?.errors) {
+      console.error('[PIPELINE] playback_start error:', JSON.stringify(playResult.errors));
+      session.isSpeaking = false;
+    }
   } catch (e) {
     console.error('[PIPELINE] speakText error:', e.message);
     session.isSpeaking = false;
-    // On TTS failure, still try to gather so the call doesn't die
-    if (!session.hanging && !session.cleanedUp) {
-      startGather(session);
-    }
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Start gathering caller's speech
-// ─────────────────────────────────────────────────────────────
-async function startGather(session) {
-  if (session.cleanedUp || session.hanging) return;
-  console.log('[PIPELINE] Gathering speech...');
-  await telnyxAction(session.callControlId, 'gather', {
-    input: ['speech'],
-    speech_timeout: 'auto',
-    speech_end_timeout: 1500,
-    language: 'en-US',
-    minimum_digits: 0,
-  });
-}
-
-// ─────────────────────────────────────────────────────────────
-// Handle speech from caller
+// Handle final transcript from caller
 // ─────────────────────────────────────────────────────────────
 async function handleTranscript(session, transcript) {
-  if (session.processing || session.cleanedUp) return;
-  session.processing = true;
+  if (session.processing || session.cleanedUp || session.isSpeaking) return;
+  if (!transcript || transcript.trim().length < 2) return;
 
+  session.processing = true;
   try {
     console.log(`[PIPELINE] User said: "${transcript}"`);
 
-    const noSignals = ['not interested', 'no thank you', 'no thanks', 'remove me', "don't call", 'do not call', 'goodbye', 'bye'];
+    const noSignals = ['not interested', 'no thank you', 'no thanks', 'remove me', "don't call", 'do not call', 'goodbye', 'bye now'];
     if (noSignals.some(s => transcript.toLowerCase().includes(s))) {
       session.hanging = true;
-      await speakText(session, "No problem at all. Have a great day!");
+      await speakText(session, "No worries — have a great day!");
       return;
     }
 
     if (Date.now() - session.startTime > 170000) {
       session.hanging = true;
-      await speakText(session, "I don't want to take more of your time. Check out klivio.online for more. Have a great day!");
+      await speakText(session, "I don't want to take more of your time. Check klivio dot online for more. Cheers!");
       return;
     }
 
@@ -196,7 +186,7 @@ async function handleTranscript(session, transcript) {
     const reply = await getAIResponse(session.messages);
     session.messages.push({ role: 'assistant', content: reply });
 
-    const endSignals = ['have a great day', 'have a good day', 'take care', 'best of luck', 'goodbye'];
+    const endSignals = ['have a great day', 'have a good one', 'take care', 'cheers', 'goodbye'];
     if (endSignals.some(s => reply.toLowerCase().includes(s))) session.hanging = true;
 
     await speakText(session, reply);
@@ -206,10 +196,10 @@ async function handleTranscript(session, transcript) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Call Control webhook — handles all Telnyx call events
+// Call Control webhook
 // ─────────────────────────────────────────────────────────────
 async function handleCallControlEvent(req, res) {
-  res.sendStatus(200); // ACK immediately — Telnyx requires fast response
+  res.sendStatus(200);
 
   const event         = req.body?.data?.event_type;
   const payload       = req.body?.data?.payload;
@@ -227,6 +217,7 @@ async function handleCallControlEvent(req, res) {
         processing:  false,
         hanging:     false,
         cleanedUp:   false,
+        transcribing: false,
         startTime:   Date.now(),
       });
       await telnyxAction(callControlId, 'answer', {});
@@ -236,15 +227,33 @@ async function handleCallControlEvent(req, res) {
     case 'call.answered': {
       const session = sessions.get(callControlId);
       if (!session) break;
-      // Speak greeting immediately — no WebSocket needed
-      await speakText(session, "Hey, thanks for calling Klivio — this is James. How can I help?");
+
+      // Start continuous transcription (Google engine)
+      const trxResult = await telnyxAction(callControlId, 'transcription_start', {
+        language: 'en',
+        transcription_engine: 'A',
+        interim_results_enabled: false,
+      });
+      if (trxResult?.errors) {
+        console.error('[CC] transcription_start error:', JSON.stringify(trxResult.errors));
+      } else {
+        session.transcribing = true;
+      }
+
+      // Speak greeting
+      await speakText(session, "Hey, James here from Klivio — how can I help?");
+      break;
+    }
+
+    case 'call.playback.started': {
+      const session = sessions.get(callControlId);
+      if (session) session.isSpeaking = true;
       break;
     }
 
     case 'call.playback.ended': {
       const session = sessions.get(callControlId);
       if (!session) break;
-
       session.isSpeaking = false;
 
       // Clean up temp audio file
@@ -257,35 +266,32 @@ async function handleCallControlEvent(req, res) {
       }
 
       if (session.hanging) {
-        // End of conversation — hang up
-        setTimeout(() => telnyxAction(callControlId, 'hangup', {}), 800);
-      } else {
-        // Listen for caller's response
-        await startGather(session);
+        setTimeout(() => telnyxAction(callControlId, 'hangup', {}), 600);
       }
+      // Otherwise: transcription is already running — just wait for caller
       break;
     }
 
-    case 'call.gather.ended': {
+    case 'call.transcription': {
       const session = sessions.get(callControlId);
       if (!session) break;
 
-      // Extract speech result from payload
-      const speechResult = payload?.speech_result
-        || payload?.digits
-        || '';
+      const trxData = payload?.transcription_data || {};
+      const transcript = trxData.transcript || '';
+      const isFinal = trxData.is_final !== false; // default true if undefined
 
-      console.log(`[CC] Gather ended — speech: "${speechResult}"`);
+      if (!transcript.trim()) break;
+      console.log(`[CC] Transcript (final=${isFinal}): "${transcript}"`);
 
-      if (!speechResult.trim()) {
-        // No speech detected
-        if (!session.hanging) {
-          await speakText(session, "I didn't quite catch that — could you say that again?");
-        }
+      if (!isFinal) break;
+
+      // Ignore caller speech while we're still talking (avoid AI hearing itself)
+      if (session.isSpeaking) {
+        console.log('[CC] Ignoring transcript — AI is speaking');
         break;
       }
 
-      await handleTranscript(session, speechResult);
+      await handleTranscript(session, transcript);
       break;
     }
 
@@ -295,11 +301,11 @@ async function handleCallControlEvent(req, res) {
       break;
     }
 
+    // Ignore unused legacy streaming events
     case 'call.streaming.started':
     case 'call.streaming.stopped':
     case 'streaming.started':
     case 'streaming.failed':
-      // Ignore — we're not using WebSocket streaming anymore
       break;
   }
 }
@@ -308,7 +314,7 @@ async function handleCallControlEvent(req, res) {
 // WebSocket handler — kept for compatibility but not used
 // ─────────────────────────────────────────────────────────────
 function handleMediaWebSocket(ws, callControlId) {
-  console.log('[PIPELINE] WS connected (not used in gather mode):', callControlId);
+  console.log('[PIPELINE] WS connected (not used):', callControlId);
   ws.close();
 }
 
