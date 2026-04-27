@@ -100,7 +100,7 @@ function telnyxAction(callControlId, action, params = {}) {
     const payload = JSON.stringify(params);
     const req = https.request({
       hostname: 'api.telnyx.com',
-      path: `/v2/calls/${callControlId}/actions/${action}`,
+      path: `/v2/calls/${encodeURIComponent(callControlId)}/actions/${action}`,
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TELNYX_API_KEY}`,
