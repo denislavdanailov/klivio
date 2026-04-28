@@ -9,7 +9,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { chat } = require('./chatbot');
-const { handleCallControlEvent, handleMediaWebSocket } = require('./voice-realtime');
+const { handleCallControlEvent, handleMediaWebSocket } = require('./voice-elevenlabs');
+const DB = require('./db');
 
 const app    = express();
 const server = http.createServer(app);
@@ -46,39 +47,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false })); // Telnyx/Twilio send form-urlencoded webhooks
 app.use(express.static(__dirname, { index: 'index.html' }));
 
-// ── Storage ──
-const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
-if (!fs.existsSync(path.join(__dirname, 'data'))) fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-if (!fs.existsSync(ORDERS_FILE)) fs.writeFileSync(ORDERS_FILE, '[]');
-
-function readOrders() { return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf-8')); }
-function writeOrders(orders) { fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2)); }
-
-// ── Deadline logic (business days) ──
-const DELIVERY_DAYS = {
-  'AI Lead Responder':       2,
-  'Follow-Up Automator':     3,
-  'AI Chatbot':              4,
-  'Review & Referral System':2,
-  'Valuation Bot':           3,
-  'Report Generator':        3,
-  'Cold Outreach Setup':     5,
-  'Live Chat Assistant':     3,
-  'Voice Assistant':         5,
-  'Custom Build':            10
-};
-
-function addBusinessDays(date, days) {
-  const result = new Date(date);
-  let added = 0;
-  while (added < days) {
-    result.setDate(result.getDate() + 1);
-    const d = result.getDay();
-    if (d !== 0 && d !== 6) added++;
-  }
-  return result;
-}
-
+// ── Date formatter for email templates ──
 function formatDate(date) {
   return new Date(date).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 }
@@ -206,33 +175,24 @@ app.post('/api/stripe/webhook', async (req, res) => {
     const product      = session.metadata?.product || plan.product;
     const price        = plan.price;
 
-    const deliveryDays = DELIVERY_DAYS[product] || 5;
-    const deadline     = addBusinessDays(new Date(), deliveryDays);
+    // Deduplicate by Stripe session ID — skip if already saved
+    const existing = await DB.findByStripeSession(session.id);
+    if (!existing) {
 
-    const order = {
-      id:           session.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 7)),
-      name:         customerName,
-      email:        customerEmail,
-      website:      session.metadata?.website  || '',
-      language:     'English',
-      notes:        `Stripe checkout: ${session.id}`,
+    const order = await DB.createOrder({
+      source:            'stripe',
+      name:              customerName,
+      email:             customerEmail,
+      website_url:       session.metadata?.website || '',
+      language:          'English',
+      notes:             `Stripe checkout: ${session.id}`,
       product,
       price,
-      status:       'pending',
-      deadline:     deadline.toISOString(),
-      deliveryDays,
-      createdAt:    new Date().toISOString(),
-      updatedAt:    new Date().toISOString(),
-      statusHistory: [{ status: 'pending', at: new Date().toISOString() }],
-    };
-
-    // Deduplicate by Stripe session ID
-    const orders = readOrders();
-    if (!orders.find(o => o.id === order.id)) {
-      orders.push(order);
-      writeOrders(orders);
-      console.log(`[Stripe] New order: ${product} — ${customerName} <${customerEmail}>`);
-    }
+      status:            'pending',
+      stripe_session_id: session.id,
+    });
+    const deadline = new Date(order.deadline);
+    const deliveryDays = order.delivery_days;
 
     // Send onboarding emails
     if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS) {
@@ -271,6 +231,7 @@ app.post('/api/stripe/webhook', async (req, res) => {
         </div>`,
       }).catch(e => console.error('Client onboarding email failed:', e.message));
     }
+    } // end dedup check
   }
 
   res.json({ received: true });
@@ -337,34 +298,26 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
-// ── POST /api/order ──
+// ── POST /api/order — manual order (website form / admin) ──
 app.post('/api/order', async (req, res) => {
   try {
-    const { name, email, website, language, notes, product, price } = req.body;
+    const { name, email, website, language, notes, product, price, phone, source } = req.body;
     if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
 
-    const deliveryDays = DELIVERY_DAYS[product] || 5;
-    const deadline = addBusinessDays(new Date(), deliveryDays);
-
-    const order = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-      name, email,
-      website: website || '',
-      language: language || 'English',
-      notes: notes || '',
-      product: product || 'Unknown',
-      price: price || '',
-      status: 'pending',
-      deadline: deadline.toISOString(),
-      deliveryDays,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      statusHistory: [{ status: 'pending', at: new Date().toISOString() }]
-    };
-
-    const orders = readOrders();
-    orders.push(order);
-    writeOrders(orders);
+    const order = await DB.createOrder({
+      source:      source || 'website',
+      name,
+      email,
+      phone:       phone       || null,
+      website_url: website     || '',
+      language:    language    || 'English',
+      notes:       notes       || '',
+      product:     product     || 'Unknown',
+      price:       price       || '',
+      status:      'pending',
+    });
+    const deadline     = new Date(order.deadline);
+    const deliveryDays = order.delivery_days;
 
     // ── Emails ──
     if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS) {
@@ -416,30 +369,29 @@ app.post('/api/order', async (req, res) => {
 });
 
 // ── PUT /api/order/:id/status — Update order status ──
-app.put('/api/order/:id/status', (req, res) => {
+app.put('/api/order/:id/status', async (req, res) => {
   if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
   const { status, note } = req.body;
-  const validStatuses = ['pending', 'in_progress', 'waiting_client', 'completed', 'cancelled'];
+  const validStatuses = ['new', 'pending', 'active', 'in_progress', 'waiting_client', 'completed', 'cancelled'];
   if (!validStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' });
-
-  const orders = readOrders();
-  const idx = orders.findIndex(o => o.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Order not found' });
-
-  orders[idx].status = status;
-  orders[idx].updatedAt = new Date().toISOString();
-  orders[idx].statusHistory = orders[idx].statusHistory || [];
-  orders[idx].statusHistory.push({ status, note: note || '', at: new Date().toISOString() });
-  writeOrders(orders);
-
-  res.json({ success: true, order: orders[idx] });
+  try {
+    await DB.updateOrderStatus(req.params.id, status, note);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(404).json({ error: e.message });
+  }
 });
 
 // ── GET /api/orders ──
-app.get('/api/orders', (req, res) => {
+app.get('/api/orders', async (req, res) => {
   if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
-  const orders = readOrders();
-  res.json(orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+  try {
+    const { status, source } = req.query;
+    const orders = await DB.getOrders({ status, source });
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── GET /api/sent — sent campaign emails ──
@@ -546,6 +498,23 @@ app.get('/campaign', (req, res) => {
 
 // ── Voice: Telnyx Call Control webhooks ──
 app.post('/api/voice/cc', handleCallControlEvent);
+
+// ── POST /api/voice/order — create order from phone call (admin or AI tool) ──
+app.post('/api/voice/order', async (req, res) => {
+  const key = req.headers['x-admin-key'] || req.body?.admin_key;
+  if (key !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { name, email, phone, product, price, call_id, notes } = req.body;
+    if (!product) return res.status(400).json({ error: 'product required' });
+    const order = await DB.createOrder({
+      source: 'phone', name, email, phone, product, price,
+      status: 'pending', call_id, notes,
+    });
+    res.json({ success: true, orderId: order?.id });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 
 // ── Chatbot API ──

@@ -17,6 +17,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const fs   = require('fs');
 const path = require('path');
 const https = require('https');
+const DB   = require('../db');
 
 const LEADS_FILE = path.join(__dirname, 'data', 'leads.json');
 const INBOX_LOG  = path.join(__dirname, 'data', 'inbox_log.json');
@@ -220,6 +221,24 @@ async function processEmail(msg) {
       leads[leadIdx].autoReplied = true;
       leads[leadIdx].autoReplyBody = responseBody;
       saveLeads(leads);
+    }
+  }
+
+  // Save interested lead as order in Supabase
+  if (intent === 'interested') {
+    try {
+      await DB.createOrder({
+        source:  'email',
+        name:    lead.contactName || lead.business,
+        email:   lead.email,
+        website_url: lead.website || '',
+        product: lead.sentProduct || 'Unknown',
+        price:   '',
+        status:  'new',
+        notes:   `Email lead — replied interested. Summary: ${classification.summary || ''}`,
+      });
+    } catch (e) {
+      console.error('[DB] Failed to save email lead:', e.message);
     }
   }
 
