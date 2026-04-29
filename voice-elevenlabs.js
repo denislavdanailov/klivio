@@ -154,8 +154,10 @@ function handleMediaWebSocket(ws, callControlId) {
   let elReady = false;
 
   // ── Connect to ElevenLabs Conversational AI ──
+  // output_format=ulaw_8000 → ElevenLabs encodes natively to μ-law 8kHz,
+  // so we forward audio bytes to Telnyx with ZERO transcoding (no artifacts).
   const elWs = new WebSocket(
-    `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${EL_AGENT_ID}`,
+    `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${EL_AGENT_ID}&output_format=ulaw_8000`,
     { headers: { 'xi-api-key': EL_API_KEY } }
   );
   session.elWs = elWs;
@@ -191,11 +193,12 @@ function handleMediaWebSocket(ws, callControlId) {
 
       switch (msg.type) {
         case 'audio':
-          // Forward AI voice chunk to caller (PCM→μ-law)
+          // Forward AI voice chunk to caller — already μ-law 8kHz (output_format=ulaw_8000),
+          // pass through directly with no transcoding so quality is preserved.
           if (msg.audio_event?.audio_base_64 && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
               event: 'media',
-              media: { payload: elToTelnyx(msg.audio_event.audio_base_64) },
+              media: { payload: msg.audio_event.audio_base_64 },
             }));
           }
           break;
