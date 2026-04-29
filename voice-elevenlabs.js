@@ -277,7 +277,39 @@ function handleMediaWebSocket(ws, callControlId) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Cleanup — save call record to DB
+// Fetch ElevenLabs conversation transcript (after call ends)
+// ─────────────────────────────────────────────────────────────
+function fetchTranscript(conversationId) {
+  return new Promise(resolve => {
+    if (!conversationId || !EL_API_KEY) return resolve(null);
+    const req = https.request({
+      hostname: 'api.elevenlabs.io',
+      path:     `/v1/convai/conversations/${encodeURIComponent(conversationId)}`,
+      method:   'GET',
+      headers:  { 'xi-api-key': EL_API_KEY },
+      timeout:  15000,
+    }, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d);
+          // Flatten transcript to readable text
+          const turns = j.transcript || j.conversation?.turns || [];
+          if (!turns.length) return resolve(null);
+          const text = turns.map(t => `${t.role === 'agent' ? 'James' : 'Caller'}: ${t.message || t.text || ''}`).join('\n');
+          resolve(text || null);
+        } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.end();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Cleanup — save call record + transcript to DB
 // ─────────────────────────────────────────────────────────────
 async function cleanup(session) {
   if (session.cleanedUp) return;
@@ -286,14 +318,25 @@ async function cleanup(session) {
   sessions.delete(session.callControlId);
   console.log(`[EL] Cleaned up: ${session.callControlId.slice(0, 24)}...`);
 
-  // Save call record to DB (so every call is tracked, even if no sale)
+  // Wait briefly so ElevenLabs has time to finalise the conversation record
+  await new Promise(r => setTimeout(r, 4000));
+
+  // Fetch transcript from ElevenLabs
+  let transcript = null;
+  if (session.conversationId) {
+    transcript = await fetchTranscript(session.conversationId);
+    if (transcript) console.log(`[EL] Transcript fetched (${transcript.length} chars)`);
+  }
+
+  // Save call record to DB (every call tracked, transcript attached)
   try {
     await DB.createOrder({
-      source:   'phone',
-      product:  'Voice Assistant',  // what they called about — update if sale confirmed
-      status:   'new',
-      call_id:  session.conversationId || session.callControlId,
-      notes:    `Inbound call. ElevenLabs conversation: ${session.conversationId || 'unknown'}`,
+      source:     'phone',
+      product:    'Voice Assistant',
+      status:     'new',
+      call_id:    session.conversationId || session.callControlId,
+      transcript: transcript || null,
+      notes:      `Inbound call. ElevenLabs conversation: ${session.conversationId || 'unknown'}`,
     });
   } catch (e) {
     console.error('[EL] Failed to save call record:', e.message);

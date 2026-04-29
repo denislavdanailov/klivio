@@ -529,10 +529,121 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// ── GET /api/health — uptime check for monitoring ──
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, uptime: Math.floor(process.uptime()), ts: new Date().toISOString() });
+});
+
+// ── Telegram bot webhook — /orders /hot /leads commands from phone ──
+app.post('/api/telegram/webhook', async (req, res) => {
+  res.sendStatus(200); // always 200 to Telegram
+  const msg = req.body?.message;
+  if (!msg?.text) return;
+  const chatId = msg.chat?.id;
+  const text   = msg.text.trim();
+  const token  = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !chatId) return;
+
+  async function tgSend(t) {
+    const https = require('https');
+    const p = JSON.stringify({ chat_id: chatId, text: t, parse_mode: 'Markdown' });
+    const req2 = https.request({
+      hostname: 'api.telegram.org',
+      path: `/bot${token}/sendMessage`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(p) },
+      timeout: 10000,
+    }, r => r.resume());
+    req2.on('error', () => {});
+    req2.write(p);
+    req2.end();
+  }
+
+  try {
+    if (text.startsWith('/orders') || text.startsWith('/pipeline')) {
+      const orders = await DB.getOrders({ limit: 20 });
+      if (!orders.length) return tgSend('No orders yet.');
+      const lines = orders.slice(0, 15).map(o => {
+        const icon = {website:'🌐',email:'📧',phone:'📞',stripe:'💳'}[o.source] || '•';
+        const status = o.status.replace(/_/g,' ');
+        return `${icon} *${(o.name||o.email||'Unknown').slice(0,22)}* — ${o.product.slice(0,20)}\n  ↳ ${status} | ${o.source}`;
+      });
+      tgSend(`📋 *Orders (${orders.length} total)*\n\n${lines.join('\n\n')}`);
+
+    } else if (text.startsWith('/hot')) {
+      // Hot leads: email orders with status new/pending
+      const hot = await DB.getOrders({ status: 'new', limit: 10 });
+      const interested = hot.filter(o => o.source === 'email');
+      if (!interested.length) return tgSend('No hot email leads right now.');
+      const lines = interested.map(o =>
+        `🔥 *${(o.name||o.email||'?').slice(0,25)}*\n  ${o.email||''}\n  ${(o.notes||'').slice(0,80)}`
+      );
+      tgSend(`🔥 *Hot Email Leads*\n\n${lines.join('\n\n')}`);
+
+    } else if (text.startsWith('/calls')) {
+      const calls = await DB.getOrders({ source: 'phone', limit: 10 });
+      if (!calls.length) return tgSend('No phone calls recorded yet.');
+      const lines = calls.map(o =>
+        `📞 *${(o.name||o.call_id||'Unknown').slice(0,25)}*\n  ${new Date(o.created_at).toLocaleString('en-GB')}\n  ${(o.notes||'').slice(0,60)}`
+      );
+      tgSend(`📞 *Recent Calls (${calls.length})*\n\n${lines.join('\n\n')}`);
+
+    } else if (text.startsWith('/stats')) {
+      const all = await DB.getOrders({ limit: 500 });
+      const counts = {};
+      all.forEach(o => { counts[o.status] = (counts[o.status]||0)+1; });
+      const srcCounts = {};
+      all.forEach(o => { srcCounts[o.source] = (srcCounts[o.source]||0)+1; });
+      const lines = [
+        `📊 *Klivio Pipeline Stats*`,
+        `Total orders: *${all.length}*`,
+        ``,
+        `*By status:*`,
+        ...Object.entries(counts).map(([k,v]) => `  ${k}: ${v}`),
+        ``,
+        `*By source:*`,
+        ...Object.entries(srcCounts).map(([k,v]) => `  ${k}: ${v}`),
+      ];
+      tgSend(lines.join('\n'));
+
+    } else if (text.startsWith('/help') || text.startsWith('/start')) {
+      tgSend(`*Klivio Bot Commands*\n\n/orders — recent orders\n/hot — hot email leads\n/calls — recent phone calls\n/stats — pipeline stats\n/help — this menu`);
+    }
+  } catch (e) {
+    tgSend(`Error: ${e.message}`);
+  }
+});
+
 // ── Fallback ──
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Klivio running on http://localhost:${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Klivio running on http://localhost:${PORT}`);
+
+  // Register Telegram webhook automatically on start
+  const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+  const domain  = process.env.SERVER_DOMAIN || 'klivio-production.up.railway.app';
+  if (tgToken) {
+    const https2 = require('https');
+    const hookUrl = `https://${domain}/api/telegram/webhook`;
+    const p2 = JSON.stringify({ url: hookUrl, allowed_updates: ['message'] });
+    const r2 = https2.request({
+      hostname: 'api.telegram.org',
+      path: `/bot${tgToken}/setWebhook`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(p2) },
+      timeout: 10000,
+    }, res2 => {
+      let d = ''; res2.on('data', c => d+=c);
+      res2.on('end', () => {
+        try { const j = JSON.parse(d); console.log('[TG] Webhook registered:', j.ok ? '✓' : j.description); }
+        catch { console.log('[TG] Webhook response:', d.slice(0,100)); }
+      });
+    });
+    r2.on('error', e => console.error('[TG] Webhook reg error:', e.message));
+    r2.write(p2); r2.end();
+  }
+});
