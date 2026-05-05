@@ -32,7 +32,10 @@ server.on('upgrade', (req, socket, head) => {
 
 // ── CORS — allow klivio.online and localhost ──
 app.use((req, res, next) => {
-  const allowed = ['https://klivio.online', 'https://www.klivio.online', 'http://localhost:3000', 'http://localhost:8080'];
+  const allowed = [
+    'https://klivio.online', 'https://www.klivio.online',
+    'http://localhost:3000', 'http://localhost:8080', 'http://localhost:5173', 'http://localhost:5174',
+  ];
   const origin = req.headers.origin;
   if (origin && allowed.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -54,48 +57,28 @@ function formatDate(date) {
 
 // ── Onboarding questions per product ──
 const ONBOARDING = {
-  'AI Lead Responder': [
+  'STARTER Bundle': [
+    'What is your business name and what do you do?',
+    'What is your website URL? (or leave blank if you don\'t have one)',
     'What email address do your leads contact you on?',
-    "What should the AI say when it replies to a new lead? (Or leave blank and we'll craft it for you)",
-    "Should it try to book a call/appointment? If yes — what's your calendar link or availability?"
+    'What is the #1 problem you want the AI to fix first? (e.g. slow lead response, no follow-ups, missed calls)'
   ],
-  'Follow-Up Automator': [
-    'What tool do you use to manage customers? (Gmail, spreadsheet, CRM — any is fine)',
-    'At what point does a lead go cold for you? (e.g. after 3 days of no reply)',
-    'What tone should follow-ups have — formal or friendly?'
-  ],
-  'AI Chatbot': [
+  'GROWTH Bundle': [
+    'What is your business name and what do you do?',
     'What is your website URL?',
     'What are the 5 most common questions your customers ask?',
-    'Should the chatbot book appointments? If yes — what booking tool do you use (Calendly, etc.)?',
-    'What is your website built on? (WordPress, Wix, Shopify, custom...)'
+    'What booking tool do you use? (Calendly, Google Calendar, none — tell us and we\'ll sort it)',
+    'What is the #1 bottleneck in your sales process right now?'
   ],
-  'Review & Referral System': [
-    'What is your Google Business Profile link? (search your business on Google Maps and copy the URL)',
-    'How do you currently contact customers after a job? (email / SMS / WhatsApp)',
-    'What is a typical job you do? (e.g. "dental cleaning", "house valuation")'
-  ],
-  'Valuation Bot': [
-    'What service or product are you pricing? (e.g. cleaning, web design, roofing)',
-    'What factors affect your price? (e.g. size, location, urgency)',
-    'What should happen after the bot gives an estimate — book a call, send an email, or just display the price?'
-  ],
-  'Report Generator': [
-    'What type of report do you generate? (e.g. inspection, audit, SEO report)',
-    'What data goes into it? (please list the fields/sections)',
-    'Can you attach a sample report so we can match the format?'
-  ],
-  'Cold Outreach Setup': [
-    'Who is your ideal customer? (industry, size, location)',
-    'What do you sell and what problem does it solve?',
-    'Do you have an existing lead list or should we build one from scratch?',
-    'What email address should outreach come from?'
-  ],
-  'Live Chat Assistant': [
+  'FULL Bundle': [
+    'What is your business name and what do you do?',
     'What is your website URL?',
+    'What is your current business phone number?',
+    'What do callers typically ask about? (e.g. pricing, availability, location, booking)',
+    'What are your opening hours?',
     'What are the 5 most common questions your customers ask?',
-    'What is your website built on? (WordPress, Wix, Shopify, custom...)',
-    'Should the chat capture name + email before answering, or just answer directly?'
+    'What booking tool do you use? (Calendly, Google Calendar, none)',
+    'Who is your ideal outreach target? (industry, size, location)'
   ],
   'Voice Assistant': [
     'What is your business name and what do you do?',
@@ -125,9 +108,9 @@ const notifyTransport = nodemailer.createTransport({
 
 // ── Stripe plan → product mapping ──
 const STRIPE_PLAN_MAP = {
-  19700: { product: 'AI Lead Responder',    price: '£197/mo', plan: 'Starter'     },
-  29700: { product: 'AI Chatbot',           price: '£297/mo', plan: 'Growth'      },
-  49700: { product: 'Voice Assistant',      price: '£497/mo', plan: 'Full System' },
+  19700: { product: 'STARTER Bundle',  price: '£197/mo', plan: 'Starter'      },
+  29700: { product: 'GROWTH Bundle',   price: '£297/mo', plan: 'Growth'       },
+  49700: { product: 'FULL Bundle',     price: '£497/mo', plan: 'Full System'  },
 };
 
 function planFromAmount(pence) {
