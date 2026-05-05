@@ -34,6 +34,7 @@ server.on('upgrade', (req, socket, head) => {
 app.use((req, res, next) => {
   const allowed = [
     'https://klivio.online', 'https://www.klivio.online',
+    'https://klivio.netlify.app', 'https://klivioai.netlify.app',
     'http://localhost:3000', 'http://localhost:8080', 'http://localhost:5173', 'http://localhost:5174',
   ];
   const origin = req.headers.origin;
