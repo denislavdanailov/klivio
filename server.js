@@ -631,3 +631,16 @@ server.listen(PORT, () => {
     r2.write(p2); r2.end();
   }
 });
+
+// ── Supabase keep-alive ping (prevents free-tier auto-pause after 7 days) ──
+const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
+async function pingSupabase() {
+  try {
+    await DB.getOrders({ limit: 1 });
+    console.log('[keepalive] Supabase ping OK');
+  } catch (e) {
+    console.error('[keepalive] Supabase ping failed:', e.message);
+  }
+}
+pingSupabase(); // ping on startup too (restores paused project on first request)
+setInterval(pingSupabase, FOUR_DAYS_MS);
