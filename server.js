@@ -423,31 +423,9 @@ app.post('/api/setup', async (req, res) => {
   }
 });
 
-// ── POST /api/order — manual order (website form / admin) ──
-app.post('/api/order', async (req, res) => {
-  try {
-    const { name, email, website, language, notes, product, price, phone, source } = req.body;
-    if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
-
-    // Save as unpaid — no emails sent until Stripe confirms payment
-    const order = await DB.createOrder({
-      source:      source || 'website',
-      name,
-      email,
-      phone:       phone    || null,
-      website_url: website  || '',
-      language:    language || 'English',
-      notes:       notes    || '',
-      product:     product  || 'Unknown',
-      price:       price    || '',
-      status:      'unpaid',
-    });
-
-    res.json({ success: true, orderId: order.id });
-  } catch (err) {
-    console.error('Order error:', err.message);
-    res.status(500).json({ error: 'Failed to process order' });
-  }
+// ── POST /api/order — disabled, orders only created via Stripe webhook ──
+app.post('/api/order', (req, res) => {
+  res.status(400).json({ error: 'Orders must be completed via checkout. Use /api/checkout to create a payment session.' });
 });
 
 // ── PUT /api/order/:id/status — Update order status ──
