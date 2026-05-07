@@ -124,6 +124,7 @@ async function runCampaign({ limit = 9999, dryRun = false } = {}) {
       weakness: analysis.weakness,
       productName: analysis.productName,
       productPrice: analysis.productPrice,
+      upsell: analysis.upsell || '',
       senderName,
       websiteContext: analysis.context || {},
       ownerName: analysis.context?.ownerName || '',

@@ -5,6 +5,7 @@ const https = require('https');
 const KLIVIO = require('../klivio-brain');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const { findLocalCompetitor } = require('./competitor');
 
 // ── Industry-specific context for better personalization ──
 const INDUSTRY_CONTEXT = {
@@ -137,56 +138,63 @@ function generateSubject(data) {
     .replace(/\{\{business\}\}/g, data.business);
 }
 
-// ── Fallback templates (без Groq) — varied to avoid spam filters ──
+// ── Fallback templates — loss-first, neuromarketing-driven ──
 const FALLBACK_TEMPLATES = [
-  (d, ctx) => `Hi ${d.contactName ? d.contactName.split(' ')[0] : 'there'},
+  (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
 
-Took a look at ${d.business} and noticed ${d.weakness}.
+${ctx.stakes} — and ${ctx.pain.toLowerCase()}. That's the reality for most ${d.industry} businesses that haven't automated yet.
 
-For ${d.industry} businesses, ${ctx.pain}. ${ctx.stakes}.
+${d.business} ${d.weakness}. The top operators in your space already have AI handling this 24/7 — nights, weekends, bank holidays. The ones who don't are losing quietly.
 
-We've built ${d.productName} (${d.productPrice}) — gets you set up in 2-3 days, zero technical work on your end. We handle everything.
-
-${ctx.cta}
-
-${d.senderName}
-Klivio`,
-
-  (d, ctx) => `Hi ${d.contactName ? d.contactName.split(' ')[0] : 'there'},
-
-Quick one — I was researching ${d.industry} businesses in the UK and ${d.business} came up.
-
-One thing I noticed: ${d.weakness}. That matters because ${ctx.pain.toLowerCase()}.
-
-Our fix is ${d.productName} at ${d.productPrice}. Usually live in 3 days, nothing for you to install.
+${d.productName} fixes this in 48 hours at ${d.productPrice}. We handle everything.
 
 ${ctx.cta}
 
 ${d.senderName}
-Klivio`,
+Klivio
 
-  (d, ctx) => `Hi ${d.contactName ? d.contactName.split(' ')[0] : 'there'},
-
-Reaching out because I saw ${d.business} online and ${d.weakness}.
-
-Here's the thing — ${ctx.pain}. ${ctx.stakes}.
-
-We solve this with ${d.productName} (${d.productPrice}). Done-for-you, live in under a week.
-
-${ctx.cta}
-
-${d.senderName}
-Klivio`,
+P.S. If you want a quick look first: klivio.online`,
 
   (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
 
-Short note — ${d.weakness} on ${d.business}.
+Every week ${d.business} ${d.weakness} — that's ${ctx.stakes} leaving silently.
 
-${ctx.stakes}. We fix it with ${d.productName} — ${d.productPrice}, set up in 2-3 days, fully managed.
+The best ${d.industry} businesses fixed this by automating the first response. Reply within 2 minutes, 24/7, without lifting a finger. Most of the competition in your area has already done it.
+
+${d.productName} at ${d.productPrice}. Live in 48 hours, zero technical work on your end.
 
 ${ctx.cta}
 
-${d.senderName} @ Klivio`,
+${d.senderName}
+Klivio
+
+P.S. If you want a quick look first: klivio.online`,
+
+  (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
+
+${ctx.pain.charAt(0).toUpperCase() + ctx.pain.slice(1)}. For ${d.industry} businesses, that means ${ctx.stakes} — quietly, every month.
+
+Noticed ${d.business} ${d.weakness}. We've already fixed this for similar businesses — ${d.productName} at ${d.productPrice}, fully managed, live in 48 hours.
+
+${ctx.cta}
+
+${d.senderName}
+Klivio
+
+P.S. If you want a quick look first: klivio.online`,
+
+  (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
+
+Quick one. ${ctx.stakes}. Most of that loss happens outside business hours, when nobody's picking up.
+
+${d.business} ${d.weakness}. We built ${d.productName} specifically for ${d.industry} businesses — ${d.productPrice}, done-for-you in 2 days.
+
+${ctx.cta}
+
+${d.senderName}
+Klivio
+
+P.S. If you want a quick look first: klivio.online`,
 ];
 
 function getFallbackEmail(data, ctx) {
@@ -231,19 +239,18 @@ function callGroq(prompt, temperature = 0.85) {
   });
 }
 
-// ── Style variations (choose randomly to avoid emails looking templated) ──
-const STYLES = [
-  'conversational and direct — like a text from a friend who works in sales',
-  'professional but warm — like an industry peer reaching out',
-  'sharp and punchy — every sentence earns its place',
-  'curious and honest — asking a real question, not pitching',
+// ── Tone variations ──
+const TONES = [
+  'direct and specific — state the loss, name the fix, ask one question',
+  'peer-to-peer — like a fellow business owner who spotted something',
+  'sharp and data-driven — one number, one outcome, one ask',
+  'honest and low-pressure — no hype, just a real observation',
 ];
 
 // ── Main generate function ──
 async function generateEmail(data) {
-  // data: { business, contactName, industry, website, weakness, productName, productPrice, senderName }
   const ctx = getContext(data.industry);
-  const style = STYLES[Math.floor(Math.random() * STYLES.length)];
+  const tone = TONES[Math.floor(Math.random() * TONES.length)];
 
   if (!GROQ_API_KEY) {
     return {
@@ -255,53 +262,75 @@ async function generateEmail(data) {
 
   const firstName = data.contactName ? data.contactName.split(' ')[0] : (data.ownerName ? data.ownerName.split(' ')[0] : '');
 
-  // Rich context from website scraping
   const websiteCtx = data.websiteContext || {};
+  const city = data.city || websiteCtx.locationMention || 'the UK';
+
+  // Build a rich, prioritised context block — more specific = better copy
   let contextBlock = '';
-  if (websiteCtx.tagline) contextBlock += `\n- Their tagline/value prop: "${websiteCtx.tagline}"`;
-  if (websiteCtx.h1 && websiteCtx.h1 !== websiteCtx.tagline) contextBlock += `\n- Homepage headline: "${websiteCtx.h1}"`;
-  if (websiteCtx.description) contextBlock += `\n- Site description: "${websiteCtx.description}"`;
-  if (websiteCtx.services && websiteCtx.services.length) contextBlock += `\n- Services they offer: ${websiteCtx.services.slice(0, 3).join(', ')}`;
-  if (websiteCtx.established) contextBlock += `\n- Established: ${websiteCtx.established} (${new Date().getFullYear() - parseInt(websiteCtx.established)} years in business)`;
-  if (websiteCtx.locationMention && !data.city) contextBlock += `\n- Location mentioned: ${websiteCtx.locationMention}`;
-  if (websiteCtx.reviewCount) contextBlock += `\n- Social proof: ${websiteCtx.reviewCount}+ reviews/clients mentioned`;
+  // Groq insight is gold — always lead with it if present
+  if (websiteCtx.groqHook) contextBlock += `\n- KEY INSIGHT (use this as the personalisation anchor — worked out from reading their site): "${websiteCtx.groqHook}"`;
+  if (websiteCtx.hook && !websiteCtx.groqHook) contextBlock += `\n- Specific detail: the business ${websiteCtx.hook}`;
+  if (websiteCtx.specialties && websiteCtx.specialties.length) contextBlock += `\n- Specialties: ${websiteCtx.specialties.slice(0, 3).join(', ')}`;
+  if (websiteCtx.established) {
+    const years = new Date().getFullYear() - parseInt(websiteCtx.established);
+    contextBlock += `\n- In business: ${years} years (since ${websiteCtx.established})`;
+  }
+  if (websiteCtx.teamSize) contextBlock += `\n- Team size: ${websiteCtx.teamSize} people`;
+  if (websiteCtx.numLocations > 1) contextBlock += `\n- Locations: ${websiteCtx.numLocations} branches`;
+  if (websiteCtx.services && websiteCtx.services.length) contextBlock += `\n- Services listed: ${websiteCtx.services.slice(0, 4).join(' | ')}`;
+  if (websiteCtx.tagline) contextBlock += `\n- Their tagline: "${websiteCtx.tagline}"`;
+  if (websiteCtx.h1 && websiteCtx.h1 !== websiteCtx.tagline) contextBlock += `\n- Main headline: "${websiteCtx.h1}"`;
+  if (websiteCtx.reviewCount) contextBlock += `\n- Client/review count: ${websiteCtx.reviewCount}+`;
+  if (websiteCtx.accreditation) contextBlock += `\n- Accreditation: ${websiteCtx.accreditation}`;
+  if (websiteCtx.closedWeekend) contextBlock += `\n- PAIN SIGNAL: closed weekends (prime time for missed enquiries)`;
+  if (websiteCtx.callToBook) contextBlock += `\n- PAIN SIGNAL: requires phone call to book (no online booking)`;
+  if (websiteCtx.phoneDependent) contextBlock += `\n- PAIN SIGNAL: heavily phone-dependent ("call us" mentioned multiple times)`;
+  if (websiteCtx.ownerName) contextBlock += `\n- Owner/principal name: ${websiteCtx.ownerName}`;
 
-  const prompt = KLIVIO.prompts.email({ ...data, senderName: data.senderName }) + `
+  // Find a local competitor from the leads database to use as social proof
+  const competitor = findLocalCompetitor(data);
+  const competitorLine = competitor
+    ? `COMPETITOR INTEL (use this once, naturally, in P2): "${competitor.phrase}"`
+    : `COMPETITOR INTEL: Mention that other ${data.industry} businesses in ${city} are already automating this — no specific name needed.`;
 
-WRITE THE EMAIL NOW:
-Business: "${data.business}" | Industry: ${data.industry} | Weakness: ${data.weakness}
-Product: ${data.productName} (${data.productPrice}) | Sender: ${data.senderName}
-Recipient: ${firstName || '(unknown)'}
-Stakes: ${ctx.stakes}
-Style: ${style}, tone: ${ctx.tone}
-${contextBlock ? '\nWHAT WE SAW ON THEIR WEBSITE:' + contextBlock : ''}
+  const prompt = `You are a $10,000/month B2B copywriter writing a cold email for Klivio. One goal: get a reply from the business owner. You write like a human who did their homework — not a marketer.
 
-STYLE: ${style}. Tone should be ${ctx.tone}.
+BUSINESS: "${data.business}" | INDUSTRY: ${data.industry} | CITY: ${city}
+WEAKNESS SPOTTED: ${data.weakness}
+PRODUCT: ${data.productName} at ${data.productPrice}
+SENDER: ${data.senderName} | RECIPIENT: ${firstName || '(use "Hi," as opener)'}
+FINANCIAL STAKES: ${ctx.stakes}
+${contextBlock ? '\nWEBSITE INTEL (use this to make the email feel handwritten for them):' + contextBlock : ''}
 
-STRUCTURE (3 short paragraphs, 90-140 words total):
-1. Greeting + a specific, observed detail about THEIR business from the context above (reference their tagline, a service, years in business, location — whatever stands out). Then name the problem.
-2. Why this matters for ${data.industry} businesses specifically — use a concrete number or outcome
-3. One-line pitch + a soft ask like "${ctx.cta}"
+${competitorLine}
 
-PERSONALIZATION RULES:
-- If you have their tagline or headline, quote or paraphrase it naturally in paragraph 1 (e.g., "Saw your 'trusted since 1998' line — impressive")
-- If they have 10+ years in business, mention it respectfully
-- If you have NO website context, open with a direct observation about the PROBLEM (not a compliment about the business)
-- NEVER invent compliments like "great reputation", "lovely website", "impressive work" — if you weren't given evidence, don't say it
-- Do NOT invent facts you weren't given. Only reference what's in the context above.
+THE EMAIL FORMULA (elite copywriters use this):
+P1 — HOOK + LOSS (2 sentences max):
+  Lead with their KEY INSIGHT or a specific detail from their site — show you looked.
+  Then immediately pivot to the financial cost of the weakness you spotted. Uncomfortable but true.
+  Example: "You offer emergency implants but booking requires a call — meaning patients in pain at 6pm hit voicemail and call whoever answers next."
 
-HARD RULES:
-- Plain text only. No HTML, no bullets, no bold, no emojis.
-- Do NOT say "I hope this email finds you well" or any opener clichés.
-- Do NOT say "I stumbled across" or "I came across".
-- Do NOT say "it's clear that", "it's likely that", "you're probably" — be direct and specific.
-- Use contractions (we've, you're, it's) — sound human.
-- Max 130 words. Be punchy — every sentence must earn its place.
-- The final line (CTA) must be a standalone sentence ending with a question mark. Do NOT combine the pitch and CTA in one run-on sentence.
-- Sign off with EXACTLY two lines: first line "${data.senderName}", second line "Klivio". Nothing else.
-- Do NOT include a subject line.
+P2 — IDENTITY + SOCIAL PROOF (2 sentences):
+  "The best [industry] businesses in [city] have already automated this."
+  Insert the competitor line EXACTLY as written. One concrete outcome (book 8 extra/week, capture 15 more leads/month).
 
-Output ONLY the email body.`;
+P3 — OFFER + CTA (2 sentences):
+  "${data.productName} at ${data.productPrice} — live in 48 hours, we handle everything. ${data.upsell ? '(' + data.upsell + '.)' : ''}"
+  End with: "${ctx.cta}"
+
+HARD RULES — any violation fails the brief:
+- Plain text only. Zero HTML, bullets, bold, emojis, links.
+- Open with a specific fact or the loss — NEVER "I noticed", "I came across", "I hope", "I saw your website".
+- Every word earns its place. If a sentence can be cut without losing meaning, cut it.
+- Contractions always: we've, it's, you're, they've.
+- Max 95 words total (body only, not sign-off).
+- CTA: its own line, ends with "?", no exclamation.
+- Sign-off: "${data.senderName}" newline "Klivio". Nothing else before or after.
+- No invented facts — only use context provided above.
+- Tone: ${tone}.
+- Do NOT include subject line.
+
+Output ONLY the email body. Nothing else.`;
 
   try {
     const result = await callGroq(prompt);
@@ -316,6 +345,11 @@ Output ONLY the email body.`;
       .replace(/^Subject:.*\n/im, '')
       .replace(/^"|"$/g, '')
       .replace(/\n{3,}/g, '\n\n');
+
+    // Add soft P.S. link — plain text only, no HTML
+    if (!body.includes('klivio.online')) {
+      body += '\n\nP.S. If you want a quick look first: klivio.online';
+    }
 
     return { subject: generateSubject(data), body, source: 'groq' };
   } catch {

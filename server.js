@@ -282,6 +282,136 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
+// ── GET /setup/:clientId — client setup form ──
+app.get('/setup/:clientId', (req, res) => {
+  const { clientId } = req.params;
+  const { product, plan } = req.query;
+
+  const productForms = {
+    'lead-responder': { title: 'AI Lead Responder', fields: [
+      { name: 'businessName',    label: 'Business name',              type: 'text',     required: true  },
+      { name: 'industry',        label: 'Industry (e.g. dental, law)', type: 'text',     required: true  },
+      { name: 'description',     label: 'What do you do in one sentence?', type: 'text', required: true },
+      { name: 'notifyEmail',     label: 'Email to receive lead alerts', type: 'email',   required: true  },
+      { name: 'commonQuestions', label: '3 most common questions your customers ask (one per line)', type: 'textarea', required: false },
+    ]},
+    'follow-up': { title: 'Follow-Up Automator', fields: [
+      { name: 'businessName',    label: 'Business name',              type: 'text',  required: true  },
+      { name: 'industry',        label: 'Industry',                   type: 'text',  required: true  },
+      { name: 'description',     label: 'What do you sell/offer?',    type: 'text',  required: true  },
+      { name: 'notifyEmail',     label: 'Your email address',         type: 'email', required: true  },
+      { name: 'website',         label: 'Website URL (optional)',     type: 'text',  required: false },
+    ]},
+    'voice-assistant': { title: 'Voice Assistant', fields: [
+      { name: 'businessName',    label: 'Business name',              type: 'text',  required: true  },
+      { name: 'industry',        label: 'Industry',                   type: 'text',  required: true  },
+      { name: 'description',     label: 'What do you do?',            type: 'text',  required: true  },
+      { name: 'voicePhone',      label: 'Your current business phone number', type: 'tel', required: true },
+      { name: 'openingHours',    label: 'Opening hours (e.g. Mon-Fri 9-5)', type: 'text', required: true },
+      { name: 'commonQuestions', label: 'What do callers typically ask? (one per line)', type: 'textarea', required: true },
+    ]},
+    'chatbot': { title: 'AI Chatbot', fields: [
+      { name: 'businessName',    label: 'Business name',              type: 'text',  required: true  },
+      { name: 'industry',        label: 'Industry',                   type: 'text',  required: true  },
+      { name: 'website',         label: 'Website URL',                type: 'text',  required: true  },
+      { name: 'description',     label: 'What do you do?',            type: 'text',  required: true  },
+      { name: 'commonQuestions', label: '5 most common customer questions (one per line)', type: 'textarea', required: true },
+      { name: 'notifyEmail',     label: 'Email to receive lead notifications', type: 'email', required: true },
+    ]},
+    'reviews': { title: 'Review & Referral System', fields: [
+      { name: 'businessName',    label: 'Business name',              type: 'text',  required: true  },
+      { name: 'industry',        label: 'Industry',                   type: 'text',  required: true  },
+      { name: 'googleReviewLink',label: 'Your Google Review link',    type: 'text',  required: false },
+      { name: 'notifyEmail',     label: 'Your email',                 type: 'email', required: true  },
+    ]},
+    'cold-outreach': { title: 'Cold Outreach Setup', fields: [
+      { name: 'businessName',    label: 'Your business name',         type: 'text',  required: true  },
+      { name: 'description',     label: 'What do you sell/offer?',    type: 'text',  required: true  },
+      { name: 'targetIndustry',  label: 'Who do you want to target? (e.g. dental clinics, law firms)', type: 'text', required: true },
+      { name: 'targetCity',      label: 'Target city/region (or "UK")', type: 'text', required: true },
+      { name: 'notifyEmail',     label: 'Your email (for reports)',   type: 'email', required: true  },
+    ]},
+  };
+
+  // Default form based on plan
+  const planMap = { starter: 'lead-responder', growth: 'follow-up', full: 'voice-assistant' };
+  const formKey  = product || planMap[plan] || 'lead-responder';
+  const form     = productForms[formKey] || productForms['lead-responder'];
+
+  const fieldsHtml = form.fields.map(f => `
+    <div style="margin-bottom:20px">
+      <label style="display:block;font-weight:600;margin-bottom:6px;font-size:14px">${f.label}${f.required ? ' <span style="color:#B5522A">*</span>' : ''}</label>
+      ${f.type === 'textarea'
+        ? `<textarea name="${f.name}" rows="4" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box" ${f.required ? 'required' : ''}></textarea>`
+        : `<input type="${f.type}" name="${f.name}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box" ${f.required ? 'required' : ''}>`}
+    </div>`).join('');
+
+  res.send(`<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Set up your ${form.title} — Klivio</title>
+    <style>*{box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:#f9f9f9;margin:0;padding:40px 20px}
+    .card{max-width:520px;margin:0 auto;background:#fff;padding:40px;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+    h1{margin:0 0 4px;font-size:22px}p.sub{color:#777;margin:0 0 28px;font-size:14px}
+    button{width:100%;padding:14px;background:#C8A84B;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+    button:hover{background:#b3933e}.logo{font-size:13px;color:#aaa;text-align:center;margin-top:20px}</style>
+  </head><body>
+    <div class="card">
+      <h1>Set up your ${form.title}</h1>
+      <p class="sub">Takes 2 minutes. We'll handle everything else.</p>
+      <form method="POST" action="/api/setup">
+        <input type="hidden" name="clientId" value="${clientId}">
+        <input type="hidden" name="productKey" value="${formKey}">
+        <input type="hidden" name="product" value="${form.title}">
+        ${fieldsHtml}
+        <button type="submit">Complete setup →</button>
+      </form>
+    </div>
+    <div class="logo">Klivio · klivio.online</div>
+  </body></html>`);
+});
+
+// ── POST /api/setup — process setup form, auto-configure product ──
+app.post('/api/setup', async (req, res) => {
+  try {
+    const { setupProduct } = require('./delivery/setup');
+    const formData = req.body;
+
+    if (!formData.businessName || !formData.productKey) {
+      return res.status(400).send('Missing required fields');
+    }
+
+    // Parse commonQuestions textarea into array
+    if (formData.commonQuestions) {
+      formData.commonQuestions = formData.commonQuestions.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    formData.name = formData.name || formData.businessName;
+    formData.email = formData.email || formData.notifyEmail;
+
+    const result = await setupProduct(formData);
+
+    // Redirect to success page
+    res.send(`<!DOCTYPE html><html lang="en"><head>
+      <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>You're live — Klivio</title>
+      <style>body{font-family:-apple-system,sans-serif;background:#f9f9f9;margin:0;padding:60px 20px;text-align:center}
+      .card{max-width:480px;margin:0 auto;background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+      h1{color:#1C1A17;margin-bottom:8px}p{color:#555;font-size:15px;line-height:1.6}
+      .check{font-size:48px;margin-bottom:16px}</style>
+    </head><body>
+      <div class="card">
+        <div class="check">✅</div>
+        <h1>You're all set.</h1>
+        <p>Check your email — we've sent setup instructions and ${result.webhookUrl ? 'your webhook URL' : result.embedScript ? 'your embed code' : 'next steps'}.</p>
+        <p style="font-size:13px;color:#aaa;margin-top:24px">Questions? Reply to the email or message us at <a href="https://t.me/klivio">t.me/klivio</a></p>
+      </div>
+    </body></html>`);
+
+  } catch (err) {
+    console.error('Setup error:', err.message);
+    res.status(500).send('Setup failed — please email hello@klivio.online');
+  }
+});
+
 // ── POST /api/order — manual order (website form / admin) ──
 app.post('/api/order', async (req, res) => {
   try {
@@ -326,19 +456,28 @@ app.post('/api/order', async (req, res) => {
         </div>`
       }).catch(e => console.error('Admin notify failed:', e.message));
 
-      // Onboarding email to client
+      // Onboarding email to client — links to self-serve setup form
+      const productKeyMap = {
+        'STARTER Bundle': 'starter', 'GROWTH Bundle': 'growth', 'FULL Bundle': 'full',
+        'AI Lead Responder': 'booking', 'Follow-Up Automator': 'followup',
+        'Review & Referral System': 'reviews', 'Voice Assistant': 'voice',
+        'AI Chatbot': 'chatbot', 'Cold Outreach Setup': 'outreach',
+      };
+      const productKey = productKeyMap[product] || 'booking';
+      const setupUrl = `${process.env.BASE_URL || 'https://klivio.online'}/setup/${order.id}?product=${productKey}`;
       notifyTransport.sendMail({
         from: '"James at Klivio" <james@klivio.bond>',
         to: email,
-        subject: `Your ${product} — a few quick questions`,
+        subject: `Your ${product} — one quick step to go live`,
         html: `<div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px;color:#1C1A17">
           <h2 style="margin-bottom:4px">Hey ${name.split(' ')[0]}, we're on it.</h2>
           <p style="color:#777;margin-top:0">Order confirmed — <b>${product}</b> · Deadline: <b>${formatDate(deadline)}</b></p>
           <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-          <p>To get started, we just need a few quick answers. <b>Reply to this email</b> with your answers and we'll handle everything else.</p>
-          <ol style="line-height:1.8;padding-left:20px">
-            ${questions}
-          </ol>
+          <p>We just need a few details to configure your AI worker. It takes under 2 minutes:</p>
+          <p style="text-align:center;margin:32px 0">
+            <a href="${setupUrl}" style="background:#C8A84B;color:#fff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:16px">Complete Your Setup →</a>
+          </p>
+          <p style="font-size:13px;color:#aaa">Or copy this link: ${setupUrl}</p>
           <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
           <p style="font-size:13px;color:#999">Order ID: ${order.id} · Questions? <a href="https://t.me/klivio" style="color:#C8A84B">Message us on Telegram</a></p>
         </div>`
@@ -595,6 +734,139 @@ app.post('/api/telegram/webhook', async (req, res) => {
     }
   } catch (e) {
     tgSend(`Error: ${e.message}`);
+  }
+});
+
+// ── POST /api/leads/hook/:clientId — AI Lead Responder webhook ──
+// Receives form submissions from client's website, auto-replies via Groq
+app.post('/api/leads/hook/:clientId', async (req, res) => {
+  res.sendStatus(200); // always 200 fast, process async
+  const { clientId } = req.params;
+  const { name, email, phone, message } = req.body;
+  if (!email) return;
+
+  const { getClient } = require('./delivery/setup');
+  const client = getClient(clientId);
+  if (!client) return;
+
+  // Build AI reply via Groq
+  let replyText = '';
+  try {
+    const https = require('https');
+    const systemPrompt = client.aiPrompt || `You are a helpful assistant for ${client.businessName || 'this business'}. Reply warmly, briefly (3-4 sentences), confirm you got their message and that someone will be in touch within 1 business hour. Sign off as the business.`;
+    const payload = JSON.stringify({
+      model: 'llama-3.3-70b-versatile', max_tokens: 200,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `New enquiry from ${name || 'a visitor'}${phone ? ` (${phone})` : ''}: ${message || 'They submitted a contact form.'}` },
+      ],
+    });
+    replyText = await new Promise((resolve, reject) => {
+      const req2 = https.request({
+        hostname: 'api.groq.com', path: '/openai/v1/chat/completions',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Length': Buffer.byteLength(payload) },
+        timeout: 10000,
+      }, r => {
+        let d = ''; r.on('data', c => d += c);
+        r.on('end', () => {
+          try { resolve(JSON.parse(d).choices[0]?.message?.content || ''); }
+          catch { resolve(''); }
+        });
+      });
+      req2.on('error', reject); req2.write(payload); req2.end();
+    });
+  } catch (e) {}
+  if (!replyText) replyText = `Hi ${name || 'there'},\n\nThanks for getting in touch! We've received your message and will get back to you within 1 business hour.\n\nBest,\n${client.businessName || 'The Team'}`;
+
+  // Log the lead
+  const leadsFile = path.join(__dirname, 'data', 'inbound_leads.json');
+  let inbound = [];
+  try { inbound = JSON.parse(fs.readFileSync(leadsFile, 'utf-8')); } catch {}
+  inbound.push({ clientId, name, email, phone, message, repliedAt: new Date().toISOString() });
+  try { fs.writeFileSync(leadsFile, JSON.stringify(inbound, null, 2)); } catch {}
+
+  // Send auto-reply email
+  if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS) {
+    const notifyTransport = nodemailer.createTransport({
+      host: 'smtp-relay.brevo.com', port: 587, secure: false,
+      auth: { user: process.env.BREVO_NOTIFY_LOGIN, pass: process.env.BREVO_NOTIFY_PASS },
+    });
+    notifyTransport.sendMail({
+      from: `"${client.businessName || 'The Team'}" <james@klivio.bond>`,
+      to: email,
+      subject: `Thanks for your message${name ? `, ${name.split(' ')[0]}` : ''}`,
+      text: replyText,
+    }).catch(e => console.error('[Lead hook] Reply failed:', e.message));
+  }
+});
+
+// ── POST /api/followup/hook/:clientId — Follow-Up Automator webhook ──
+// Registers a new lead into the follow-up sequence (Day 3, 7, 14)
+app.post('/api/followup/hook/:clientId', async (req, res) => {
+  res.sendStatus(200);
+  const { clientId } = req.params;
+  const { name, email, phone, source } = req.body;
+  if (!email) return;
+
+  const { getClient } = require('./delivery/setup');
+  const client = getClient(clientId);
+  if (!client) return;
+
+  const followupsFile = path.join(__dirname, 'data', 'followup_queue.json');
+  let queue = [];
+  try { queue = JSON.parse(fs.readFileSync(followupsFile, 'utf-8')); } catch {}
+
+  const now = new Date();
+  const day3  = new Date(now.getTime() + 3  * 24 * 60 * 60 * 1000).toISOString();
+  const day7  = new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000).toISOString();
+  const day14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
+  queue.push({
+    clientId, name, email, phone, source: source || 'webhook',
+    addedAt: now.toISOString(),
+    followups: [
+      { sendAt: day3,  step: 1, status: 'pending' },
+      { sendAt: day7,  step: 2, status: 'pending' },
+      { sendAt: day14, step: 3, status: 'pending' },
+    ],
+  });
+
+  try { fs.writeFileSync(followupsFile, JSON.stringify(queue, null, 2)); } catch {}
+});
+
+// ── POST /api/reviews/hook/:clientId — Review & Referral webhook ──
+// Triggered after a job/appointment is completed; sends Google review request
+app.post('/api/reviews/hook/:clientId', async (req, res) => {
+  res.sendStatus(200);
+  const { clientId } = req.params;
+  const { name, email, phone, jobType } = req.body;
+  if (!email) return;
+
+  const { getClient } = require('./delivery/setup');
+  const client = getClient(clientId);
+  if (!client) return;
+
+  // Log
+  const reviewsFile = path.join(__dirname, 'data', 'review_requests.json');
+  let requests = [];
+  try { requests = JSON.parse(fs.readFileSync(reviewsFile, 'utf-8')); } catch {}
+  requests.push({ clientId, name, email, phone, jobType, sentAt: new Date().toISOString() });
+  try { fs.writeFileSync(reviewsFile, JSON.stringify(requests, null, 2)); } catch {}
+
+  // Send review request email
+  if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS && client.googleReviewLink) {
+    const notifyTransport = nodemailer.createTransport({
+      host: 'smtp-relay.brevo.com', port: 587, secure: false,
+      auth: { user: process.env.BREVO_NOTIFY_LOGIN, pass: process.env.BREVO_NOTIFY_PASS },
+    });
+    const firstName = (name || 'there').split(' ')[0];
+    notifyTransport.sendMail({
+      from: `"${client.businessName || 'The Team'}" <james@klivio.bond>`,
+      to: email,
+      subject: `How did we do${name ? `, ${firstName}` : ''}?`,
+      text: `Hi ${firstName},\n\nHope everything went well${jobType ? ` with your ${jobType}` : ''}!\n\nIf you have 30 seconds, we'd really appreciate a quick Google review — it helps us a lot:\n\n${client.googleReviewLink}\n\nThanks so much,\n${client.businessName || 'The Team'}`,
+    }).catch(e => console.error('[Review hook] Email failed:', e.message));
   }
 });
 
