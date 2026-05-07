@@ -199,17 +199,28 @@ app.post('/api/stripe/webhook', async (req, res) => {
         </div>`,
       }).catch(e => console.error('Admin notify failed:', e.message));
 
-      // Onboarding email to client
+      // Onboarding email to client — setup form link
+      const productKeyMap = {
+        'STARTER Bundle': 'starter', 'GROWTH Bundle': 'growth', 'FULL Bundle': 'full',
+        'AI Lead Responder': 'booking', 'Follow-Up Automator': 'followup',
+        'Review & Referral System': 'reviews', 'Voice Assistant': 'voice',
+        'AI Chatbot': 'chatbot', 'Cold Outreach Setup': 'outreach',
+      };
+      const productKey = productKeyMap[product] || 'booking';
+      const setupUrl = `${process.env.BASE_URL || 'https://klivio.online'}/setup/${order.id}?product=${productKey}`;
       notifyTransport.sendMail({
         from:    '"James at Klivio" <james@klivio.bond>',
         to:      customerEmail,
-        subject: `Your ${product} — a few quick questions`,
+        subject: `Your ${product} — one quick step to go live`,
         html: `<div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px;color:#1C1A17">
-          <h2 style="margin-bottom:4px">Hey ${firstName}, we're on it.</h2>
+          <h2 style="margin-bottom:4px">Hey ${firstName}, payment confirmed ✓</h2>
           <p style="color:#777;margin-top:0">Order confirmed — <b>${product}</b> · Deadline: <b>${formatDate(deadline)}</b></p>
           <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-          <p>To get started, we just need a few quick answers. <b>Reply to this email</b> with your answers and we'll handle everything else.</p>
-          <ol style="line-height:1.8;padding-left:20px">${questions}</ol>
+          <p>We just need a few details to configure your AI worker. It takes under 2 minutes:</p>
+          <p style="text-align:center;margin:32px 0">
+            <a href="${setupUrl}" style="background:#C8A84B;color:#fff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:16px">Complete Your Setup →</a>
+          </p>
+          <p style="font-size:13px;color:#aaa">Or copy this link: ${setupUrl}</p>
           <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
           <p style="font-size:13px;color:#999">Order ID: ${order.id} · Questions? <a href="https://t.me/klivio" style="color:#C8A84B">Message us on Telegram</a></p>
         </div>`,
@@ -418,73 +429,21 @@ app.post('/api/order', async (req, res) => {
     const { name, email, website, language, notes, product, price, phone, source } = req.body;
     if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
 
+    // Save as unpaid — no emails sent until Stripe confirms payment
     const order = await DB.createOrder({
       source:      source || 'website',
       name,
       email,
-      phone:       phone       || null,
-      website_url: website     || '',
-      language:    language    || 'English',
-      notes:       notes       || '',
-      product:     product     || 'Unknown',
-      price:       price       || '',
-      status:      'pending',
+      phone:       phone    || null,
+      website_url: website  || '',
+      language:    language || 'English',
+      notes:       notes    || '',
+      product:     product  || 'Unknown',
+      price:       price    || '',
+      status:      'unpaid',
     });
-    const deadline     = new Date(order.deadline);
-    const deliveryDays = order.delivery_days;
 
-    // ── Emails ──
-    if (process.env.BREVO_NOTIFY_LOGIN && process.env.BREVO_NOTIFY_PASS) {
-      const questions = (ONBOARDING[product] || []).map((q, i) => `<li style="margin-bottom:8px">${q}</li>`).join('');
-
-      // Notify admin
-      notifyTransport.sendMail({
-        from: '"Klivio Orders" <james@klivio.bond>',
-        to: process.env.NOTIFY_EMAIL || 'hello@klivio.online',
-        subject: `🆕 New Order: ${product} — ${name}`,
-        html: `<div style="font-family:sans-serif;max-width:560px">
-          <h2 style="color:#1C1A17">New Order #${order.id}</h2>
-          <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr><td style="padding:8px;color:#777">Product</td><td style="padding:8px"><b>${product}</b> (${price})</td></tr>
-            <tr style="background:#f9f9f9"><td style="padding:8px;color:#777">Client</td><td style="padding:8px">${name} — ${email}</td></tr>
-            <tr><td style="padding:8px;color:#777">Website</td><td style="padding:8px">${website || 'N/A'}</td></tr>
-            <tr style="background:#f9f9f9"><td style="padding:8px;color:#777">Language</td><td style="padding:8px">${language}</td></tr>
-            <tr><td style="padding:8px;color:#777">Notes</td><td style="padding:8px">${notes || 'None'}</td></tr>
-            <tr style="background:#f9f9f9"><td style="padding:8px;color:#777">Deadline</td><td style="padding:8px"><b style="color:#B5522A">${formatDate(deadline)} (${deliveryDays} business days)</b></td></tr>
-            <tr><td style="padding:8px;color:#777">Order ID</td><td style="padding:8px;font-family:monospace">${order.id}</td></tr>
-          </table>
-        </div>`
-      }).catch(e => console.error('Admin notify failed:', e.message));
-
-      // Onboarding email to client — links to self-serve setup form
-      const productKeyMap = {
-        'STARTER Bundle': 'starter', 'GROWTH Bundle': 'growth', 'FULL Bundle': 'full',
-        'AI Lead Responder': 'booking', 'Follow-Up Automator': 'followup',
-        'Review & Referral System': 'reviews', 'Voice Assistant': 'voice',
-        'AI Chatbot': 'chatbot', 'Cold Outreach Setup': 'outreach',
-      };
-      const productKey = productKeyMap[product] || 'booking';
-      const setupUrl = `${process.env.BASE_URL || 'https://klivio.online'}/setup/${order.id}?product=${productKey}`;
-      notifyTransport.sendMail({
-        from: '"James at Klivio" <james@klivio.bond>',
-        to: email,
-        subject: `Your ${product} — one quick step to go live`,
-        html: `<div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px;color:#1C1A17">
-          <h2 style="margin-bottom:4px">Hey ${name.split(' ')[0]}, we're on it.</h2>
-          <p style="color:#777;margin-top:0">Order confirmed — <b>${product}</b> · Deadline: <b>${formatDate(deadline)}</b></p>
-          <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-          <p>We just need a few details to configure your AI worker. It takes under 2 minutes:</p>
-          <p style="text-align:center;margin:32px 0">
-            <a href="${setupUrl}" style="background:#C8A84B;color:#fff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:16px">Complete Your Setup →</a>
-          </p>
-          <p style="font-size:13px;color:#aaa">Or copy this link: ${setupUrl}</p>
-          <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-          <p style="font-size:13px;color:#999">Order ID: ${order.id} · Questions? <a href="https://t.me/klivio" style="color:#C8A84B">Message us on Telegram</a></p>
-        </div>`
-      }).catch(e => console.error('Client onboarding email failed:', e.message));
-    }
-
-    res.json({ success: true, orderId: order.id, deadline: deadline.toISOString() });
+    res.json({ success: true, orderId: order.id });
   } catch (err) {
     console.error('Order error:', err.message);
     res.status(500).json({ error: 'Failed to process order' });

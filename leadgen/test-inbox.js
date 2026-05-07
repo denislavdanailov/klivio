@@ -6,7 +6,7 @@ const { ACTIVE_ACCOUNTS } = require('./accounts');
 const { sendFromAccount } = require('./sender');
 const { generateEmail } = require('./personalizer');
 
-const TO = 'danailovd48@gmail.com';
+const TO = 'klivio.ai.employees@gmail.com';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -218,9 +218,14 @@ async function main() {
 
     try {
       const { subject, body } = await generateEmail(lead);
-      await sendFromAccount(account, TO, subject, body);
-      console.log(`✓  "${subject}"`);
-      sent++;
+      const result = await sendFromAccount(account, TO, subject, body);
+      if (result.ok) {
+        console.log(`✓  "${subject}"`);
+        sent++;
+      } else {
+        console.log(`✗  ${result.reason?.slice(0, 60)}`);
+        failed++;
+      }
     } catch (err) {
       console.log(`✗  ${err.message.slice(0, 60)}`);
       failed++;

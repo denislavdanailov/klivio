@@ -153,7 +153,7 @@ ${ctx.cta}
 ${d.senderName}
 Klivio
 
-P.S. If you want a quick look first: klivio.online`,
+P.S. If you want a quick look first: https://klivio.online`,
 
   (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
 
@@ -168,7 +168,7 @@ ${ctx.cta}
 ${d.senderName}
 Klivio
 
-P.S. If you want a quick look first: klivio.online`,
+P.S. If you want a quick look first: https://klivio.online`,
 
   (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
 
@@ -181,7 +181,7 @@ ${ctx.cta}
 ${d.senderName}
 Klivio
 
-P.S. If you want a quick look first: klivio.online`,
+P.S. If you want a quick look first: https://klivio.online`,
 
   (d, ctx) => `${d.contactName ? d.contactName.split(' ')[0] + ',' : 'Hi,'}
 
@@ -194,7 +194,7 @@ ${ctx.cta}
 ${d.senderName}
 Klivio
 
-P.S. If you want a quick look first: klivio.online`,
+P.S. If you want a quick look first: https://klivio.online`,
 ];
 
 function getFallbackEmail(data, ctx) {
@@ -311,8 +311,8 @@ P1 — HOOK + LOSS (2 sentences max):
   Example: "You offer emergency implants but booking requires a call — meaning patients in pain at 6pm hit voicemail and call whoever answers next."
 
 P2 — IDENTITY + SOCIAL PROOF (2 sentences):
-  "The best [industry] businesses in [city] have already automated this."
-  Insert the competitor line EXACTLY as written. One concrete outcome (book 8 extra/week, capture 15 more leads/month).
+  Start with: "The best [industry] businesses in [city] have already automated this." (or a natural variation).
+  Then insert the competitor line EXACTLY as written — weave it in as a single sentence. Add one concrete outcome (e.g. "capturing 15 more leads/month" or "booking 8 extra patients/week").
 
 P3 — OFFER + CTA (2 sentences):
   "${data.productName} at ${data.productPrice} — live in 48 hours, we handle everything. ${data.upsell ? '(' + data.upsell + '.)' : ''}"
@@ -347,8 +347,8 @@ Output ONLY the email body. Nothing else.`;
       .replace(/\n{3,}/g, '\n\n');
 
     // Add soft P.S. link — plain text only, no HTML
-    if (!body.includes('klivio.online')) {
-      body += '\n\nP.S. If you want a quick look first: klivio.online';
+    if (!body.includes('https://klivio.online')) {
+      body += '\n\nP.S. If you want a quick look first: https://klivio.online';
     }
 
     return { subject: generateSubject(data), body, source: 'groq' };
