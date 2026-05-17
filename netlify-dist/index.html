@@ -31,11 +31,87 @@
       [style*="contain: paint"] {
         background: #030303 !important;
       }
+
+      /* ── FIX: dark text unreadable on dark background ── */
+      p, span, div, li, h1, h2, h3, h4, h5, h6, a, label {
+        color: inherit;
+      }
+      /* Force any black or near-black text to be readable */
+      [style*="color: #000"],
+      [style*="color:#000"],
+      [style*="color: black"],
+      [style*="color:black"],
+      [style*="color: rgb(0"],
+      [style*="color: rgba(0, 0, 0"] {
+        color: rgba(255, 255, 255, 0.75) !important;
+      }
+      /* Hero subtext — force all low-opacity white text to be readable */
+      .text-black, [class*="text-black"] {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+      .text-white\/20, .text-white\/25, .text-white\/30, .text-white\/35, .text-white\/40 {
+        color: rgba(255, 255, 255, 0.6) !important;
+      }
+      /* Badge "LIMITED ONBOARDING" — make text bolder and more visible */
+      [class*="rounded-full"][class*="border"] {
+        border-color: rgba(230, 184, 75, 0.6) !important;
+        background: rgba(230, 184, 75, 0.08) !important;
+      }
+      [class*="rounded-full"][class*="border"] span,
+      [class*="rounded-full"][class*="border"] {
+        color: #e6b84b !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.15em !important;
+      }
     </style>
   </head>
   <body>
     <div id="root"></div>
     <script>
+    function openKlivioModal(plan) {
+      var GOLD = '#e6b84b';
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px)';
+      overlay.innerHTML = '<div style="position:relative;width:100%;max-width:480px;border-radius:16px;overflow:hidden;background:#0e0e0e;border:1px solid rgba(230,184,75,0.3)">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:28px 32px 20px;border-bottom:1px solid rgba(255,255,255,0.07)">' +
+          '<div><span style="font-family:Inter,sans-serif;font-weight:900;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:'+GOLD+'">'+plan.name+' · '+plan.price+'/mo</span>' +
+          '<p style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;color:#fff;font-size:18px;margin-top:4px">Tell us about your business</p></div>' +
+          '<button id="kl-modal-close" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:20px;line-height:1">✕</button>' +
+        '</div>' +
+        '<form id="kl-modal-form" style="padding:24px 32px;display:flex;flex-direction:column;gap:16px">' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Full name *</label>' +
+          '<input name="name" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Email *</label>' +
+          '<input name="email" type="email" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Phone</label>' +
+          '<input name="phone" type="tel" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Website</label>' +
+          '<input name="website" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<button type="submit" style="width:100%;padding:14px;border-radius:12px;background:'+GOLD+';color:#080808;font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:0.1em;border:none;cursor:pointer;margin-top:8px" id="kl-modal-submit">Continue to Payment →</button>' +
+          '<p id="kl-modal-err" style="color:#ff6b6b;font-size:12px;text-align:center;display:none">Something went wrong — please try again.</p>' +
+        '</form></div>';
+      document.body.appendChild(overlay);
+      document.getElementById('kl-modal-close').onclick = function() { document.body.removeChild(overlay); };
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) document.body.removeChild(overlay); });
+      document.getElementById('kl-modal-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('kl-modal-submit');
+        btn.textContent = 'Processing...'; btn.disabled = true;
+        var fd = new FormData(e.target);
+        try {
+          var r = await fetch('https://klivio-production.up.railway.app/api/order', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ source:'website', name:fd.get('name'), email:fd.get('email'), phone:fd.get('phone'), website:fd.get('website'), product:plan.name, price:plan.price+'/mo' })
+          });
+          if (!r.ok) throw new Error();
+          window.location.href = plan.stripeLink;
+        } catch(err) {
+          document.getElementById('kl-modal-err').style.display = 'block';
+          btn.textContent = 'Continue to Payment →'; btn.disabled = false;
+        }
+      });
+    }
+
     (function() {
       var GOLD = '#e6b84b';
       var cardBase = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1)';
@@ -81,37 +157,58 @@
             badge: '&#9889; TRY IT FIRST',
             desc: 'Auto-replies to every enquiry in under 2 minutes. Perfect entry point with zero risk.',
             features: ['AI Lead Responder', '24/7 — evenings & weekends', 'Setup in 1 day', 'Up to 200 contacts/month', 'Standard support'],
-            link: 'https://buy.stripe.com/7sY00j6AF0LS6jl2z67Vm07',
+            link: '#',
             cta: 'Get Started →',
             featured: false
           });
           qr.id = 'kl-quickreply';
+          qr.querySelector('a').addEventListener('click', function(ev) {
+            ev.preventDefault();
+            openKlivioModal({
+              name: 'AI Quick Reply',
+              price: '$47',
+              stripeLink: 'https://buy.stripe.com/7sY00j6AF0LS6jl2z67Vm07'
+            });
+          });
           grid.insertBefore(qr, starterCard);
         }
 
-        // Done-For-You — append after last card
-        if (!document.getElementById('kl-doneforyou')) {
-          var dfy = makeCard({
-            name: 'DONE-FOR-YOU',
-            price: '$1,497',
-            badge: '&#128081; FULL MANAGEMENT',
-            desc: 'We run everything. All 7 AI workers + our team actively finds new clients for your business each month.',
-            features: ['All 7 AI Workers active', 'We find new clients for you', '10–20 qualified leads/month', 'Dedicated account manager', 'Cold outreach on autopilot', 'Setup in 7 days — SLA included'],
-            link: 'https://buy.stripe.com/7sY28r7EJcuA9vx3Da7Vm08',
-            cta: 'Get Started →',
-            featured: true
-          });
-          dfy.id = 'kl-doneforyou';
-          grid.appendChild(dfy);
-        }
 
         return true;
       }
 
-      if (!inject()) {
-        var obs = new MutationObserver(function() { if (inject()) obs.disconnect(); });
+      function fixHero() {
+        // Remove "LIMITED ONBOARDING — Q2 2026" badge
+        var allEls = document.querySelectorAll('*');
+        for (var i = 0; i < allEls.length; i++) {
+          if (allEls[i].children.length === 0 && allEls[i].textContent.indexOf('LIMITED ONBOARDING') !== -1) {
+            var badge = allEls[i].closest('[class*="rounded-full"]') || allEls[i].closest('[class*="border"]') || allEls[i].parentElement;
+            if (badge) badge.style.display = 'none';
+            break;
+          }
+        }
+        // Replace the onboarding restriction text
+        var els = document.querySelectorAll('*');
+        for (var j = 0; j < els.length; j++) {
+          if (els[j].children.length === 0 && els[j].textContent.indexOf("Klivio's onboarding is handled") !== -1) {
+            els[j].textContent = 'Setup takes 2–7 days. No contracts, no setup fees. Cancel anytime.';
+            els[j].style.color = 'rgba(255,255,255,0.55)';
+            break;
+          }
+        }
+        return document.querySelector('[class*="rounded-full"]') !== null || true;
+      }
+
+      function injectAll() {
+        var ok = inject();
+        fixHero();
+        return ok;
+      }
+
+      if (!injectAll()) {
+        var obs = new MutationObserver(function() { if (injectAll()) { obs.disconnect(); } });
         obs.observe(document.body, { childList: true, subtree: true });
-        setTimeout(inject, 4000);
+        setTimeout(injectAll, 4000);
       }
     })();
     </script>

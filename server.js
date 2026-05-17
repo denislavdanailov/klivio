@@ -541,9 +541,41 @@ app.post('/api/setup', async (req, res) => {
   }
 });
 
-// ── POST /api/order — disabled, orders only created via Stripe webhook ──
-app.post('/api/order', (req, res) => {
-  res.status(400).json({ error: 'Orders must be completed via checkout. Use /api/checkout to create a payment session.' });
+// ── POST /api/order — website modal submits here before redirecting to Stripe ──
+app.post('/api/order', async (req, res) => {
+  try {
+    const { name, email, phone, website, product, price, notes, source } = req.body;
+    if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
+
+    const order = await DB.createOrder({
+      source: source || 'website',
+      name, email,
+      website_url: website || '',
+      language: 'English',
+      notes: notes || '',
+      product: product || 'Unknown',
+      price: price || 'TBD',
+      status: 'pending',
+    });
+
+    // Telegram alert
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+    const tgChat  = process.env.TELEGRAM_CHAT_ID;
+    if (tgToken && tgChat) {
+      const msg = `🌐 *WEBSITE ORDER*\n\n*${name}*\nProduct: ${product}\nPrice: ${price}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ''}${website ? `\nSite: ${website}` : ''}${notes ? `\n\n${notes}` : ''}`;
+      require('https').request({
+        hostname: 'api.telegram.org',
+        path: `/bot${tgToken}/sendMessage`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }, () => {}).on('error', () => {}).end(JSON.stringify({ chat_id: tgChat, text: msg, parse_mode: 'Markdown' }));
+    }
+
+    res.json({ ok: true, orderId: order.id });
+  } catch (e) {
+    console.error('POST /api/order error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ── PUT /api/order/:id/status — Update order status ──
