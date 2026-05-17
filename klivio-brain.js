@@ -14,25 +14,25 @@ const KLIVIO = {
   // ── Products ──
   products: {
     'AI Lead Responder': {
-      price: '£197/mo',
+      price: '$197/mo',
       delivery: '2 days',
       description: 'Responds to every new enquiry within 2 minutes — day or night. Never miss a lead again.',
       bestFor: ['dental', 'law', 'realestate', 'accounting', 'medical'],
       pain: 'Missing leads that come in evenings, weekends, or when staff are busy',
       result: 'Every lead gets a reply in under 2 minutes, 24/7',
-      roiExample: 'One saved lead per week = £500-£3,000 extra revenue — pays for itself 10x over',
+      roiExample: 'One saved lead per week = $625-$3,750 extra revenue — pays for itself 10x over',
     },
     'Follow-Up Automator': {
-      price: '£197/mo',
+      price: '$197/mo',
       delivery: '3 days',
       description: 'Automatically follows up with leads who haven\'t replied — at day 3, day 7, day 14.',
       bestFor: ['realestate', 'fitness', 'accounting', 'beauty'],
       pain: 'Leads go cold because nobody follows up consistently',
       result: '3x more conversions from the same leads you already have',
-      roiExample: 'Recovering 2 cold leads per month at £500 each = £1,000 extra/month',
+      roiExample: 'Recovering 2 cold leads per month at $625 each = $1,250 extra/month',
     },
     'AI Chatbot': {
-      price: '£297/mo',
+      price: '$197/mo',
       delivery: '4 days',
       description: 'A smart chatbot on your website that answers questions, qualifies leads, and books appointments — 24/7.',
       bestFor: ['dental', 'fitness', 'realestate', 'beauty', 'restaurant'],
@@ -41,7 +41,7 @@ const KLIVIO = {
       roiExample: 'If your site gets 500 visitors/month and 2% more convert = 10 extra leads/month',
     },
     'Review & Referral System': {
-      price: '£197/mo',
+      price: '$197/mo',
       delivery: '2 days',
       description: 'Automatically asks happy customers for Google reviews and referrals at the perfect moment.',
       bestFor: ['dental', 'beauty', 'restaurant', 'fitness', 'trades'],
@@ -50,40 +50,40 @@ const KLIVIO = {
       roiExample: 'Going from 3.8 to 4.7 stars increases enquiries by 30-40%',
     },
     'Live Chat Assistant': {
-      price: '£297/mo',
+      price: '$197/mo',
       delivery: '3 days',
       description: 'AI live chat on your website — responds instantly, answers questions, books calls. Indistinguishable from a human.',
       bestFor: ['law', 'accounting', 'medical', 'realestate'],
       pain: 'Expensive to staff a live chat, but website visitors expect instant replies',
       result: 'Instant replies 24/7 at a fraction of the cost of a human',
-      roiExample: 'One extra client per month from chat = £2k-£10k in fees',
+      roiExample: 'One extra client per month from chat = $2.5k-$12k in fees',
     },
     'Valuation Bot': {
-      price: '£297/mo',
+      price: '$197/mo',
       delivery: '3 days',
       description: 'AI that gives instant property or service valuations, captures leads, and books follow-up calls.',
       bestFor: ['realestate'],
       pain: 'Sellers want instant valuations — if you can\'t provide one, they go to Purplebricks or online agents',
       result: 'Capture 3x more seller leads with instant AI valuations',
-      roiExample: 'One extra property listing = £3k-£15k commission',
+      roiExample: 'One extra property listing = $3.75k-$15k commission',
     },
     'Voice Assistant': {
-      price: '£497/mo',
+      price: '$497/mo',
       delivery: '5 days',
       description: 'AI that answers your phone calls 24/7 — books appointments, answers questions, takes messages. Sounds completely human.',
       bestFor: ['dental', 'medical', 'law', 'trades', 'realestate'],
       pain: 'Missed calls = missed revenue. Staff can\'t answer every call.',
       result: 'Zero missed calls. Every caller gets an instant, human-sounding response.',
-      roiExample: 'Answering 10 extra calls/week at £300 average value = £3k extra/month',
+      roiExample: 'Answering 10 extra calls/week at $375 average value = $3.75k extra/month',
     },
     'Cold Outreach Setup': {
-      price: '£497/mo',
+      price: '$497/mo',
       delivery: '5 days',
       description: 'We build and run a complete cold email outreach system for your business — finding prospects, writing personalised emails, and booking calls into your calendar.',
       bestFor: ['accounting', 'law', 'realestate', 'fitness'],
       pain: 'No consistent pipeline of new clients',
       result: '10-30 qualified sales calls booked per month on autopilot',
-      roiExample: 'Close 3 of 20 calls at £2k each = £6k extra revenue/month',
+      roiExample: 'Close 3 of 20 calls at $2.5k each = $6k extra revenue/month',
     },
     'Custom Build': {
       price: 'Custom quote',
@@ -97,26 +97,40 @@ const KLIVIO = {
 
   // ── Plans ──
   plans: {
+    quickReply: {
+      name: 'AI Quick Reply',
+      price: '$47/mo',
+      includes: 1,
+      description: 'Replies to every enquiry in under 2 minutes, 24/7. Setup in 1 day. Perfect entry point.',
+      stripe: 'https://buy.stripe.com/7sY00j6AF0LS6jl2z67Vm07',
+    },
     starter: {
       name: 'Starter',
-      price: '£197/mo',
+      price: '$197/mo',
       includes: 1,
       description: '1 AI worker of your choice',
       stripe: 'https://buy.stripe.com/4gMaEX0cheCIgXZddK7Vm00',
     },
     growth: {
       name: 'Growth',
-      price: '£297/mo',
-      includes: 2,
-      description: '2 AI workers of your choice — most popular',
+      price: '$297/mo',
+      includes: 5,
+      description: '5 AI workers of your choice — most popular',
       stripe: 'https://buy.stripe.com/fZu6oH6AF2U04bd5Li7Vm04',
     },
     full: {
       name: 'Full System',
-      price: '£497/mo',
-      includes: 3,
-      description: '3 AI workers including Voice AI & Cold Outreach',
+      price: '$497/mo',
+      includes: 7,
+      description: 'All 7 AI workers — complete stack',
       stripe: 'https://buy.stripe.com/5kQ7sL6AFcuAePR4He7Vm06',
+    },
+    doneForYou: {
+      name: 'Done-For-You Growth System',
+      price: '$1,497/mo',
+      includes: 'everything',
+      description: 'All 7 AI workers + we actively find and contact new prospects for your business. 10-20 qualified leads/month delivered. Dedicated account manager.',
+      stripe: 'https://buy.stripe.com/7sY28r7EJcuA9vx3Da7Vm08',
     },
   },
 
@@ -136,7 +150,7 @@ const KLIVIO = {
     },
     {
       q: 'Is it too expensive?',
-      a: 'At £197/mo, if our system saves you just one enquiry per week that would have been missed, it pays for itself. Most clients see ROI within the first 2 weeks.',
+      a: 'At $197/mo, if our system saves you just one enquiry per week that would have been missed, it pays for itself. Most clients see ROI within the first 2 weeks.',
     },
     {
       q: 'Will the AI sound like a robot?',
@@ -166,7 +180,7 @@ const KLIVIO = {
 
   // ── Objection Handling ──
   objections: {
-    'too expensive': 'I understand — at £197/mo it\'s a real commitment. But consider: if the system saves just one missed enquiry per week at £300 average value, that\'s £1,200/month extra. It pays for itself 6x over. Would you be open to a 10-minute demo so you can see exactly what it does?',
+    'too expensive': 'I understand — at $197/mo it\'s a real commitment. But consider: if the system saves just one missed enquiry per week at $375 average value, that\'s $1,500/month extra. It pays for itself 7x over. Would you be open to a 10-minute demo so you can see exactly what it does?',
     'not interested': 'Totally fair — I won\'t push. Can I ask what you\'re currently using to handle enquiries that come in after hours or on weekends?',
     'already have something': 'Good to hear you\'re thinking about this. What are you using at the moment? Most of our clients came to us because their previous tool wasn\'t converting — happy to show you the difference.',
     'need to think about it': 'Of course — it\'s a decision worth thinking through. I\'ll send you the details by email so you have everything in front of you. What\'s the best email for you?',
@@ -231,9 +245,9 @@ ABOUT KLIVIO:
 ${KLIVIO.description}
 
 PLANS:
-- Starter £197/mo: 1 AI worker
-- Growth £297/mo: 2 AI workers (most popular)
-- Full System £497/mo: 3 AI workers including Voice AI
+- Starter $197/mo: 1 AI worker
+- Growth $297/mo: 5 AI workers (most popular)
+- Full System $497/mo: all 7 AI workers
 
 PRODUCTS: ${Object.keys(KLIVIO.products).join(', ')}
 
@@ -250,33 +264,51 @@ RULES:
 OBJECTION RESPONSES:
 ${Object.entries(KLIVIO.objections).map(([obj, resp]) => `- "${obj}": ${resp}`).join('\n')}`,
 
-  phone: (context = {}) => `You are James from Klivio, having a real phone conversation. You are a human sales rep — warm, sharp, British.
+  phone: (context = {}) => `You are James from Klivio. You are a real human sales rep — warm, sharp, British. Never admit you're an AI.
 
-${context.callType === 'cold'
-? `You've called ${context.business || 'a local business'} (${context.industry || 'UK business'}). Introduce yourself in one sentence, then ask ONE short question to open a conversation. Goal: get them curious, then book a 15-min call.`
-: `Someone has called Klivio's number. They came to you — so be helpful, not salesy. Find out what they need.`}
+${context.callType === 'cold' ? `
+COLD CALL CONTEXT:
+You've just called ${context.business || 'a UK business'} — a ${context.industry || 'local business'}.
+They didn't expect your call. Be brief, respectful of their time, and genuinely curious.
 
-KLIVIO IN ONE LINE: We build AI workers for UK businesses — things like auto-replying to leads, chatbots, review automation. Starts at £197/mo, live in 2-5 days.
+YOUR OPENING (say this exactly, naturally):
+"Hi, is this ${context.business || 'the team there'}?
+[PAUSE — wait for yes/hello]
+Brilliant — it's James calling from Klivio. Really quick one — do you have literally 30 seconds?
+[PAUSE — wait for response]
+So we work with ${context.industry || 'businesses'} across the UK — basically we set up a system that responds to every enquiry in under 2 minutes, evenings and weekends included. Most of the businesses we work with were losing 4-5 enquiries a week they didn't even know about.
+Does that sound like something that might be relevant for you?"
 
-HOW TO TALK (CRITICAL — sound human):
-- Speak in COMPLETE sentences. Never cut off mid-thought. Always finish what you're saying.
-- Do NOT start replies with filler words like "Yeah,", "Right,", "Mm-hm." — those are handled separately. Jump straight into the substance.
-- 1-2 short sentences per turn. Like a real phone call.
-- Use contractions everywhere: "we've", "it's", "don't", "you're", "I'll", "that's"
-- Drop in natural fillers occasionally: "honestly", "to be fair", "look", "I mean"
-- Ask ONE question at a time, then shut up and wait.
-- Never list products unprompted — ask their biggest headache first.
-- If interested → "Brilliant — what's the best email to send a quick overview to?"
-- If 2 rejections → "No worries at all — you have a good one."
-- NEVER use bullet points, lists, or formal structure. This is SPEECH.
-- Keep replies under 40 words but ALWAYS complete the sentence.
-- Do NOT repeat the caller's words back to them robotically.
+AFTER THE OPENING:
+- If curious → ask "What do you currently do when someone calls after you've closed?"
+- If interested → "Great — what's the best email? I'll send a quick 2-minute overview."
+- If "not interested" → "Totally fair. Can I ask — what do you use at the moment for out-of-hours?"
+- If busy → "Of course — when's a better time, tomorrow morning or later this week?"
+- After 2 clear rejections → "No worries at all, have a good one." then end.
+` : `
+INBOUND CALL CONTEXT:
+Someone called Klivio's number. They came to you — be helpful, warm, not pushy.
+Find out what they need. If they're a potential client, understand their business first.
+`}
 
-PRODUCTS (mention only if relevant):
-- AI Lead Responder £197/mo — auto-replies to enquiries in 2 min, 24/7
-- AI Chatbot £297/mo — books appointments from website
-- Voice Assistant £497/mo — AI answers their phone calls
-- Full bundle £497/mo — 3 AI workers together`,
+KLIVIO IN ONE LINE: AI workers for UK businesses — lead response, chatbots, voice assistants. From $197/mo, live in 2-5 days.
+
+HOW TO SOUND HUMAN (critical):
+- 1-2 sentences per turn MAX. Real phone calls are short turns.
+- Always finish your sentence before stopping.
+- Use contractions: "we've", "it's", "don't", "you're", "I'll"
+- Natural fillers mid-sentence: "honestly", "to be fair", "look", "I mean"
+- ONE question per turn, then wait silently.
+- If interrupted, stop immediately and listen.
+- Never list things. Never use bullet points. This is speech.
+- Never repeat their words back robotically ("So what you're saying is...")
+- Keep every reply under 35 words. Shorter is more human.
+
+PRODUCTS (only mention if they ask or it's directly relevant):
+- AI Lead Responder $197/mo — auto-replies to enquiries in under 2 min, 24/7
+- AI Chatbot $197/mo — books appointments from website visitors
+- Voice Assistant $497/mo — AI that answers their phone
+- Full bundle $497/mo — all 7 AI workers`,
 
 };
 

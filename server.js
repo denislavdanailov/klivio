@@ -93,6 +93,21 @@ const ONBOARDING = {
     'What problem are you trying to solve?',
     'What tools/systems do you currently use in your business?',
     'Do you have a deadline or launch date in mind?'
+  ],
+  'AI Quick Reply': [
+    'What is your business name and what do you do?',
+    'What email address do leads contact you on? (we will monitor this)',
+    'What is your website URL? (optional)',
+    'What should the AI say when it replies to a new enquiry? (we will draft this — just give us your tone)'
+  ],
+  'Done-For-You Growth System': [
+    'What is your business name, website, and industry?',
+    'What is your ideal client? (location, size, budget)',
+    'What is your current phone number and email for inbound enquiries?',
+    'What booking tool do you use? (Calendly, Google Calendar, other)',
+    'What are your opening hours?',
+    'What is the #1 result you want in the first 30 days?',
+    'Who is your main point of contact for this engagement?'
   ]
 };
 
@@ -109,9 +124,11 @@ const notifyTransport = nodemailer.createTransport({
 
 // ── Stripe plan → product mapping ──
 const STRIPE_PLAN_MAP = {
-  19700: { product: 'STARTER Bundle',  price: '£197/mo', plan: 'Starter'      },
-  29700: { product: 'GROWTH Bundle',   price: '£297/mo', plan: 'Growth'       },
-  49700: { product: 'FULL Bundle',     price: '£497/mo', plan: 'Full System'  },
+   4700: { product: 'AI Quick Reply',             price: '$47/mo',    plan: 'Quick Reply'    },
+  19700: { product: 'STARTER Bundle',             price: '$197/mo',   plan: 'Starter'        },
+  29700: { product: 'GROWTH Bundle',              price: '$297/mo',   plan: 'Growth'         },
+  49700: { product: 'FULL Bundle',                price: '$497/mo',   plan: 'Full System'    },
+ 149700: { product: 'Done-For-You Growth System', price: '$1,497/mo', plan: 'Done-For-You'  },
 };
 
 function planFromAmount(pence) {
@@ -151,12 +168,19 @@ app.post('/api/stripe/webhook', async (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session      = event.data.object;
-    const customerEmail = session.customer_details?.email || '';
-    const customerName  = session.customer_details?.name  || 'Customer';
+    const customerEmail = session.customer_details?.email || session.metadata?.email || '';
+    const customerName  = session.customer_details?.name  || session.metadata?.name || 'Customer';
     const amountPence   = session.amount_total || 19700;
 
+    // Metadata from new /api/create-checkout flow
+    const metaPlan     = session.metadata?.plan; // 'starter'|'growth'|'full'
+    const metaBusiness = session.metadata?.business || '';
+    const metaWebsite  = session.metadata?.website  || '';
+
     const plan         = planFromAmount(amountPence);
-    const product      = session.metadata?.product || plan.product;
+    // If metadata has an explicit plan key, use that for product name; otherwise fall back to amount lookup
+    const planNames    = { starter: 'STARTER Bundle', growth: 'GROWTH Bundle', full: 'FULL Bundle' };
+    const product      = session.metadata?.product || (metaPlan && planNames[metaPlan]) || plan.product;
     const price        = plan.price;
 
     // Deduplicate by Stripe session ID — skip if already saved
@@ -164,17 +188,32 @@ app.post('/api/stripe/webhook', async (req, res) => {
     if (!existing) {
 
     const order = await DB.createOrder({
-      source:            'stripe',
+      source:            'stripe_checkout',
       name:              customerName,
       email:             customerEmail,
-      website_url:       session.metadata?.website || '',
+      website_url:       metaWebsite || session.metadata?.website || '',
       language:          'English',
-      notes:             `Stripe checkout: ${session.id}`,
+      notes:             `Stripe checkout: ${session.id}${metaBusiness ? ` | Business: ${metaBusiness}` : ''}`,
       product,
       price,
       status:            'pending',
       stripe_session_id: session.id,
     });
+
+    // Telegram alert for new payment
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+    const tgChat  = process.env.TELEGRAM_CHAT_ID;
+    if (tgToken && tgChat) {
+      const tgMsg = `💳 *NEW PAYMENT*\n\n*${customerName}*${metaBusiness ? ` from *${metaBusiness}*` : ''}\nPlan: ${metaPlan || product}\nEmail: ${customerEmail}\nAmount: ${price}`;
+      require('https').request({
+        hostname: 'api.telegram.org',
+        path: `/bot${tgToken}/sendMessage`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }, () => {}).on('error', () => {}).end(JSON.stringify({
+        chat_id: tgChat, text: tgMsg, parse_mode: 'Markdown',
+      }));
+    }
     const deadline = new Date(order.deadline);
     const deliveryDays = order.delivery_days;
 
@@ -205,6 +244,7 @@ app.post('/api/stripe/webhook', async (req, res) => {
         'AI Lead Responder': 'booking', 'Follow-Up Automator': 'followup',
         'Review & Referral System': 'reviews', 'Voice Assistant': 'voice',
         'AI Chatbot': 'chatbot', 'Cold Outreach Setup': 'outreach',
+        'AI Quick Reply': 'quickreply', 'Done-For-You Growth System': 'doneforyou',
       };
       const productKey = productKeyMap[product] || 'booking';
       const setupUrl = `${process.env.BASE_URL || 'https://klivio.online'}/setup/${order.id}?product=${productKey}`;
@@ -232,63 +272,141 @@ app.post('/api/stripe/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
-// ── POST /api/checkout — create Stripe Checkout Session ──
-app.post('/api/checkout', async (req, res) => {
-  const { name, email, plan, website, language, notes } = req.body;
-  if (!name || !email || !plan) return res.status(400).json({ error: 'name, email and plan required' });
+// /api/checkout is now handled by /api/create-checkout below
 
-  const PLANS = {
-    starter: { name: 'Klivio Starter — AI Lead Responder', amount: 19700 },
-    growth:  { name: 'Klivio Growth — AI Chatbot',         amount: 29700 },
-    full:    { name: 'Klivio Full System — Voice AI',      amount: 49700 },
+// ── GET /checkout — checkout page ──
+app.get('/checkout', (req, res) => {
+  res.sendFile(path.join(__dirname, 'checkout.html'));
+});
+
+// ── GET /success — post-payment success page ──
+app.get('/success', (req, res) => {
+  res.send(`<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Payment confirmed — Klivio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{background:#0d0d0d;color:#f0f0f0;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+      .card{max-width:480px;width:100%;background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:48px 36px;text-align:center}
+      .icon{font-size:56px;margin-bottom:20px;display:block}
+      h1{font-size:28px;font-weight:800;margin-bottom:10px;letter-spacing:-0.5px}
+      p{color:#888;font-size:15px;line-height:1.7;margin-bottom:16px}
+      a{color:#f5a623;text-decoration:none;font-weight:600}
+      a:hover{text-decoration:underline}
+      .back{display:inline-block;margin-top:24px;padding:12px 28px;background:#f5a623;color:#0d0d0d;border-radius:8px;font-weight:700;font-size:15px}
+    </style>
+  </head><body>
+    <div class="card">
+      <span class="icon">✅</span>
+      <h1>Payment confirmed!</h1>
+      <p>We'll be in touch within 24 hours to kick off your setup. Check your inbox for an email from <strong>james@klivio.bond</strong>.</p>
+      <p>Questions? Just reply to that email or message us at <a href="https://t.me/klivio">t.me/klivio</a></p>
+      <a href="/" class="back">Back to Klivio →</a>
+    </div>
+  </body></html>`);
+});
+
+// ── POST /api/create-checkout — create Stripe Checkout Session ──
+// Body: { plan: 'starter'|'growth'|'full', name, email, business, website }
+// Returns: { url: 'https://checkout.stripe.com/...' }
+app.post('/api/create-checkout', async (req, res) => {
+  const { plan, name, email, business, website } = req.body || {};
+
+  if (!plan || !name || !email) {
+    return res.status(400).json({ error: 'plan, name and email are required' });
+  }
+
+  // Resolve price ID from env
+  const PRICE_IDS = {
+    starter: process.env.STRIPE_PRICE_STARTER,
+    growth:  process.env.STRIPE_PRICE_GROWTH,
+    full:    process.env.STRIPE_PRICE_FULL,
   };
-  const p = PLANS[plan] || PLANS.starter;
+
+  const priceId = PRICE_IDS[plan];
+
+  // If no price IDs configured, fall back to inline price_data (dynamic pricing)
+  // This lets the checkout work immediately without pre-creating Stripe Products
+  const PLAN_AMOUNTS = {
+    starter: { amount: 19700, label: 'Klivio Starter — 1 AI Worker' },
+    growth:  { amount: 29700, label: 'Klivio Growth — 5 AI Workers' },
+    full:    { amount: 49700, label: 'Klivio Full System — All 7 AI Workers' },
+  };
+
+  const planData = PLAN_AMOUNTS[plan] || PLAN_AMOUNTS.starter;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) return res.status(500).json({ error: 'Stripe not configured' });
+
+  if (!stripeKey) {
+    return res.status(500).json({ error: 'Stripe not configured on server. Contact hello@klivio.online' });
+  }
+
+  const baseUrl = process.env.BASE_URL || 'https://klivio.online';
 
   try {
     const https = require('https');
-    const params = new URLSearchParams({
+
+    // Build form params — use price ID if available, otherwise inline price_data
+    let lineItem;
+    if (priceId) {
+      lineItem = new URLSearchParams({
+        'line_items[0][price]': priceId,
+        'line_items[0][quantity]': '1',
+      }).toString();
+    } else {
+      lineItem = new URLSearchParams({
+        'line_items[0][price_data][currency]': 'usd',
+        'line_items[0][price_data][product_data][name]': planData.label,
+        'line_items[0][price_data][unit_amount]': planData.amount.toString(),
+        'line_items[0][price_data][recurring][interval]': 'month',
+        'line_items[0][quantity]': '1',
+      }).toString();
+    }
+
+    const baseParams = new URLSearchParams({
       mode: 'subscription',
-      'line_items[0][price_data][currency]': 'gbp',
-      'line_items[0][price_data][product_data][name]': p.name,
-      'line_items[0][price_data][unit_amount]': p.amount.toString(),
-      'line_items[0][price_data][recurring][interval]': 'month',
-      'line_items[0][quantity]': '1',
       customer_email: email,
-      success_url: `${process.env.BASE_URL || 'https://klivio.online'}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.BASE_URL || 'https://klivio.online'}/#pricing`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/checkout`,
       'metadata[name]': name,
       'metadata[email]': email,
       'metadata[plan]': plan,
-      'metadata[website]': website || '',
-      'metadata[language]': language || 'English',
-      'metadata[notes]': (notes || '').slice(0, 500),
+      'metadata[business]': (business || '').slice(0, 500),
+      'metadata[website]': (website || '').slice(0, 500),
     }).toString();
+
+    const params = `${lineItem}&${baseParams}`;
 
     const url = await new Promise((resolve, reject) => {
       const r = https.request({
-        hostname: 'api.stripe.com', path: '/v1/checkout/sessions', method: 'POST',
+        hostname: 'api.stripe.com',
+        path: '/v1/checkout/sessions',
+        method: 'POST',
         headers: {
           'Authorization': 'Basic ' + Buffer.from(stripeKey + ':').toString('base64'),
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': Buffer.byteLength(params)
-        }
+          'Content-Length': Buffer.byteLength(params),
+        },
       }, response => {
-        let d = ''; response.on('data', c => d += c);
+        let d = '';
+        response.on('data', c => d += c);
         response.on('end', () => {
-          const j = JSON.parse(d);
-          if (j.error) reject(new Error(j.error.message));
-          else resolve(j.url);
+          try {
+            const j = JSON.parse(d);
+            if (j.error) reject(new Error(j.error.message));
+            else resolve(j.url);
+          } catch (e) { reject(e); }
         });
       });
       r.on('error', reject);
-      r.write(params); r.end();
+      r.write(params);
+      r.end();
     });
 
     res.json({ url });
   } catch (e) {
-    console.error('Stripe checkout error:', e.message);
+    console.error('[create-checkout] Error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -805,6 +923,259 @@ app.post('/api/reviews/hook/:clientId', async (req, res) => {
       text: `Hi ${firstName},\n\nHope everything went well${jobType ? ` with your ${jobType}` : ''}!\n\nIf you have 30 seconds, we'd really appreciate a quick Google review — it helps us a lot:\n\n${client.googleReviewLink}\n\nThanks so much,\n${client.businessName || 'The Team'}`,
     }).catch(e => console.error('[Review hook] Email failed:', e.message));
   }
+});
+
+// ══════════════════════════════════════════════════════════
+// ── INBOUND EMAIL WEBHOOK (auto-reply pipeline) ───────────
+// ══════════════════════════════════════════════════════════
+// Receives parsed email JSON from Brevo / Mailgun / Postmark
+// Auto-classifies (Groq) → auto-responds (Cal/Stripe link) →
+// updates lead status → Telegram alert
+//
+// DNS setup needed (one-time): see ADMIN_SETUP.md
+// Pattern matches: any of the major inbound parsers' formats
+
+app.post('/api/inbound-email', express.json({ limit: '5mb' }), async (req, res) => {
+  res.status(200).json({ ok: true });  // ack immediately so sender doesn't retry
+
+  try {
+    const body = req.body || {};
+    // Normalize between Brevo / Mailgun / Postmark / SendGrid formats
+    const from   = body.from?.email || body.From || body.sender || body.sender_email
+                 || (body.from && body.from[0]?.email) || '';
+    const subject = body.subject || body.Subject || body.subject_line || '';
+    const text   = body.text || body['stripped-text'] || body.TextBody
+                 || body.plain || body.body_plain || (body.RawHtml || '').replace(/<[^>]+>/g, '');
+    const messageId = body.messageId || body['Message-Id'] || body.MessageID || body.message_id
+                    || body['message-id'] || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    if (!from || !text) {
+      console.log('[inbound] Skip: no from or text', JSON.stringify(body).slice(0, 200));
+      return;
+    }
+
+    // Hand off to inbox.js processEmail
+    try {
+      const { processEmail } = require('./leadgen/inbox');
+      const result = await processEmail({
+        from: from.toLowerCase(),
+        subject,
+        body: text,
+        messageId,
+      });
+      console.log('[inbound]', from, '→', JSON.stringify(result).slice(0, 200));
+
+      // Telegram alert on hot replies
+      if (result?.intent === 'interested' || result?.intent === 'question') {
+        const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+        const tgChat = process.env.TELEGRAM_CHAT_ID;
+        if (tgToken && tgChat) {
+          const msg = `🔥 *HOT REPLY* — ${result.intent.toUpperCase()}\n\n*From:* ${from}\n*Business:* ${result.business || '?'}\n*Subject:* ${subject.slice(0, 60)}\n\n*Snippet:*\n${text.slice(0, 300)}\n\n→ Auto-reply sent: ${result.autoReplied ? '✅' : '❌'}`;
+          require('https').request({
+            hostname: 'api.telegram.org',
+            path: `/bot${tgToken}/sendMessage`,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          }, () => {}).on('error', () => {}).end(JSON.stringify({
+            chat_id: tgChat, text: msg, parse_mode: 'Markdown',
+          }));
+        }
+      }
+
+      // Activity log
+      try {
+        const af = path.join(__dirname, 'leadgen', 'data', 'activity.json');
+        const list = JSON.parse(fs.readFileSync(af, 'utf-8'));
+        list.push({
+          at: new Date().toISOString(),
+          type: 'REPLY',
+          msg: `${from}: ${result?.intent || '?'}`,
+        });
+        fs.writeFileSync(af, JSON.stringify(list.slice(-500), null, 2));
+      } catch {}
+    } catch (e) {
+      console.error('[inbound] processEmail failed:', e.message);
+    }
+  } catch (e) { console.error('[inbound] webhook error:', e.message); }
+});
+
+// ══════════════════════════════════════════════════════════
+// ── LIVE DASHBOARD API (admin.klivio.online) ──────────────
+// ══════════════════════════════════════════════════════════
+
+const LEADGEN_DATA = path.join(__dirname, 'leadgen', 'data');
+
+function readJSONsafe(file, def) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf-8')); } catch { return def; }
+}
+
+// ── Cookie/header auth helper for the dashboard ──
+function dashAuth(req, res, next) {
+  const key = req.headers['x-admin-key'] || req.query.key || '';
+  if (key !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
+
+// ── GET /api/dashboard/overview — single-call top stats ──
+app.get('/api/dashboard/overview', dashAuth, (req, res) => {
+  try {
+    const leads   = readJSONsafe(path.join(LEADGEN_DATA, 'leads.json'), []);
+    const sentLog = readJSONsafe(path.join(LEADGEN_DATA, 'sent_log.json'), []);
+    const today   = new Date().toISOString().slice(0, 10);
+    const yest    = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    const sentToday  = sentLog.filter(e => (e.sentAt || '').startsWith(today)).length;
+    const sentYest   = sentLog.filter(e => (e.sentAt || '').startsWith(yest)).length;
+    const sentTotal  = sentLog.length;
+
+    // last 7 days for chart
+    const last7 = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      last7.push({ date: d, count: sentLog.filter(e => (e.sentAt || '').startsWith(d)).length });
+    }
+
+    const byStatus = {};
+    const byIndustry = {};
+    const byCity = {};
+    const byCountry = {};
+    const bySource = {};
+    leads.forEach(l => {
+      byStatus[l.status] = (byStatus[l.status] || 0) + 1;
+      byIndustry[l.industry] = (byIndustry[l.industry] || 0) + 1;
+      if (l.city)    byCity[l.city] = (byCity[l.city] || 0) + 1;
+      if (l.country) byCountry[l.country] = (byCountry[l.country] || 0) + 1;
+      if (l.source)  bySource[l.source] = (bySource[l.source] || 0) + 1;
+    });
+
+    let accounts = { totalCapacity: 0, totalToday: 0, breakdown: [] };
+    try {
+      const { getDailyStats } = require('./leadgen/sender');
+      accounts = getDailyStats();
+    } catch {}
+
+    res.json({
+      now: new Date().toISOString(),
+      leads: {
+        total: leads.length,
+        ready: byStatus.new || 0,
+        sent: byStatus.sent || 0,
+        replied: byStatus.replied || 0,
+        bounced: byStatus.bounced || 0,
+        duplicate: byStatus.duplicate || 0,
+        error: byStatus.error || 0,
+      },
+      sending: { today: sentToday, yesterday: sentYest, total: sentTotal, last7 },
+      breakdown: { byStatus, byIndustry, byCity, byCountry, bySource },
+      accounts,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── GET /api/dashboard/activity — recent activity feed ──
+app.get('/api/dashboard/activity', dashAuth, (req, res) => {
+  const list = readJSONsafe(path.join(LEADGEN_DATA, 'activity.json'), []);
+  const limit = parseInt(req.query.limit) || 50;
+  res.json(list.slice(-limit).reverse());
+});
+
+// ── GET /api/dashboard/recent-sends — last N sent emails ──
+app.get('/api/dashboard/recent-sends', dashAuth, (req, res) => {
+  const sentLog = readJSONsafe(path.join(LEADGEN_DATA, 'sent_log.json'), []);
+  const limit = parseInt(req.query.limit) || 20;
+  res.json(sentLog.slice(-limit).reverse().map(e => ({
+    to: e.to, subject: e.subject, account: e.account || e.from,
+    sentAt: e.sentAt, business: e.business, industry: e.industry, city: e.city,
+  })));
+});
+
+// ── GET /api/dashboard/scraper-state — what's been scraped ──
+app.get('/api/dashboard/scraper-state', dashAuth, (req, res) => {
+  const state = readJSONsafe(path.join(LEADGEN_DATA, 'scraper_state.json'), {});
+  const entries = Object.entries(state)
+    .map(([slug, s]) => ({ slug, ...s }))
+    .sort((a, b) => new Date(b.lastRunAt) - new Date(a.lastRunAt));
+  const totalScraped = entries.reduce((sum, e) => sum + (e.addedTotal || 0), 0);
+  res.json({
+    targetsScraped: entries.length,
+    totalLeadsFromScraper: totalScraped,
+    recentTargets: entries.slice(0, 25),
+  });
+});
+
+// ── GET /api/dashboard/pm2 — PM2 process status ──
+app.get('/api/dashboard/pm2', dashAuth, (req, res) => {
+  const { exec } = require('child_process');
+  exec('npx pm2 jlist', { timeout: 5000 }, (err, stdout) => {
+    if (err) return res.json({ processes: [], error: err.message });
+    try {
+      const list = JSON.parse(stdout);
+      res.json({
+        processes: list.map(p => ({
+          name: p.name,
+          status: p.pm2_env?.status,
+          uptime: p.pm2_env?.pm_uptime ? Date.now() - p.pm2_env.pm_uptime : 0,
+          restarts: p.pm2_env?.restart_time,
+          cpu: p.monit?.cpu,
+          memory: p.monit?.memory,
+          pid: p.pid,
+        })),
+      });
+    } catch (e) { res.json({ processes: [], error: e.message }); }
+  });
+});
+
+// ── GET /api/dashboard/stream — Server-Sent Events for live updates ──
+app.get('/api/dashboard/stream', (req, res) => {
+  const key = req.query.key || req.headers['x-admin-key'];
+  if (key !== ADMIN_KEY) return res.status(401).end('Unauthorized');
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.write(`event: hello\ndata: ${JSON.stringify({ at: Date.now() })}\n\n`);
+
+  let lastActivityLen = 0;
+  let lastLeadsCount = 0;
+
+  const tick = () => {
+    try {
+      const activity = readJSONsafe(path.join(LEADGEN_DATA, 'activity.json'), []);
+      const leads = readJSONsafe(path.join(LEADGEN_DATA, 'leads.json'), []);
+
+      // New activity events
+      if (activity.length !== lastActivityLen) {
+        const newOnes = activity.slice(lastActivityLen);
+        lastActivityLen = activity.length;
+        newOnes.forEach(e => {
+          res.write(`event: activity\ndata: ${JSON.stringify(e)}\n\n`);
+        });
+      }
+
+      // Lead count delta
+      if (leads.length !== lastLeadsCount) {
+        const ready = leads.filter(l => l.status === 'new').length;
+        const sent  = leads.filter(l => l.status === 'sent').length;
+        res.write(`event: counts\ndata: ${JSON.stringify({ total: leads.length, ready, sent })}\n\n`);
+        lastLeadsCount = leads.length;
+      }
+
+      // heartbeat
+      res.write(`event: ping\ndata: ${Date.now()}\n\n`);
+    } catch (e) { /* swallow */ }
+  };
+
+  tick(); // immediate
+  const iv = setInterval(tick, 3000);
+  req.on('close', () => clearInterval(iv));
+});
+
+// ── New live dashboard route (admin.klivio.online → /dashboard or /) ──
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-dashboard.html'));
 });
 
 // ── Fallback ──

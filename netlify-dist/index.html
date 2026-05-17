@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KLivio - AI Automation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Inter:wght@400;600;800&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-C0E9jYvU.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/chunk-CaILmz35.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-D2c6Tr_2.css">
+    <style>
+      /* ── BUG FIX 1 & 3: text-white/28 not compiled in Tailwind output → add it ── */
+      .text-white\/28 {
+        color: rgba(255, 255, 255, 0.65) !important;
+      }
+      /* Slightly boost the NOT FOR YOU IF section label too */
+      .text-white\/30 {
+        color: rgba(255, 255, 255, 0.55) !important;
+      }
+
+      /* ── BUG FIX 2: Spline white gap — force all Spline containers dark ── */
+      spline-viewer,
+      spline-viewer::part(container),
+      canvas {
+        background: transparent !important;
+      }
+      /* Any div containing the spline canvas gets dark bg during load */
+      [style*="contain: paint"] {
+        background: #030303 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+    (function() {
+      var GOLD = '#e6b84b';
+      var cardBase = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1)';
+      var cardFeatured = 'background:rgba(230,184,75,0.07);border:1px solid rgba(230,184,75,0.4);box-shadow:0 0 80px rgba(230,184,75,0.14)';
+
+      function makeCard(cfg) {
+        var d = document.createElement('div');
+        d.className = 'rounded-2xl p-5 flex flex-col relative overflow-hidden transition-all';
+        d.style.cssText = cfg.featured ? cardFeatured : cardBase;
+        var featuredLine = cfg.featured ? '<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#e6b84b,transparent)"></div>' : '';
+        var badge = cfg.badge ? '<span style="font-family:Inter,sans-serif;font-weight:900;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:'+GOLD+';margin-bottom:16px;display:block">'+cfg.badge+'</span>' : '';
+        var feats = cfg.features.map(function(f){ return '<li style="display:flex;align-items:flex-start;gap:8px;font-family:Inter,sans-serif;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5"><span style="color:'+GOLD+';margin-top:2px;flex-shrink:0">&#10003;</span>'+f+'</li>'; }).join('');
+        d.innerHTML = featuredLine + badge +
+          '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;text-transform:uppercase;font-size:11px;letter-spacing:0.22em;color:rgba(255,255,255,0.4);margin-bottom:16px">'+cfg.name+'</h3>'+
+          '<div style="margin-bottom:12px"><span style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:2.6rem;color:#fff;line-height:1">'+cfg.price+'</span><span style="font-family:Inter,sans-serif;font-size:13px;color:rgba(255,255,255,0.35)">/mo</span></div>'+
+          '<p style="font-family:Inter,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;line-height:1.6">'+cfg.desc+'</p>'+
+          '<ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px">'+feats+'</ul>'+
+          '<a href="'+cfg.link+'" style="margin-top:auto;display:block;text-align:center;padding:13px 20px;border-radius:12px;font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:13px;text-decoration:none;transition:opacity 0.2s;background:'+(cfg.featured?GOLD:'transparent')+';color:'+(cfg.featured?'#080808':GOLD)+';border:1px solid '+(cfg.featured?'transparent':GOLD)+'">'+cfg.cta+'</a>';
+        return d;
+      }
+
+      function inject() {
+        var h3s = document.querySelectorAll('h3');
+        var starterH3 = null;
+        for (var i = 0; i < h3s.length; i++) {
+          if (h3s[i].textContent.trim() === 'STARTER') { starterH3 = h3s[i]; break; }
+        }
+        if (!starterH3) return false;
+
+        var starterCard = starterH3.closest('[class*="rounded-2xl"]');
+        if (!starterCard) return false;
+        var grid = starterCard.parentElement;
+        if (!grid) return false;
+
+        // Widen grid for more cards
+        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(210px, 1fr))';
+
+        // AI Quick Reply — insert before STARTER
+        if (!document.getElementById('kl-quickreply')) {
+          var qr = makeCard({
+            name: 'QUICK REPLY',
+            price: '$47',
+            badge: '&#9889; TRY IT FIRST',
+            desc: 'Auto-replies to every enquiry in under 2 minutes. Perfect entry point with zero risk.',
+            features: ['AI Lead Responder', '24/7 — evenings & weekends', 'Setup in 1 day', 'Up to 200 contacts/month', 'Standard support'],
+            link: 'https://buy.stripe.com/7sY00j6AF0LS6jl2z67Vm07',
+            cta: 'Get Started →',
+            featured: false
+          });
+          qr.id = 'kl-quickreply';
+          grid.insertBefore(qr, starterCard);
+        }
+
+        // Done-For-You — append after last card
+        if (!document.getElementById('kl-doneforyou')) {
+          var dfy = makeCard({
+            name: 'DONE-FOR-YOU',
+            price: '$1,497',
+            badge: '&#128081; FULL MANAGEMENT',
+            desc: 'We run everything. All 7 AI workers + our team actively finds new clients for your business each month.',
+            features: ['All 7 AI Workers active', 'We find new clients for you', '10–20 qualified leads/month', 'Dedicated account manager', 'Cold outreach on autopilot', 'Setup in 7 days — SLA included'],
+            link: 'https://buy.stripe.com/7sY28r7EJcuA9vx3Da7Vm08',
+            cta: 'Get Started →',
+            featured: true
+          });
+          dfy.id = 'kl-doneforyou';
+          grid.appendChild(dfy);
+        }
+
+        return true;
+      }
+
+      if (!inject()) {
+        var obs = new MutationObserver(function() { if (inject()) obs.disconnect(); });
+        obs.observe(document.body, { childList: true, subtree: true });
+        setTimeout(inject, 4000);
+      }
+    })();
+    </script>
+  </body>
+</html>
