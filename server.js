@@ -1256,3 +1256,11 @@ async function pingSupabase() {
 }
 pingSupabase(); // ping on startup too (restores paused project on first request)
 setInterval(pingSupabase, FOUR_DAYS_MS);
+
+// ── Inbox watcher — auto-classify replies 24/7 ──
+if (process.env.INBOX_USER && process.env.INBOX_PASS) {
+  const { watchLoop } = require('./leadgen/inbox');
+  watchLoop().catch(e => console.error('[inbox] watcher crashed:', e.message));
+} else {
+  console.log('[inbox] Skipped — no INBOX_USER/INBOX_PASS set');
+}
