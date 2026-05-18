@@ -73,9 +73,16 @@ function alreadySent(to) {
 // ── Brevo HTTP API send ──
 function sendBrevo(account, to, subject, body) {
   return new Promise((resolve, reject) => {
+    // Reply-To routes all replies to a real monitored inbox
+    const replyToEmail = process.env.REPLY_TO_EMAIL || process.env.INBOUND_DOMAIN && `lead-${Date.now()}@${process.env.INBOUND_DOMAIN}`;
+    const replyToObj = replyToEmail
+      ? { replyTo: { email: replyToEmail, name: account.name } }
+      : {};
+
     const payload = JSON.stringify({
       sender: { name: account.name, email: account.email },
       to: [{ email: to }],
+      ...replyToObj,
       subject,
       textContent: body,
       headers: {

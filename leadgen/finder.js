@@ -25,12 +25,35 @@ const JUNK = [
   '.wp.com', 'gravatar', 'placeholder', 'loremipsum',
 ];
 
+// Large corporations, government bodies, NHS, banks — not our buyers
+const CORPORATE_DOMAIN_BLACKLIST = [
+  'nhs.net','nhs.uk','gov.uk','gov.scot','gov.wales','parliament.uk',
+  'ebrd.com','worldbank.org','imf.org','un.org','nato.int',
+  'puregym.com','thegymgroup.com','anytimefitness.com','davidlloyd.co.uk',
+  'frasershospitality.com','ihg.com','marriott.com','hilton.com','accor.com',
+  'your-move.co.uk','purplebricks.co.uk','rightmove.co.uk','zoopla.co.uk',
+  'savills.com','knightfrank.com','jll.com','cushmanwakefield.com',
+  'mcdonalds.com','kfc.com','burger-king.co.uk','subway.com','greggs.co.uk',
+  'tesco.com','asda.com','sainsburys.co.uk','morrisons.com','waitrose.com',
+  'amazon.com','amazon.co.uk','ebay.com','ebay.co.uk',
+  'lloyds.com','barclays.com','natwest.com','hsbc.com','santander.co.uk',
+  'aviva.com','axa.com','zurich.com','legalandgeneral.com',
+  'bt.com','sky.com','virginmedia.com','ee.co.uk','o2.co.uk','vodafone.com',
+  'bbc.co.uk','itv.com','channel4.com','guardian.com','dailymail.co.uk',
+];
+
+function isCorporateDomain(email) {
+  const domain = (email.split('@')[1] || '').toLowerCase();
+  return CORPORATE_DOMAIN_BLACKLIST.some(d => domain === d || domain.endsWith('.' + d));
+}
+
 function loadLeads()  { try { return JSON.parse(fs.readFileSync(LEADS_FILE,'utf-8')); } catch { return []; } }
 function saveLeads(l) { fs.writeFileSync(LEADS_FILE, JSON.stringify(l,null,2)); }
 
 function isValidEmail(e) {
   if (!e || e.length > 80 || !e.includes('@')) return false;
   if (JUNK.some(j => e.toLowerCase().includes(j))) return false;
+  if (isCorporateDomain(e)) return false;
   const [local, domain] = e.split('@');
   if (!domain || !domain.includes('.') || local.length < 2) return false;
   const tld = domain.split('.').pop();
