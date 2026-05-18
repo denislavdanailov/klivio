@@ -79,14 +79,14 @@
           '<button id="kl-modal-close" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:20px;line-height:1">✕</button>' +
         '</div>' +
         '<form id="kl-modal-form" style="padding:24px 32px;display:flex;flex-direction:column;gap:16px">' +
-          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Full name *</label>' +
-          '<input name="name" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
-          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Email *</label>' +
-          '<input name="email" type="email" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
-          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Phone</label>' +
-          '<input name="phone" type="tel" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
-          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Website</label>' +
-          '<input name="website" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Full name <span style="color:'+GOLD+'">*</span></label>' +
+          '<input name="name" required placeholder="John Smith" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Email <span style="color:'+GOLD+'">*</span></label>' +
+          '<input name="email" type="email" required placeholder="john@business.com" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Phone <span style="color:rgba(255,255,255,0.3);font-size:9px;text-transform:none;letter-spacing:0">(optional)</span></label>' +
+          '<input name="phone" type="tel" placeholder="+44 7xxx xxxxxx" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
+          '<div><label style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px">Website <span style="color:rgba(255,255,255,0.3);font-size:9px;text-transform:none;letter-spacing:0">(optional)</span></label>' +
+          '<input name="website" placeholder="https://yourbusiness.com" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-family:Inter,sans-serif;font-size:14px;outline:none"></div>' +
           '<button type="submit" style="width:100%;padding:14px;border-radius:12px;background:'+GOLD+';color:#080808;font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:0.1em;border:none;cursor:pointer;margin-top:8px" id="kl-modal-submit">Continue to Payment →</button>' +
           '<p id="kl-modal-err" style="color:#ff6b6b;font-size:12px;text-align:center;display:none">Something went wrong — please try again.</p>' +
         '</form></div>';
@@ -177,6 +177,28 @@
         return true;
       }
 
+      function fixModalLabels() {
+        // Find React modal labels and add required/optional indicators
+        var labels = document.querySelectorAll('[class*="fixed"][class*="inset"] label, [class*="z-"][class*="fixed"] label');
+        labels.forEach(function(label) {
+          var text = label.textContent.trim().toLowerCase();
+          if ((text === 'full name' || text === 'email') && !label.querySelector('.kl-req')) {
+            var req = document.createElement('span');
+            req.className = 'kl-req';
+            req.style.cssText = 'color:#e6b84b;margin-left:3px';
+            req.textContent = '*';
+            label.appendChild(req);
+          }
+          if ((text === 'phone' || text === 'website') && !label.querySelector('.kl-opt')) {
+            var opt = document.createElement('span');
+            opt.className = 'kl-opt';
+            opt.style.cssText = 'color:rgba(255,255,255,0.3);font-size:9px;margin-left:4px;text-transform:none;letter-spacing:0';
+            opt.textContent = '(optional)';
+            label.appendChild(opt);
+          }
+        });
+      }
+
       function fixHero() {
         // Remove "LIMITED ONBOARDING — Q2 2026" badge
         var allEls = document.querySelectorAll('*');
@@ -202,8 +224,13 @@
       function injectAll() {
         var ok = inject();
         fixHero();
+        fixModalLabels();
         return ok;
       }
+
+      // Re-run fixModalLabels when modal opens (React renders it dynamically)
+      var modalObs = new MutationObserver(function() { fixModalLabels(); });
+      modalObs.observe(document.body, { childList: true, subtree: true });
 
       if (!injectAll()) {
         var obs = new MutationObserver(function() { if (injectAll()) { obs.disconnect(); } });
