@@ -706,6 +706,11 @@ app.get('/campaign', (req, res) => {
   res.sendFile(path.join(__dirname, 'campaign.html'));
 });
 
+// ── LeadRevive dashboard ──
+app.get('/leadrevive', (req, res) => {
+  res.sendFile(path.join(__dirname, 'leadrevive.html'));
+});
+
 // ── Voice: Telnyx Call Control webhooks ──
 app.post('/api/voice/cc', handleCallControlEvent);
 
@@ -742,6 +747,53 @@ app.post('/api/chat', async (req, res) => {
 // ── GET /api/health — uptime check for monitoring ──
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, uptime: Math.floor(process.uptime()), ts: new Date().toISOString() });
+});
+
+// ── LeadRevive endpoints (admin-protected) ──
+const leadrevive = require('./leadgen/leadrevive');
+function requireAdmin(req, res, next) {
+  const key = req.query.key || req.headers['x-admin-key'] || req.body?.key;
+  if (key !== ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
+  next();
+}
+
+app.get('/api/leadrevive/clients', requireAdmin, (req, res) => {
+  res.json({ clients: leadrevive.listClients() });
+});
+
+app.get('/api/leadrevive/stats/:slug', requireAdmin, (req, res) => {
+  const stats = leadrevive.statsForClient(req.params.slug);
+  if (!stats) return res.status(404).json({ error: 'not_found' });
+  res.json(stats);
+});
+
+app.post('/api/leadrevive/create', requireAdmin, (req, res) => {
+  try {
+    const { slug, ...partial } = req.body;
+    if (!slug) return res.status(400).json({ error: 'slug required' });
+    const cfg = leadrevive.createClient(slug, partial);
+    res.json({ ok: true, config: cfg });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/leadrevive/import/:slug', requireAdmin, express.text({ limit: '10mb', type: '*/*' }), (req, res) => {
+  try {
+    const tmp = path.join(__dirname, 'data', 'leadrevive', `${req.params.slug}-import.csv`);
+    fs.mkdirSync(path.dirname(tmp), { recursive: true });
+    fs.writeFileSync(tmp, req.body || '');
+    const r = leadrevive.importContacts(req.params.slug, tmp);
+    fs.unlinkSync(tmp);
+    res.json({ ok: true, ...r });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/leadrevive/run/:slug', requireAdmin, async (req, res) => {
+  try {
+    const limit = parseInt(req.body?.limit || req.query.limit || '50');
+    // Fire and forget — return immediately
+    leadrevive.runClient(req.params.slug, { limit }).catch(e => console.error('[leadrevive]', e.message));
+    res.json({ ok: true, started: true, limit });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // ── Telegram bot webhook — /orders /hot /leads commands from phone ──

@@ -22,7 +22,29 @@ const DB   = require('../db');
 const LEADS_FILE = path.join(__dirname, 'data', 'leads.json');
 const INBOX_LOG  = path.join(__dirname, 'data', 'inbox_log.json');
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const CAL_LINK = process.env.CAL_LINK || 'https://cal.com/klivio/demo';
+
+// Stripe Payment Links — set in .env (one per product)
+const STRIPE = {
+  lead_responder:    process.env.STRIPE_LEAD_LINK     || '',
+  follow_up:         process.env.STRIPE_FOLLOWUP_LINK || '',
+  chatbot:           process.env.STRIPE_CHATBOT_LINK  || '',
+  live_chat:         process.env.STRIPE_LIVECHAT_LINK || '',
+  voice_assistant:   process.env.STRIPE_VOICE_LINK    || '',
+  review_system:     process.env.STRIPE_REVIEWS_LINK  || '',
+};
+
+// Pick the Stripe link that matches the product the lead was sold on.
+// Falls back to the first available link.
+function stripeLink(productName) {
+  const p = (productName || '').toLowerCase();
+  if (p.includes('lead') || p.includes('responder'))   return STRIPE.lead_responder || STRIPE.chatbot || Object.values(STRIPE).find(v => v);
+  if (p.includes('follow'))                             return STRIPE.follow_up      || STRIPE.lead_responder || Object.values(STRIPE).find(v => v);
+  if (p.includes('chat') && !p.includes('live'))        return STRIPE.chatbot        || STRIPE.lead_responder || Object.values(STRIPE).find(v => v);
+  if (p.includes('live'))                               return STRIPE.live_chat      || STRIPE.chatbot        || Object.values(STRIPE).find(v => v);
+  if (p.includes('voice'))                              return STRIPE.voice_assistant|| STRIPE.lead_responder || Object.values(STRIPE).find(v => v);
+  if (p.includes('review'))                             return STRIPE.review_system  || STRIPE.lead_responder || Object.values(STRIPE).find(v => v);
+  return Object.values(STRIPE).find(v => v) || 'https://klivio.online/#pricing';
+}
 
 function loadLeads()  { return JSON.parse(fs.readFileSync(LEADS_FILE, 'utf-8')); }
 function saveLeads(l) { fs.writeFileSync(LEADS_FILE, JSON.stringify(l, null, 2)); }
@@ -113,31 +135,45 @@ Respond with ONLY a JSON object like: {"intent": "interested", "confidence": 0.9
   });
 }
 
-// ── Auto-responses ──
+// ── Auto-responses — no demo, direct purchase ──
 const AUTO_RESPONSES = {
-  interested: (d) => `Hi ${d.firstName || 'there'},
+  interested: (d) => {
+    const link = stripeLink(d.productName);
+    const price = d.productPrice || '$197/mo';
+    return `Hi ${d.firstName || 'there'},
 
 Brilliant — thanks for coming back.
 
-Easiest way is to grab 15 min here: ${CAL_LINK}
+${d.productName || 'Klivio'} is fully managed — we handle the entire setup for ${d.business} within 48 hours, you don't lift a finger.
 
-On the call I'll show you exactly how ${d.productName || 'the system'} would work for ${d.business}, walk through pricing, and answer anything. No hard sell.
+Fixed price: ${price}. No contracts, cancel anytime.
 
-If those times don't work, reply with a couple that do and I'll make it happen.
+You can get started right now here:
+${link}
 
-${d.senderName || 'James'}
-Klivio`,
-
-  question: (d) => `Hi ${d.firstName || 'there'},
-
-Good question — happy to answer properly. Here's the quick version:
-
-${d.productName || 'Klivio'} is fully managed — we set it up in 2-3 days, you don't install anything. Pricing is fixed monthly (${d.productPrice || '£197-497/mo'}), no per-message fees. Cancel anytime.
-
-Want the full walkthrough? Grab 15 min here: ${CAL_LINK}
+Once you're in, I'll personally oversee the setup and send you a confirmation.
 
 ${d.senderName || 'James'}
-Klivio`,
+Klivio`;
+  },
+
+  question: (d) => {
+    const link = stripeLink(d.productName);
+    const price = d.productPrice || '$197/mo';
+    return `Hi ${d.firstName || 'there'},
+
+Happy to answer — here's the quick version:
+
+${d.productName || 'Klivio'} is fully managed. We set it up for ${d.business} in 48 hours, you don't install anything. Price is ${price}/month — fixed, no per-message fees, no contracts.
+
+If that sounds good, you can start directly here:
+${link}
+
+Any other questions, just reply and I'll come straight back.
+
+${d.senderName || 'James'}
+Klivio`;
+  },
 
   not_interested: (d) => `Hi ${d.firstName || 'there'},
 
@@ -168,6 +204,20 @@ async function processEmail(msg) {
   const leadIdx = leads.findIndex(l => l.email.toLowerCase() === fromEmail);
 
   if (leadIdx === -1) {
+    // Not in cold-outreach leads — check LeadRevive client databases
+    try {
+      const { processReply } = require('./leadrevive');
+      const r = await processReply({ from: fromEmail, body: msg.body, subject: msg.subject || '' });
+      if (r.matched) {
+        log.push({ messageId: msg.messageId, from: fromEmail, at: new Date().toISOString(), source: 'leadrevive', client: r.client, intent: r.intent });
+        saveInboxLog(log);
+        if (r.intent === 'interested') {
+          await notifyTelegram(`🔥 *LeadRevive — HOT REPLY*\n\nClient: *${r.client}*\nFrom: ${fromEmail}\n\n_Body:_ ${msg.body.slice(0, 300)}`);
+        }
+        return { source: 'leadrevive', client: r.client, intent: r.intent };
+      }
+    } catch (e) { /* LeadRevive module not yet loaded — ignore */ }
+
     log.push({ messageId: msg.messageId, from: fromEmail, at: new Date().toISOString(), skipped: 'not_in_leads' });
     saveInboxLog(log);
     return { skipped: 'not_in_leads' };
@@ -206,7 +256,7 @@ async function processEmail(msg) {
     firstName: (lead.contactName || '').split(' ')[0],
     business: lead.business,
     productName: lead.sentProduct,
-    productPrice: '£197-497/mo',
+    productPrice: '$197-497/mo',
     senderName: (lead.sentAccount || 'James').split(' ')[0],
   };
 
@@ -251,7 +301,7 @@ async function processEmail(msg) {
     await notifyTelegram(`❓ *QUESTION*\n\n${lead.business} asked something.\n\n_Summary:_ ${classification.summary}\n\nAuto-reply sent, but you may want to follow up.`);
   }
 
-  return { intent, autoReplied: !!responseBody };
+  return { intent, autoReplied: !!responseBody, business: lead.business, leadId: lead.id };
 }
 
 // ── IMAP poller ──
@@ -267,8 +317,12 @@ async function pollInbox() {
 
   const { INBOX_HOST, INBOX_PORT, INBOX_USER, INBOX_PASS } = process.env;
   if (!INBOX_USER || !INBOX_PASS) {
-    console.error('❌ Missing INBOX_USER or INBOX_PASS in .env');
-    return;
+    // Silent skip — inbox monitoring optional. Log once per hour max.
+    if (!global.__inboxWarnedAt || Date.now() - global.__inboxWarnedAt > 3600000) {
+      console.log('ℹ️  Inbox monitoring disabled (no INBOX_USER/INBOX_PASS) — campaign continues without reply detection');
+      global.__inboxWarnedAt = Date.now();
+    }
+    return [];
   }
 
   return new Promise(resolve => {
