@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Klivio SmartBid AI — Automated Proposals</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  body { background: #0a0a0f; color: #e4e4e7; min-height: 100vh; padding: 24px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  .subtitle { color: #71717a; margin-bottom: 32px; font-size: 14px; }
+  .card { background: #15151c; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .card h2 { font-size: 18px; margin-bottom: 16px; color: #fafafa; }
+  input, select, textarea, button { background: #1e1e26; color: #fafafa; border: 1px solid #3f3f46; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: #6366f1; }
+  button { cursor: pointer; background: #6366f1; border-color: #6366f1; font-weight: 600; padding: 10px 20px; }
+  button:hover { background: #4f46e5; }
+  button.secondary { background: #27272a; border-color: #3f3f46; }
+  .row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 200px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #27272a; font-size: 14px; }
+  th { color: #a1a1aa; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .stat.green { background: #052e2b; color: #4ade80; }
+  .stat.blue { background: #1e1b4b; color: #818cf8; }
+  .stat.yellow { background: #3f2e0a; color: #fbbf24; }
+  .stat.gray { background: #27272a; color: #a1a1aa; }
+  .empty { text-align: center; padding: 48px; color: #71717a; }
+  .toast { position: fixed; top: 24px; right: 24px; padding: 12px 20px; background: #052e2b; color: #4ade80; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; z-index: 999; }
+  .toast.show { opacity: 1; }
+  .toast.error { background: #2e0505; color: #f87171; }
+  textarea { width: 100%; min-height: 180px; resize: vertical; font-family: 'SF Mono', Monaco, monospace; font-size: 13px; }
+  .hint { font-size: 12px; color: #71717a; margin-top: 6px; }
+  .badge-fee { font-size: 11px; padding: 2px 8px; background: #1e1b4b; color: #818cf8; border-radius: 4px; margin-left: 8px; }
+  .result-box { background: #0c0c11; border: 1px solid #3f3f46; border-radius: 8px; padding: 16px; margin-top: 16px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+  .total-row { font-size: 16px; padding: 8px 0; }
+  .total-row.grand { font-size: 20px; font-weight: 700; color: #4ade80; border-top: 1px solid #27272a; padding-top: 12px; margin-top: 8px; }
+  a.download-btn { display: inline-block; background: #4ade80; color: #052e2b; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>SmartBid AI</h1>
+  <div class="subtitle">Drop an RFP → AI extracts requirements, matches your pricelist, generates a Word proposal. <span class="badge-fee">$1,500–3,000 setup per client</span></div>
+
+  <div class="card">
+    <h2>Admin Key</h2>
+    <input id="adminKey" type="password" placeholder="Enter admin key" style="width: 300px;" />
+    <button onclick="saveKey()">Save & Load</button>
+  </div>
+
+  <div class="card">
+    <h2>Add a Client</h2>
+    <div class="row">
+      <input id="newSlug" placeholder="Slug (e.g. acme-construction)" />
+      <input id="newBusiness" placeholder="Business name" />
+      <select id="newIndustry">
+        <option value="construction">Construction</option>
+        <option value="logistics">Logistics</option>
+        <option value="accounting">Accounting</option>
+        <option value="legal">Legal</option>
+        <option value="manufacturing">Manufacturing</option>
+        <option value="it-services">IT Services</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="row">
+      <input id="newContactName" placeholder="Contact person" />
+      <input id="newContactEmail" placeholder="Contact email" />
+      <input id="newContactPhone" placeholder="Contact phone" />
+    </div>
+    <div class="row">
+      <input id="newAddress" placeholder="Business address" />
+      <select id="newCurrency">
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+        <option value="BGN">BGN</option>
+        <option value="GBP">GBP</option>
+      </select>
+      <select id="newLang">
+        <option value="en">English</option>
+        <option value="bg">Bulgarian</option>
+      </select>
+      <input id="newSetupFee" type="number" value="1500" placeholder="Setup fee ($)" />
+      <button onclick="createClient()">Create</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Clients</h2>
+    <div id="clientsList" class="empty">Enter admin key above to load clients.</div>
+  </div>
+
+  <div class="card" id="pricelistCard" style="display:none;">
+    <h2>Upload Pricelist (CSV)</h2>
+    <div class="row">
+      <select id="plSlug" style="max-width: 300px;"></select>
+      <input type="file" id="plFile" accept=".csv" />
+      <button onclick="uploadPricelist()">Upload Pricelist</button>
+    </div>
+    <div class="hint">CSV format: <code>code,name,unit,price,category</code></div>
+    <div class="hint">Example:<br><code>INSTALL-01,Tile installation per m²,m²,25,install</code><br><code>MAT-CEM,Cement bag 25kg,bag,8.50,materials</code></div>
+  </div>
+
+  <div class="card" id="generateCard" style="display:none;">
+    <h2>Generate Proposal from RFP</h2>
+    <div class="row">
+      <select id="genSlug" style="max-width: 300px;"></select>
+    </div>
+    <textarea id="rfpText" placeholder="Paste the RFP / tender / request text here...
+
+Example: 'We are looking for a contractor to install 150 m² of ceramic floor tiles in our new office. The work must be completed by 30 June. Materials should be included. Please send a detailed quote including installation, materials, and any other costs.'"></textarea>
+    <div class="row" style="margin-top: 12px;">
+      <button onclick="generateProposal()">Generate Proposal</button>
+    </div>
+    <div id="resultArea"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let ADMIN_KEY = localStorage.getItem('smartbid_key') || '';
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 3000);
+}
+
+function saveKey() {
+  ADMIN_KEY = document.getElementById('adminKey').value.trim();
+  localStorage.setItem('smartbid_key', ADMIN_KEY);
+  loadClients();
+}
+
+async function api(method, path, body, isText) {
+  const opts = { method, headers: { 'X-Admin-Key': ADMIN_KEY } };
+  if (body !== undefined) {
+    if (isText) {
+      opts.headers['Content-Type'] = 'text/plain';
+      opts.body = body;
+    } else {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+  }
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'request_failed');
+  return j;
+}
+
+async function loadClients() {
+  if (!ADMIN_KEY) return;
+  try {
+    const { clients } = await api('GET', '/api/smartbid/clients');
+    renderClients(clients);
+    populateSelects(clients);
+    document.getElementById('pricelistCard').style.display = 'block';
+    document.getElementById('generateCard').style.display = 'block';
+  } catch (e) { toast('Load failed: ' + e.message, true); }
+}
+
+function renderClients(clients) {
+  const el = document.getElementById('clientsList');
+  if (!clients.length) { el.innerHTML = '<div class="empty">No clients yet. Add one above.</div>'; return; }
+  el.innerHTML = '<table><thead><tr><th>Business</th><th>Industry</th><th>Pricelist items</th><th>Proposals</th><th>Total value</th><th>Setup fee</th><th>Status</th></tr></thead><tbody>' +
+    clients.map(c => {
+      const status =
+        c.status === 'paid' ? '<span class="stat green">PAID</span>' :
+        c.status === 'delivered' ? '<span class="stat yellow">DELIVERED</span>' :
+        '<span class="stat gray">SETUP</span>';
+      return `<tr>
+        <td><strong>${c.business}</strong><br><span class="stat gray">${c.slug}</span></td>
+        <td>${c.industry}</td>
+        <td><span class="stat blue">${c.pricelistItems}</span></td>
+        <td>${c.proposalsGenerated}</td>
+        <td>${c.totalProposalValue.toFixed(2)}</td>
+        <td><strong>$${c.setupFee}</strong></td>
+        <td>${status}</td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+}
+
+function populateSelects(clients) {
+  const opts = clients.map(c => `<option value="${c.slug}">${c.business} (${c.slug})</option>`).join('');
+  document.getElementById('plSlug').innerHTML = opts;
+  document.getElementById('genSlug').innerHTML = opts;
+}
+
+async function createClient() {
+  const body = {
+    slug: document.getElementById('newSlug').value.trim(),
+    business: document.getElementById('newBusiness').value.trim(),
+    industry: document.getElementById('newIndustry').value,
+    contactName: document.getElementById('newContactName').value.trim(),
+    contactEmail: document.getElementById('newContactEmail').value.trim(),
+    contactPhone: document.getElementById('newContactPhone').value.trim(),
+    address: document.getElementById('newAddress').value.trim(),
+    currency: document.getElementById('newCurrency').value,
+    language: document.getElementById('newLang').value,
+    setupFee: parseFloat(document.getElementById('newSetupFee').value) || 1500,
+  };
+  if (!body.slug) { toast('Slug required', true); return; }
+  try {
+    await api('POST', '/api/smartbid/create', body);
+    toast('Client created');
+    loadClients();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function uploadPricelist() {
+  const slug = document.getElementById('plSlug').value;
+  const file = document.getElementById('plFile').files[0];
+  if (!slug || !file) { toast('Pick client and CSV', true); return; }
+  const text = await file.text();
+  try {
+    const r = await api('POST', '/api/smartbid/pricelist/' + slug, text, true);
+    toast(`Imported ${r.count} items`);
+    loadClients();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function generateProposal() {
+  const slug = document.getElementById('genSlug').value;
+  const rfp = document.getElementById('rfpText').value.trim();
+  if (!slug || !rfp) { toast('Pick client and paste RFP', true); return; }
+  const area = document.getElementById('resultArea');
+  area.innerHTML = '<div class="result-box">⏳ Analyzing RFP, matching prices, generating proposal...</div>';
+  try {
+    const r = await api('POST', '/api/smartbid/generate/' + slug, { rfp });
+    const lineItemsHtml = r.lineItems.map(li =>
+      `${li.matched_code || '—'}  ${li.matched_name || li.description}  ×${li.quantity_calculated || li.quantity || 1}  =  ${(li.line_total || 0).toFixed(2)}`
+    ).join('\n');
+    area.innerHTML = `
+      <div class="result-box"><strong>Extracted requirements:</strong>
+Client: ${r.requirements.client_name || '—'}
+Project: ${r.requirements.project_name || '—'}
+Deadline: ${r.requirements.deadline || '—'}
+
+<strong>Line items:</strong>
+${lineItemsHtml}
+
+<div class="total-row">Subtotal: ${r.totals.subtotal.toFixed(2)}</div>
+<div class="total-row">VAT (${(r.totals.vatRate * 100).toFixed(0)}%): ${r.totals.vat.toFixed(2)}</div>
+<div class="total-row grand">GRAND TOTAL: ${r.totals.grandTotal.toFixed(2)}</div>
+      </div>
+      <div style="margin-top: 12px;">
+        <a class="download-btn" href="/api/smartbid/download/${slug}/${r.id}?key=${encodeURIComponent(ADMIN_KEY)}" download>📄 Download Word Proposal</a>
+      </div>`;
+    loadClients();
+  } catch (e) { area.innerHTML = `<div class="result-box" style="color:#f87171;">Error: ${e.message}</div>`; }
+}
+
+if (ADMIN_KEY) {
+  document.getElementById('adminKey').value = ADMIN_KEY;
+  loadClients();
+}
+</script>
+</body>
+</html>

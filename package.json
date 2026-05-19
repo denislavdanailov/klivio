@@ -14,12 +14,15 @@
   "dependencies": {
     "@deepgram/sdk": "^5.0.0",
     "cheerio": "^1.0.0",
+    "docx": "^9.6.1",
     "dotenv": "^16.4.0",
     "emailjs": "^5.0.0",
     "express": "^4.21.0",
     "imap": "^0.8.19",
     "mailparser": "^3.9.8",
     "nodemailer": "^6.9.0",
+    "pdf-parse": "^2.4.5",
+    "playwright": "^1.59.1",
     "ws": "^8.20.0"
   },
   "devDependencies": {

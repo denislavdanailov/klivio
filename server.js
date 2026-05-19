@@ -711,6 +711,11 @@ app.get('/leadrevive', (req, res) => {
   res.sendFile(path.join(__dirname, 'leadrevive.html'));
 });
 
+// ── SmartBid AI dashboard ──
+app.get('/smartbid', (req, res) => {
+  res.sendFile(path.join(__dirname, 'smartbid.html'));
+});
+
 // ── Voice: Telnyx Call Control webhooks ──
 app.post('/api/voice/cc', handleCallControlEvent);
 
@@ -794,6 +799,50 @@ app.post('/api/leadrevive/run/:slug', requireAdmin, async (req, res) => {
     leadrevive.runClient(req.params.slug, { limit }).catch(e => console.error('[leadrevive]', e.message));
     res.json({ ok: true, started: true, limit });
   } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// ── SmartBid AI endpoints ──
+const smartbid = require('./smartbid');
+
+app.get('/api/smartbid/clients', requireAdmin, (req, res) => {
+  res.json({ clients: smartbid.listClients() });
+});
+
+app.post('/api/smartbid/create', requireAdmin, (req, res) => {
+  try {
+    const { slug, ...partial } = req.body;
+    if (!slug) return res.status(400).json({ error: 'slug required' });
+    smartbid.createClient(slug, partial);
+    res.json({ ok: true });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/smartbid/pricelist/:slug', requireAdmin, express.text({ limit: '5mb', type: '*/*' }), (req, res) => {
+  try {
+    const r = smartbid.importPricelistCSV(req.params.slug, req.body || '');
+    res.json({ ok: true, ...r });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+app.post('/api/smartbid/generate/:slug', requireAdmin, async (req, res) => {
+  try {
+    const rfp = req.body?.rfp;
+    if (!rfp || rfp.length < 20) return res.status(400).json({ error: 'rfp text too short' });
+    const result = await smartbid.generateProposal(req.params.slug, rfp);
+    res.json({
+      ok: true,
+      id: result.id,
+      requirements: result.requirements,
+      lineItems: result.lineItems,
+      totals: result.totals,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/smartbid/download/:slug/:id', requireAdmin, (req, res) => {
+  const file = path.join(__dirname, 'data', 'smartbid', req.params.slug, 'proposals', req.params.id + '.docx');
+  if (!fs.existsSync(file)) return res.status(404).json({ error: 'not_found' });
+  res.download(file, `proposal-${req.params.id}.docx`);
 });
 
 // ── Telegram bot webhook — /orders /hot /leads commands from phone ──
