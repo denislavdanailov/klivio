@@ -40,7 +40,7 @@
 <body>
 <div class="container">
   <h1>LeadRevive</h1>
-  <div class="subtitle">Reactivate old customer databases. You take a commission on every booking.</div>
+  <div class="subtitle">Reactivate old customer databases. Pay-on-results model: $1,000 flat fee per client when system generates revenue.</div>
 
   <div class="card">
     <h2>Admin Key</h2>
@@ -58,7 +58,10 @@
     <div class="row">
       <input id="newOffer" placeholder="Offer (e.g. 30% off check-up this month)" />
       <input id="newBooking" placeholder="Booking link (Calendly, etc.)" />
-      <input id="newCommission" type="number" step="0.01" placeholder="Your commission (0.20 = 20%)" />
+      <input id="newDealFee" type="number" placeholder="Deal fee ($ paid when revenue ≥ trigger)" value="1000" />
+    </div>
+    <div class="row">
+      <input id="newMinRevenue" type="number" placeholder="Min revenue to invoice (default $1,500)" value="1500" />
     </div>
     <div class="row">
       <input id="newSender" placeholder="Sender name (e.g. Sarah)" />
@@ -146,8 +149,13 @@ async function loadClients() {
 function renderClients(clients) {
   const el = document.getElementById('clientsList');
   if (!clients.length) { el.innerHTML = '<div class="empty">No clients yet. Add one above.</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Business</th><th>Contacts</th><th>Sent</th><th>Replied</th><th>Interested</th><th>Booked</th><th>Revenue</th><th>Your cut</th></tr></thead><tbody>' +
-    clients.map(c => `
+  el.innerHTML = '<table><thead><tr><th>Business</th><th>Contacts</th><th>Sent</th><th>Replied</th><th>Interested</th><th>Booked</th><th>Revenue</th><th>Fee</th><th>Status</th></tr></thead><tbody>' +
+    clients.map(c => {
+      const statusBadge =
+        c.status === 'paid' ? '<span class="stat green">PAID</span>' :
+        c.status === 'ready_to_invoice' ? '<span class="stat yellow">INVOICE NOW</span>' :
+        '<span class="stat gray">running</span>';
+      return `
       <tr>
         <td><strong>${c.business}</strong><br><span class="stat gray">${c.slug}</span></td>
         <td>${c.contacts}</td>
@@ -156,8 +164,10 @@ function renderClients(clients) {
         <td><span class="stat yellow">${c.interested}</span></td>
         <td><span class="stat green">${c.booked}</span></td>
         <td>$${c.revenue}</td>
-        <td><strong>$${c.commission}</strong></td>
-      </tr>`).join('') +
+        <td><strong>$${c.dealFee}</strong></td>
+        <td>${statusBadge}</td>
+      </tr>`;
+    }).join('') +
     '</tbody></table>';
 }
 
@@ -174,7 +184,8 @@ async function createClient() {
     industry: document.getElementById('newIndustry').value.trim(),
     offer: document.getElementById('newOffer').value.trim(),
     bookingLink: document.getElementById('newBooking').value.trim(),
-    commission: parseFloat(document.getElementById('newCommission').value) || 0.15,
+    dealFee: parseFloat(document.getElementById('newDealFee').value) || 1000,
+    minRevenueToInvoice: parseFloat(document.getElementById('newMinRevenue').value) || 1500,
     senderName: document.getElementById('newSender').value.trim() || 'Klivio',
     language: document.getElementById('newLang').value,
   };

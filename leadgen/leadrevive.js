@@ -55,6 +55,7 @@ function parseCSV(raw) {
 }
 
 // ── Default client config template ──
+// Pricing model: pay-on-results. No upfront. Fixed $1,000 fee when system generates revenue.
 function defaultConfig(slug) {
   return {
     slug,
@@ -68,7 +69,9 @@ function defaultConfig(slug) {
     senderPhone: '',
     tone: 'friendly and casual',
     language: 'en',
-    commission: 0.15,
+    dealFee: 1000,            // fixed fee owed to us once revenue is generated
+    feePaid: false,           // mark true once client has paid the dealFee
+    minRevenueToInvoice: 1500, // we only invoice when generated revenue exceeds this
     createdAt: new Date().toISOString(),
   };
 }
@@ -81,14 +84,21 @@ async function generateMessage(config, contact) {
     ? Math.round((Date.now() - new Date(contact.last_visit).getTime()) / (30 * 86400000))
     : null;
 
-  const prompt = `You are writing a SHORT, friendly, personal message from a small business reactivating an old customer.
+  const isBG = config.language === 'bg';
+
+  const bgExample = `Example style (Bulgarian):
+"Здравей, Иван! Георги от автосервиза. Минаха 6 месеца от последната смяна на маслата ти. Тъй като наближава лятото, искаш ли да ти запазя час за бърз преглед?"`;
+
+  const enExample = `Example style (English):
+"Hi Sarah — Mike from Sunshine Dental here. Been about 8 months since your cleaning. We're running a quick check-up offer this month — fancy popping in?"`;
+
+  const prompt = `You are writing a SHORT, casual, personal message from a small business reactivating an old customer. This is a TEXT MESSAGE between two people, not an email blast.
 
 Business: ${config.business}
 Industry: ${config.industry}
 Services they offer: ${config.services.join(', ') || 'their services'}
 Offer to mention: ${config.offer}
-Tone: ${config.tone}
-Sender name: ${config.senderName}
+Sender name (the human sending this): ${config.senderName}
 
 Customer details:
 - Name: ${contact.name || 'there'}
@@ -96,17 +106,20 @@ Customer details:
 - Service they used: ${contact.services || 'previous service'}
 - Special notes: ${contact.notes || 'none'}
 
+${isBG ? bgExample : enExample}
+
 Rules:
 - Maximum 3 short sentences
-- Sound like a real human texting, NOT marketing
-- Use the customer's first name
-- Reference the time gap naturally
-- Soft mention of the offer, no hard sell
-- One question at the end (would they like to book / are they free this week)
-- Language: ${config.language === 'bg' ? 'Bulgarian' : 'English'}
-- NEVER use the words: "AI", "automated", "we noticed", "campaign"
+- Sound like a real friend texting — relaxed, NOT marketing
+- Start with the customer's first name
+- Reference the time gap naturally ("been a while", "missed you")
+- Soft mention of the offer, NO hard sell, NO discount %
+- ONE question at the end (would they like to book / are they free this week)
+- Language: ${isBG ? 'Bulgarian (casual, "ти" form, NOT formal)' : 'English'}
+- NEVER use: "AI", "automated", "campaign", "promotion", "limited time", "act now"
+- NEVER include the business name in the opening — only the sender's first name
 
-Return ONLY the message body — no subject, no greeting line, no signature.`;
+Return ONLY the message body — no subject, no signature, no "Best regards".`;
 
   return new Promise(resolve => {
     const payload = JSON.stringify({
@@ -261,7 +274,9 @@ function statsForClient(slug) {
   const interested = replies.filter(r => r.intent === 'interested').length;
   const bookedCount = bookings.length;
   const revenue = bookings.reduce((s, b) => s + (b.amount || 0), 0);
-  const commission = revenue * (config.commission || 0.15);
+  const dealFee = config.dealFee || 1000;
+  const minRevenue = config.minRevenueToInvoice || 1500;
+  const invoiceable = revenue >= minRevenue && !config.feePaid;
 
   return {
     slug, business: config.business,
@@ -271,7 +286,10 @@ function statsForClient(slug) {
     interested,
     booked: bookedCount,
     revenue,
-    commission: Number(commission.toFixed(2)),
+    dealFee,
+    feePaid: !!config.feePaid,
+    invoiceable,
+    status: config.feePaid ? 'paid' : (invoiceable ? 'ready_to_invoice' : 'running'),
   };
 }
 
