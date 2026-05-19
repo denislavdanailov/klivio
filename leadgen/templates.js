@@ -1,40 +1,35 @@
 // ── Industry-specific cold email templates ──
 // Each template has multiple variants to avoid spam filters
 // Variables: {{name}}, {{business}}, {{sender}}, {{industry}}, {{unsubscribe}}
+// Rules: MAX 75 words, NO "AI", PAS format, one soft close question
 
 const TEMPLATES = {
 
   dental: {
     subject: [
-      '{{business}} — quick question about missed calls',
-      'Do you know how many calls {{business}} misses during procedures?',
-      'Thought about this for {{business}}',
+      '{{business}} — missed calls during procedures',
+      'Every missed call is a missed booking for {{business}}',
+      '{{business}} — what happens when the phone rings mid-procedure?',
     ],
     body: [
       `Hi {{name}},
 
-I was looking at dental practices in your area and noticed something most clinics struggle with — missed phone calls during procedures.
+When your team is with a patient, every missed call is a missed booking — most callers don't leave voicemails, they just call the next clinic.
 
-Studies show the average dental practice misses 30-40% of incoming calls. At roughly £300-500 per new patient, that's £3,000-8,000/month walking out the door.
+We built a 24/7 receptionist that answers every call for {{business}}, books appointments, and sends you a summary. Setup in 48 hours, no tech needed.
 
-We built an AI system that answers your phone 24/7, books appointments, and sends you a summary — all for less than a receptionist's daily wage.
+Worth a look?
 
-Would it be worth a 5-minute chat to see if this fits {{business}}?
-
-Best,
 {{sender}}
-Klivio — AI Workers for Business
-klivio.online`,
+Klivio — klivio.online`,
 
       `Hi {{name}},
 
-Quick question: what happens when a patient calls {{business}} during a procedure?
+The average dental practice misses 30-40% of calls during procedures. At $375-500 per new patient, that's up to $8,000/month walking out.
 
-For most clinics, the answer is voicemail — and 80% of callers who hit voicemail never call back.
+We set up a system that answers every call for {{business}}, handles bookings, and works 24/7. Costs less than a receptionist's daily wage.
 
-We help dental practices capture every call with an AI receptionist that sounds natural, books appointments, and works 24/7. Setup takes 3-5 days, no tech needed on your end.
-
-Worth a look? Happy to share a quick demo.
+Could this help {{business}}?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -43,33 +38,29 @@ Klivio — klivio.online`,
 
   realestate: {
     subject: [
-      '{{business}} — are you losing leads overnight?',
-      'Quick thought for {{business}} about response times',
+      '{{business}} — leads going cold overnight?',
       'The 5-minute rule and {{business}}',
+      '{{business}} — response time is costing you viewings',
     ],
     body: [
       `Hi {{name}},
 
-Research from MIT shows that responding to a property enquiry within 5 minutes makes you 10x more likely to convert that lead.
+Buyers who don't hear back within 5 minutes call three other agents. Most agencies reply in 2-4 hours — by then the lead is gone.
 
-Most estate agents reply in 2-4 hours. By then, the buyer has already called 3 other agents.
+We built a system that responds to every enquiry for {{business}} in under 2 minutes, day or night. One agency added 15 extra viewings per month from after-hours leads alone.
 
-We build AI systems that respond to every enquiry in under 2 minutes — even at midnight. One of our agents added 15 extra viewings per month just from capturing after-hours leads.
-
-Could this work for {{business}}? Happy to show you in 5 minutes.
+Worth a look?
 
 {{sender}}
 Klivio — klivio.online`,
 
       `Hi {{name}},
 
-I work with estate agents who were losing 40-60% of their online leads simply because they couldn't respond fast enough.
+Forty to sixty percent of online property leads go cold simply from slow response times — not because buyers lost interest.
 
-We built a system that instantly responds to every enquiry, qualifies the lead, and books a callback — 24/7, no human needed.
+We set up a system for {{business}} that qualifies every enquiry instantly, books callbacks, and never goes offline. Setup under a week, less than a part-time admin.
 
-Setup takes under a week and costs less than a part-time admin.
-
-Would {{business}} benefit from never missing another lead? Happy to chat briefly.
+Is this something {{business}} could use?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -78,33 +69,29 @@ Klivio — klivio.online`,
 
   law: {
     subject: [
-      '{{business}} — thought about your after-hours enquiries',
+      '{{business}} — after-hours enquiries going elsewhere',
       'How {{business}} could capture more cases',
-      'Quick idea for {{business}}',
+      '{{business}} — the cost of a slow first reply',
     ],
     body: [
       `Hi {{name}},
 
 When someone needs a solicitor at 10pm, they don't leave a voicemail — they call the next firm on Google.
 
-We help law firms capture every enquiry with an AI system that responds in under 2 minutes, qualifies the case, and books a consultation — day or night.
+We help law firms like {{business}} capture every enquiry with a system that responds in under 2 minutes, qualifies the case, and books a consultation — day or night.
 
-One firm went from losing 60% of after-hours leads to capturing 95%.
-
-Worth a 5-minute conversation to see if this fits {{business}}?
+Worth a quick look?
 
 {{sender}}
 Klivio — klivio.online`,
 
       `Hi {{name}},
 
-Most law firms I speak to have the same problem: great at what they do, but enquiries slip through the cracks — especially outside office hours.
+Most firms lose 60% of after-hours enquiries to competitors who reply faster — not because they're better, just quicker.
 
-We built an AI system that handles initial client contact 24/7. It responds instantly, asks the right qualifying questions, and routes urgent matters to you.
+We set up a system for {{business}} that handles initial contact 24/7: responds instantly, asks the right qualifying questions, routes urgent matters to you. Live in under a week.
 
-No contracts, no setup fees. Live in under a week.
-
-Could this help {{business}}? Happy to show you a quick demo.
+Could this help {{business}}?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -113,20 +100,18 @@ Klivio — klivio.online`,
 
   restaurant: {
     subject: [
-      '{{business}} — are you losing bookings during service?',
-      'Quick thought for {{business}}',
-      '{{business}} — what happens when the phone rings during rush?',
+      '{{business}} — bookings missed during service',
+      'What happens when the phone rings during rush at {{business}}?',
+      '{{business}} — capturing bookings your team can\'t answer',
     ],
     body: [
       `Hi {{name}},
 
-During peak service, nobody can answer the phone — but that's exactly when customers call to book.
+During peak service nobody can answer the phone — but that's exactly when customers call to book. A missed call at 7pm on a Friday is a table lost.
 
-We help restaurants and venues with an AI that answers every call, handles reservations, and responds to online enquiries 24/7. No more missed bookings during busy service.
+We set up a system that answers every call for {{business}}, handles reservations, and responds to enquiries 24/7. Setup 3-5 days, costs less than one evening's lost covers.
 
-Setup takes 3-5 days. Costs less than one evening's lost bookings.
-
-Interested to see how it works for {{business}}?
+Worth a look?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -135,20 +120,18 @@ Klivio — klivio.online`,
 
   fitness: {
     subject: [
-      '{{business}} — converting more website visitors to members',
-      'Quick idea for {{business}}',
+      '{{business}} — website visitors leaving without booking',
       'How {{business}} could get 30% more trial sessions',
+      '{{business}} — converting late-night website traffic',
     ],
     body: [
       `Hi {{name}},
 
-When someone visits your website at 9pm thinking about joining, what happens? Usually nothing — they browse, leave, and join the gym that replied first.
+When someone visits your website at 9pm thinking about joining, they browse, leave, and sign up with the gym that responded first.
 
-We build AI chatbots that sit on your website and convert visitors into trial sessions — 24/7, automatically.
+We put a system on {{business}}'s website that engages visitors instantly and books trial sessions automatically — 24/7. Gyms using this see 30% more trial bookings within the first month.
 
-Gyms using this see 30% more trial bookings because the bot engages visitors instantly.
-
-Worth a quick look for {{business}}? Takes 5 minutes to show you.
+Worth a quick look?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -157,20 +140,18 @@ Klivio — klivio.online`,
 
   trades: {
     subject: [
-      '{{business}} — never miss a job enquiry again',
-      'Quick thought for {{business}} about missed calls',
-      '{{business}} — what happens when you can\'t answer the phone on site?',
+      '{{business}} — missed jobs while you\'re on site',
+      'What happens when you can\'t answer the phone on a job?',
+      '{{business}} — never lose a lead to voicemail again',
     ],
     body: [
       `Hi {{name}},
 
-When you're on a job site, the phone rings and you can't answer. By the time you call back, they've found someone else.
+When you're on a job site, the phone rings and you can't answer. By the time you call back, they've already booked someone else.
 
-We built an AI that answers your business phone, takes the job details, qualifies the lead, and texts you a summary — all while you're working.
+We built a system that answers {{business}}'s phone, takes the job details, qualifies the lead, and texts you a summary — all while you're working. No app, no tech. Live in 3-5 days.
 
-No app to install, no tech needed. Live in 3-5 days.
-
-Could this help {{business}}? Happy to show you how it works.
+Could this help {{business}}?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -179,20 +160,80 @@ Klivio — klivio.online`,
 
   ecommerce: {
     subject: [
-      '{{business}} — recovering abandoned carts automatically',
-      'Quick idea for {{business}} about conversion rates',
-      '{{business}} — 70% of your carts are abandoned. Here\'s a fix.',
+      '{{business}} — 70% of carts are abandoned. Here\'s a fix.',
+      'Recovering lost sales for {{business}} automatically',
+      '{{business}} — converting more browsers into buyers',
     ],
     body: [
       `Hi {{name}},
 
-The average online store loses 70% of carts before checkout. Most of those people just needed a quick answer or a small nudge.
+Seventy percent of online carts are abandoned — most shoppers just needed a quick answer or a small nudge before checkout.
 
-We build AI chatbots that engage your visitors in real time — answering product questions, handling objections, and recovering abandoned carts automatically.
+We set up a system for {{business}} that engages visitors in real time, answers product questions, and recovers abandoned carts automatically. Stores using this recover 15-25% of lost sales.
 
-Stores using this recover 15-25% of abandoned carts.
+Worth a look?
 
-Worth a quick look for {{business}}?
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  medical: {
+    subject: [
+      '{{business}} — patients calling after hours go elsewhere',
+      'After-hours patient enquiries for {{business}}',
+      '{{business}} — missed appointment requests cost more than you think',
+    ],
+    body: [
+      `Hi {{name}},
+
+When patients call after hours and reach voicemail, most don't leave a message — they book with the next clinic on Google.
+
+We set up a system for {{business}} that answers calls 24/7, books appointments, and handles routine enquiries automatically. Practices using this capture 20-30% more appointments. Setup in under a week.
+
+Worth a look?
+
+{{sender}}
+Klivio — klivio.online`,
+
+      `Hi {{name}},
+
+The average medical practice misses 35-40% of calls outside office hours. At $200-400 per patient visit, that adds up fast.
+
+We built a 24/7 system for {{business}} that answers every call, books appointments, and only escalates genuine emergencies to you. No app, no tech to manage. Live in 3-5 days.
+
+Could this help {{business}}?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  finance: {
+    subject: [
+      '{{business}} — client enquiries going to faster advisers?',
+      'Quick thought on after-hours leads for {{business}}',
+      '{{business}} — the cost of a slow first reply',
+    ],
+    body: [
+      `Hi {{name}},
+
+When someone needs financial advice, they contact 2-3 firms. Research shows 74% go with whoever responds first — not necessarily whoever is best.
+
+We set up a system for {{business}} that responds to every enquiry in under 2 minutes, qualifies the lead, and books a consultation — day or night, including weekends.
+
+Worth a quick look?
+
+{{sender}}
+Klivio — klivio.online`,
+
+      `Hi {{name}},
+
+Most financial firms lose 50-60% of after-hours enquiries simply because no one replies until the next morning. By then, prospects have moved on.
+
+We built a 24/7 response system for {{business}}: answers instantly, asks the right qualifying questions, books callbacks with your team. From $197/month. Cancel anytime.
+
+Could this work for {{business}}?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -201,18 +242,16 @@ Klivio — klivio.online`,
 
   accounting: {
     subject: [
+      '{{business}} — leads slipping through after hours',
+      'Quick thought for {{business}} about after-hours enquiries',
       '{{business}} — capturing more client enquiries automatically',
-      'Quick thought for {{business}}',
-      '{{business}} — what happens to leads outside office hours?',
     ],
     body: [
       `Hi {{name}},
 
-During tax season you're drowning in calls. Off-season, leads slip through the cracks. Either way, potential clients are choosing the firm that responds first.
+During tax season you're drowning in calls. Off-season, enquiries slip through. Either way, potential clients choose whichever firm replies first.
 
-We help accounting firms capture every enquiry with an AI system that responds in under 2 minutes, qualifies the lead, and books a consultation — year-round, 24/7.
-
-No setup fees, cancel anytime. Live in under a week.
+We set up a system for {{business}} that responds to every enquiry in under 2 minutes, qualifies the lead, and books a consultation — year-round, 24/7. No setup fees, cancel anytime.
 
 Could this work for {{business}}?
 
@@ -223,20 +262,18 @@ Klivio — klivio.online`,
 
   healthcare: {
     subject: [
-      '{{business}} — capturing after-hours patient enquiries',
-      'Quick idea for {{business}} about missed appointments',
       '{{business}} — patients calling after hours go elsewhere',
+      'After-hours patient enquiries for {{business}}',
+      '{{business}} — missed appointment requests cost more than you think',
     ],
     body: [
       `Hi {{name}},
 
-When patients call after hours, they get voicemail and call the next clinic. Every missed call is a lost patient — and lost recurring revenue.
+When patients call after hours and hit voicemail, they call the next clinic. Every missed call is a lost patient — and lost recurring revenue.
 
-We help healthcare practices with an AI that answers calls 24/7, books appointments, handles routine enquiries, and only escalates emergencies to you.
+We set up a system for {{business}} that answers calls 24/7, books appointments, handles routine enquiries, and only escalates emergencies. Practices using this book 20-30% more appointments. Setup 3-5 days.
 
-Practices using this book 20-30% more appointments. Setup in 3-5 days.
-
-Worth a conversation for {{business}}?
+Worth a conversation?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -245,20 +282,20 @@ Klivio — klivio.online`,
 
   wedding: {
     subject: [
-      '{{business}} — losing bookings to faster responders?',
-      'Quick idea for {{business}} about enquiry response times',
+      '{{business}} — 68% of couples book whoever responds first',
+      'Losing bookings to faster responders, {{business}}?',
       '{{business}} — what happens to enquiries at midnight?',
     ],
     body: [
       `Hi {{name}},
 
-Couples planning their wedding usually contact 3-5 vendors. Research shows 68% book with whoever responds first.
+Couples planning their wedding contact 3-5 vendors. Research shows 68% book whoever responds first.
 
-If someone fills out your enquiry form at 10pm, how quickly do they hear back? For most wedding businesses, it's the next morning — by which time they've already booked someone else.
+If someone fills your enquiry form at 10pm, how quickly do they hear back? For most businesses, it's next morning — by which time they've booked someone else.
 
-We build AI systems that respond to every enquiry in under 2 minutes, 24/7. It answers common questions, shares availability, and books consultations automatically.
+We set up a system that responds to every {{business}} enquiry in under 2 minutes, 24/7.
 
-Would this be useful for {{business}}? Happy to show you in 5 minutes.
+Worth a look?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -267,20 +304,18 @@ Klivio — klivio.online`,
 
   cleaning: {
     subject: [
-      '{{business}} — are you missing quote requests after hours?',
-      'Quick thought for {{business}} about lead capture',
-      '{{business}} — 40% of cleaning enquiries come outside office hours',
+      '{{business}} — quote requests after hours going cold',
+      '40% of cleaning enquiries come outside office hours',
+      '{{business}} — capturing leads while your team is on-site',
     ],
     body: [
       `Hi {{name}},
 
-When a potential client requests a quote on your website at 8pm, what happens? For most cleaning companies, they wait until morning — but by then, the client has already booked someone who replied faster.
+A potential client requests a quote at 8pm. By morning, they've booked whichever cleaning company replied fastest — it wasn't you.
 
-We build AI systems that respond instantly to every enquiry, gather property details, provide estimates, and book assessments — 24/7, automatically.
+We set up a system for {{business}} that responds instantly to every enquiry, gathers property details, and books assessments — 24/7. Cleaning companies using this capture 30-40% more clients. Under a week setup.
 
-Cleaning companies using this capture 30-40% more clients. Setup in under a week, no tech skills needed.
-
-Could this help {{business}}? Happy to show you how it works.
+Could this help {{business}}?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -289,20 +324,18 @@ Klivio — klivio.online`,
 
   recruitment: {
     subject: [
-      '{{business}} — are candidates ghosting you?',
-      'Quick idea for {{business}} about candidate response rates',
-      '{{business}} — speed-to-contact and placement rates',
+      '{{business}} — top candidates gone in 10 days',
+      'Speed-to-contact and placement rates for {{business}}',
+      '{{business}} — are candidates ghosting because of slow response?',
     ],
     body: [
       `Hi {{name}},
 
-The best candidates are off the market in 10 days. If your team takes even a few hours to respond to an application, the top talent has already moved on.
+The best candidates are off the market in 10 days. If your team takes even a few hours to respond to an application, top talent has already moved on.
 
-We build AI systems that engage candidates instantly — screening, answering FAQs, and scheduling interviews automatically. Agencies using this see 40% higher placement rates from faster first contact.
+We set up a system for {{business}} that engages candidates instantly — screening, answering FAQs, scheduling interviews automatically. Agencies using this see 40% higher placement rates.
 
-No contracts, no setup fees. Live in under a week.
-
-Worth a quick chat for {{business}}?
+Worth a quick look?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -312,19 +345,182 @@ Klivio — klivio.online`,
   insurance: {
     subject: [
       '{{business}} — losing quotes to faster brokers?',
-      'Quick thought for {{business}} about lead response times',
-      '{{business}} — what if every quote request got an instant reply?',
+      'What if every quote request got an instant reply from {{business}}?',
+      '{{business}} — response time wins the deal 78% of the time',
     ],
     body: [
       `Hi {{name}},
 
-When someone requests an insurance quote online, they typically submit to 3-4 brokers. The one who responds first wins the business 78% of the time.
+When someone requests an insurance quote, they typically submit to 3-4 brokers. The one who responds first wins the business 78% of the time.
 
-We build AI systems that respond to every enquiry in under 2 minutes — gathering details, answering common questions, and booking callbacks with your team. Works 24/7, even on weekends.
+We set up a system for {{business}} that responds to every enquiry in under 2 minutes, gathers details, and books callbacks with your team — 24/7, including weekends.
 
-Brokers using this convert 30-40% more leads. No tech needed on your end.
+Could this help {{business}}?
 
-Could this help {{business}}? Happy to show you a quick demo.
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  veterinary: {
+    subject: [
+      '{{business}} — pet owners calling in emergencies need instant answers',
+      'After-hours calls for {{business}} going to competitors?',
+      '{{business}} — missed calls during consultations cost bookings',
+    ],
+    body: [
+      `Hi {{name}},
+
+When a worried pet owner calls at 8pm, they need reassurance immediately — not voicemail. Most will call the next clinic and never come back.
+
+We set up a system for {{business}} that answers every call, handles routine enquiries, books appointments, and flags genuine emergencies. 24/7, no tech to manage.
+
+Worth a look?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  hotel: {
+    subject: [
+      '{{business}} — booking enquiries unanswered overnight?',
+      'Direct bookings vs OTA fees for {{business}}',
+      '{{business}} — capturing late-night reservation requests',
+    ],
+    body: [
+      `Hi {{name}},
+
+Travellers book hotels at 11pm. If your direct line goes to voicemail, they go to Booking.com — and you pay the commission.
+
+We set up a system for {{business}} that answers every call and web enquiry instantly, handles availability questions, and takes direct bookings 24/7. Hotels using this shift 15-25% of OTA bookings to direct. Setup under a week.
+
+Could this help {{business}}?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  // ── Online / Digital businesses ──
+  saas: {
+    subject: [
+      '{{business}} — trial signups not converting?',
+      'Quick question about {{business}} onboarding',
+      '{{business}} — what happens when a trial user gets stuck?',
+    ],
+    body: [
+      `Hi {{name}},
+
+Most SaaS trials fail not because the product is bad — but because the user gets stuck and nobody replies fast enough.
+
+We set up a system for {{business}} that responds to every trial user question in under 2 minutes, 24/7. Automatically qualifies who's worth chasing and books demos with your team.
+
+Worth a look?
+
+{{sender}}
+Klivio — klivio.online`,
+
+      `Hi {{name}},
+
+The average SaaS loses 60% of trial users in the first 48 hours — most just needed one quick answer.
+
+We built an instant-response system for {{business}} that handles onboarding questions, nudges inactive trials, and routes hot leads straight to your team. Setup under a week.
+
+Could this help {{business}}?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  coach: {
+    subject: [
+      '{{business}} — contact form replies taking too long?',
+      'Quick thought for {{business}}',
+      '{{business}} — how fast do you reply to new enquiries?',
+    ],
+    body: [
+      `Hi {{name}},
+
+When someone fills your contact form at 10pm excited to work with you — how long before they hear back?
+
+Most coaches reply next morning. By then, they've booked with whoever responded first.
+
+We set up a system for {{business}} that replies instantly, qualifies the lead, and books a discovery call automatically. From $47/month.
+
+Worth a look?
+
+{{sender}}
+Klivio — klivio.online`,
+
+      `Hi {{name}},
+
+Research shows 78% of clients go with the first coach or consultant who responds — not necessarily the best one.
+
+We help {{business}} respond to every enquiry in under 2 minutes, 24/7. Qualifies leads, answers FAQs, books calls — while you focus on clients.
+
+Is this something {{business}} could use?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  agency: {
+    subject: [
+      '{{business}} — losing new business enquiries overnight?',
+      'Quick question for {{business}}',
+      '{{business}} — what happens to leads that come in on weekends?',
+    ],
+    body: [
+      `Hi {{name}},
+
+New business enquiries that come in on Friday afternoon are usually cold by Monday. The prospect has already spoken to two other agencies.
+
+We set up a system for {{business}} that responds within 2 minutes — any time, any day. Qualifies the brief, confirms budget, books a call. No staff needed.
+
+Worth a quick look?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  freelancer: {
+    subject: [
+      '{{business}} — replying to every lead while you\'re on a project?',
+      'Quick thought for {{business}}',
+      '{{business}} — missing new clients while you\'re heads-down?',
+    ],
+    body: [
+      `Hi {{name}},
+
+When you're deep in a project, new enquiries go unanswered. By the time you surface, that client has hired someone else.
+
+We set up a system that responds to every {{business}} enquiry instantly — qualifies the project, gets the brief, books a call. All while you work.
+
+From $47/month. Worth a look?
+
+{{sender}}
+Klivio — klivio.online`,
+    ],
+  },
+
+  dropshipping: {
+    subject: [
+      '{{business}} — customer questions killing your conversion rate?',
+      'Quick thought on {{business}} support',
+      '{{business}} — how fast do you answer pre-purchase questions?',
+    ],
+    body: [
+      `Hi {{name}},
+
+70% of online shoppers abandon their cart after getting no answer to a pre-purchase question. They needed 30 seconds of help — and instead they left.
+
+We set up an instant-response system for {{business}} that answers product questions, handles objections, and recovers abandoned carts automatically. Stores see 15-25% more completed purchases.
+
+Worth a look?
 
 {{sender}}
 Klivio — klivio.online`,
@@ -333,68 +529,36 @@ Klivio — klivio.online`,
 
   generic: {
     subject: [
-      '{{business}} — are you losing leads outside office hours?',
+      '{{business}} — losing leads outside office hours?',
       'Quick question about {{business}}',
       '{{business}} — what if every enquiry got a reply in 2 minutes?',
     ],
     body: [
       `Hi {{name}},
 
-Quick question: when someone contacts {{business}} at 9pm or on a weekend, how long before they get a reply?
+When someone contacts {{business}} at 9pm or on a weekend, how long before they get a reply?
 
-For most businesses, the answer is "next morning" — and by then, 78% of leads go with whoever responded first.
+For most businesses, the answer is "next morning" — and by then, 78% of leads have already gone with whoever responded first.
 
-We build AI systems that respond to every enquiry in under 2 minutes, 24/7. No staff needed, no tech skills required. Live in 2-7 days.
+We set up a system that responds to every enquiry in under 2 minutes, 24/7. Live in 2-7 days.
 
-Would it be worth 5 minutes to see if this fits your business?
+Worth 5 minutes to see if it fits?
 
 {{sender}}
 Klivio — klivio.online`,
 
       `Hi {{name}},
 
-I've been looking at businesses like {{business}} and noticed a pattern — most lose 30-50% of leads simply from slow response times.
+Most businesses lose 30-50% of leads simply from slow response times — not from bad products or pricing.
 
-We built AI workers that handle enquiries, answer calls, and follow up with leads — all automatically, 24/7. From £197/month, no contracts.
+We built a system that handles enquiries, answers calls, and follows up with leads automatically, 24/7. From $197/month, no contracts. Most clients see ROI in the first two weeks.
 
-Most of our clients see ROI in the first 2 weeks.
-
-Curious to learn more? Happy to send a quick overview.
+Is this something {{business}} could use?
 
 {{sender}}
 Klivio — klivio.online`,
     ],
   },
-};
-
-// ── Follow-up templates (Email 2: Day 3, Email 3: Day 7) ──
-const FOLLOWUP_2 = {
-  subject: 'Re: {{original_subject}}',
-  body: `Hi {{name}},
-
-Just following up on my note a few days ago.
-
-One of our clients — a {{industry_desc}} — went from losing 60% of after-hours enquiries to capturing 95% within the first week. Their words: "It paid for itself on day one."
-
-If you're curious, I can show you exactly how it works in 5 minutes — no commitment.
-
-Either way, no pressure at all.
-
-{{sender}}
-Klivio — klivio.online`,
-};
-
-const FOLLOWUP_3 = {
-  subject: 'Re: {{original_subject}}',
-  body: `Hi {{name}},
-
-I sent a couple of notes about how {{business}} could capture more leads automatically. If it's not relevant right now, totally understand — just let me know and I'll stop reaching out.
-
-If the timing is better down the road, we'll be here.
-
-All the best,
-{{sender}}
-Klivio — klivio.online`,
 };
 
 const INDUSTRY_DESC = {
@@ -407,10 +571,20 @@ const INDUSTRY_DESC = {
   ecommerce: 'online store',
   accounting: 'accounting firm',
   healthcare: 'healthcare clinic',
+  medical: 'medical practice',
+  finance: 'financial services firm',
+  veterinary: 'veterinary practice',
+  hotel: 'hotel',
   wedding: 'wedding business',
   cleaning: 'cleaning company',
   recruitment: 'recruitment agency',
   insurance: 'insurance broker',
+  events: 'events business',
+  saas: 'SaaS company',
+  coach: 'coaching or consulting business',
+  agency: 'digital agency',
+  freelancer: 'freelance business',
+  dropshipping: 'online store',
   generic: 'business similar to yours',
 };
 
@@ -439,24 +613,4 @@ function renderTemplate(template, vars) {
   return { subject, body };
 }
 
-// Get follow-up template (step 2 or 3)
-function getFollowup(step) {
-  return step === 3 ? FOLLOWUP_3 : FOLLOWUP_2;
-}
-
-// Render follow-up with variables
-function renderFollowup(step, vars) {
-  const tmpl = getFollowup(step);
-  let subject = tmpl.subject;
-  let body = tmpl.body;
-  vars.industry_desc = INDUSTRY_DESC[vars.industry] || INDUSTRY_DESC.generic;
-  for (const [key, val] of Object.entries(vars)) {
-    const re = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-    subject = subject.replace(re, val);
-    body = body.replace(re, val);
-  }
-  body += `\n\n---\nIf you don't want to hear from us, reply "unsubscribe" and we'll remove you immediately.`;
-  return { subject, body };
-}
-
-module.exports = { TEMPLATES, INDUSTRY_DESC, getTemplate, renderTemplate, getFollowup, renderFollowup };
+module.exports = { TEMPLATES, INDUSTRY_DESC, getTemplate, renderTemplate };
